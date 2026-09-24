@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b2e25">
+  <meta name="description" content="Ontologized Entertainment creates thoughtful, browser-based games powered by semantic game models.">
+  <title>Ontologized Entertainment</title>
+  <link rel="stylesheet" href="./styles/normalize.css">
+  <link rel="stylesheet" href="./styles/skeleton.css">
+  <link rel="stylesheet" href="./styles/app-base.css">
+  <link rel="stylesheet" href="./styles/games-landing.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="wordmark" href="./" aria-label="Ontologized Entertainment home">
+      <span class="wordmark-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span>Ontologized <strong>Entertainment</strong></span>
+    </a>
+    <nav aria-label="Primary navigation">
+      <a href="#games">Games</a>
+      <a href="#developers">For developers</a>
+      <a href="https://github.com/jonathanvajda/ontologized-entertainment">Source</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">Play with meaning</p>
+        <h1 id="hero-title">Games with a world<br>under the surface.</h1>
+        <p class="hero-lede">Ontologized Entertainment is a collection of small, thoughtful browser games built on explicit rules, semantic models, and open web technology.</p>
+        <a class="primary-action" href="#games">Explore the games <span aria-hidden="true">↓</span></a>
+      </div>
+      <div class="hero-table" aria-hidden="true">
+        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+        <div class="hero-die hero-die-one"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="hero-die hero-die-two"><span></span><span></span><span></span></div>
+        <p>RDF state<br><strong>Open rules</strong></p>
+      </div>
+    </section>
+
+    <section id="games" class="games-section" aria-labelledby="games-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">The collection</p><h2 id="games-title">Choose a table</h2></div>
+        <p>Each game runs entirely in your browser. No account, no server, and no data leaves your device.</p>
+      </div>
+
+      <article class="game-card">
+        <div class="game-art" aria-hidden="true">
+          <div class="card-die card-die-back"><b></b><b></b><b></b></div>
+          <div class="card-die card-die-front"><b></b><b></b><b></b><b></b><b></b></div>
+          <div class="score-slip"><span>ONES</span><span>FULL HOUSE</span><span>STRAIGHT</span><strong>250</strong></div>
+        </div>
+        <div class="game-copy">
+          <div class="game-meta"><span>1–6 players</span><span>10–20 min</span><span>Offline ready</span></div>
+          <h3>Poker Dice</h3>
+          <p>Roll, hold, and take your chances across thirteen scoring categories. Play a quiet solitaire game or pass the dice around the room.</p>
+          <ul aria-label="Poker Dice features"><li>Five dice</li><li>Three rolls</li><li>Thirteen decisions</li></ul>
+          <a class="play-action" href="./poker-dice/">Play Poker Dice <span aria-hidden="true">→</span></a>
+        </div>
+      </article>
+
+      <div class="next-table">
+        <span aria-hidden="true">◇</span>
+        <div><p class="eyebrow">More tables are being set</p><p>The shared engine is ready for cards, boards, tokens, and whatever comes next.</p></div>
+      </div>
+    </section>
+
+    <section id="developers" class="developer-section" aria-labelledby="developer-title">
+      <div class="developer-intro">
+        <p class="eyebrow">Build on the engine</p>
+        <h2 id="developer-title">Make the next game ontological.</h2>
+        <p>The common codebase separates canonical RDF state, deterministic game mechanics, and rendering. A new game supplies its ontology, rules, projection, and visual layer without rewriting persistence or transaction handling.</p>
+        <a href="https://github.com/jonathanvajda/ontologized-entertainment">Browse the repository <span aria-hidden="true">↗</span></a>
+      </div>
+      <div class="how-to" aria-label="Developer quick start">
+        <h3>Quick start</h3>
+        <ol>
+          <li><span>01</span><div><strong>Read the contracts</strong><p>Start with the boilerplate capability and technical specifications in <code>specs/</code>.</p></div></li>
+          <li><span>02</span><div><strong>Specify the game</strong><p>Use <code>GAME_IMPLEMENTATION_GUIDE.md</code> to define turns, actions, randomness, scoring, invariants, and rendering.</p></div></li>
+          <li><span>03</span><div><strong>Extend the vocabulary</strong><p>Add one focused CCO-aligned ontology and optional SHACL shapes under <code>docs/src/ontologies/</code>.</p></div></li>
+          <li><span>04</span><div><strong>Register trusted rules</strong><p>Import <code>@ontoeagle/game-mechanics</code>, then register action handlers, validators, scoring functions, and projections.</p></div></li>
+          <li><span>05</span><div><strong>Ship a static PWA</strong><p>Keep the game in <code>docs/&lt;game-name&gt;/</code>, use relative module paths, add deterministic tests, and push to publish with GitHub Pages.</p></div></li>
+        </ol>
+        <div class="code-sample">
+          <div><span></span><span></span><span></span><small>game.js</small></div>
+          <pre><code>import {
+  RdfStore,
+  RuleRegistry,
+  createGameEngine
+} from '../packages/game-mechanics/src/index.js';
+
+const rules = new RuleRegistry()
+  .registerAction('play', gameAction);
+
+const game = createGameEngine({
+  store: new RdfStore(initialQuads),
+  rules,
+  seed: 'replayable'
+});</code></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <a class="wordmark footer-mark" href="./"><span class="wordmark-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>Ontologized <strong>Entertainment</strong></span></a>
+    <p>Open games. Explicit rules. Local-first play.</p>
+  </footer>
+</body>
+</html>
