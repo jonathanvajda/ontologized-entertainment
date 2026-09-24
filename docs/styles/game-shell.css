@@ -1,0 +1,11 @@
+.game-shell { min-height: 100dvh; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: var(--ont-bg); color: var(--ont-text); }
+.game-shell__main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem); gap: var(--ont-gap); padding: var(--ont-gap); min-height: 0; }
+.game-board { min-height: 18rem; overflow: hidden; touch-action: none; border: 1px solid var(--ont-border); border-radius: var(--ont-radius); background: var(--ont-panel-bg); }
+.game-board [data-entity-iri] { cursor: pointer; transition: filter 120ms ease, stroke-width 120ms ease; }
+.game-board [data-entity-iri]:focus-visible { outline: none; stroke: var(--ont-focus); stroke-width: 3; }
+.game-controls { overflow: auto; border: 1px solid var(--ont-border); border-radius: var(--ont-radius); padding: var(--ont-gap); background: var(--ont-panel-bg); }
+.game-controls button { min-width: 44px; min-height: 44px; }
+.game-status[aria-live] { min-height: 1.5em; }
+@media (orientation: landscape) and (max-height: 600px) { .game-shell__main { grid-template-columns: minmax(0, 1fr) minmax(14rem, 28vw); padding: .5rem; gap: .5rem; } }
+@media (orientation: portrait), (max-width: 700px) { .game-shell__main { grid-template-columns: 1fr; grid-template-rows: minmax(18rem, 1fr) auto; } .game-controls { max-height: 40dvh; } }
+@media (prefers-reduced-motion: reduce) { .game-board [data-entity-iri] { transition: none; } }
