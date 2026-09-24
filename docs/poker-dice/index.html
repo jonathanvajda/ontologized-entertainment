@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#123f32">
+  <meta name="description" content="A private, offline-ready game of Poker Dice for one to six local players.">
+  <title>Poker Dice</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="../styles/normalize.css">
+  <link rel="stylesheet" href="../styles/skeleton.css">
+  <link rel="stylesheet" href="../styles/app-base.css">
+  <link rel="stylesheet" href="./poker-dice.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="game-header">
+      <a class="brand" href="./" aria-label="Poker Dice home"><span class="brand-mark" aria-hidden="true">⚄</span><span>Poker Dice</span></a>
+      <nav aria-label="Game actions">
+        <button id="undo-button" type="button">Undo</button>
+        <button id="redo-button" type="button">Redo</button>
+        <button id="save-button" type="button">Save</button>
+        <button id="export-button" type="button">Export</button>
+        <button id="import-button" type="button">Import</button>
+        <button id="new-game-button" type="button">New game</button>
+        <input id="import-file" type="file" accept="application/json,.json" hidden>
+      </nav>
+    </header>
+
+    <main id="game-screen" class="game-layout" hidden>
+      <section class="play-panel" aria-labelledby="current-player">
+        <div class="turn-heading">
+          <div><p class="eyebrow">Current turn</p><h1 id="current-player">Player</h1></div>
+          <p id="turn-meta" class="turn-meta">Roll 0 of 3</p>
+        </div>
+        <p id="turn-prompt" class="turn-prompt">Roll all five dice.</p>
+        <div class="felt-tray">
+          <div id="dice-tray" class="dice-tray" role="group" aria-label="Five poker dice"></div>
+          <button id="roll-button" class="roll-button" type="button">Roll dice</button>
+        </div>
+        <section id="results" class="results-card" hidden aria-labelledby="results-title">
+          <p class="eyebrow">Final result</p><h2 id="results-title">Game complete</h2><ol id="ranking"></ol>
+        </section>
+        <details class="rules-summary">
+          <summary>How to play</summary>
+          <p>Roll up to three times. Hold any dice between rolls, then choose one unused category. Every category must be scored once—even for zero.</p>
+          <a href="../POKER_DICE_RULES.md">Read the complete rules</a>
+        </details>
+      </section>
+
+      <section class="score-panel" aria-labelledby="scorecard-title">
+        <div class="score-heading"><div><p class="eyebrow">Standard 13</p><h2 id="scorecard-title">Scorecard</h2></div><span class="bonus-note">+35 at 63 upper</span></div>
+        <div class="score-scroll"><table id="scorecard"><caption class="sr-only">Poker Dice scores and available category previews</caption></table></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="setup-dialog" class="setup-dialog">
+    <form id="setup-form" method="dialog">
+      <div class="setup-emblem" aria-hidden="true"><span>⚂</span><span>⚄</span></div>
+      <p class="eyebrow">A game of nerve and numbers</p>
+      <h1>Set the table</h1>
+      <p>Play thirteen turns alone, or pass the dice between up to six local players.</p>
+      <label>Players
+        <select id="player-count">
+          <option value="1">1 · Solitaire</option><option value="2">2 players</option><option value="3">3 players</option>
+          <option value="4">4 players</option><option value="5">5 players</option><option value="6">6 players</option>
+        </select>
+      </label>
+      <div id="player-names" class="player-names"></div>
+      <details><summary>Deterministic game</summary><label>Seed (optional)<input id="seed" type="text" maxlength="64" placeholder="Leave blank for a fresh game"></label></details>
+      <button class="button-primary start-button" type="submit">Start game</button>
+      <button id="resume-button" type="button">Resume saved game</button>
+      <small>Your game stays on this device unless you export it.</small>
+    </form>
+  </dialog>
+  <dialog id="pass-dialog" class="pass-dialog">
+    <p class="eyebrow">Pass the device</p><h2 id="pass-player">Next player</h2>
+    <p>The score is recorded. Hand the device to the next player before continuing.</p>
+    <button id="continue-button" class="button-primary" type="button">Begin turn</button>
+  </dialog>
+  <div id="live-status" class="sr-only" aria-live="polite"></div>
+  <div id="alert-status" class="alert-status" role="alert"></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

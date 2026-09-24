@@ -1,0 +1,14 @@
+@prefix pd: <https://w3id.org/ontoeagle/games/poker-dice/> .
+@prefix game: <https://w3id.org/ontoeagle/game/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+<https://w3id.org/ontoeagle/games/poker-dice/shapes> a owl:Ontology ; owl:versionInfo "0.1.0" ; dcterms:title "Poker Dice SHACL Shapes"@en ; dcterms:license <https://opensource.org/license/bsd-3-clause> ; rdfs:comment "Structural constraints for the standard-13 Poker Dice profile."@en .
+pd:DieShape a sh:NodeShape ; sh:targetClass pd:PokerDie ; sh:property [ sh:path game:memberOf ; sh:minCount 1 ; sh:maxCount 1 ; sh:class pd:DicePool ] ; sh:property [ sh:path pd:hasCurrentFace ; sh:maxCount 1 ; sh:class pd:DieFaceValue ] ; sh:property [ sh:path pd:isHeldBy ; sh:maxCount 1 ; sh:class pd:PokerDicePlayer ] .
+pd:FaceValueShape a sh:NodeShape ; sh:targetClass pd:DieFaceValue ; sh:property [ sh:path rdf:value ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 1 ; sh:maxInclusive 6 ] .
+pd:PlayerShape a sh:NodeShape ; sh:targetClass pd:PokerDicePlayer ; sh:property [ sh:path pd:hasScorecard ; sh:minCount 1 ; sh:maxCount 1 ; sh:class pd:Scorecard ] ; sh:property [ sh:path pd:playerOrder ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 0 ; sh:maxInclusive 5 ] .
+pd:ScoreEntryShape a sh:NodeShape ; sh:targetClass pd:ScoreEntry ; sh:property [ sh:path pd:forScoringCategory ; sh:minCount 1 ; sh:maxCount 1 ; sh:class pd:ScoringCategory ] ; sh:property [ sh:path rdf:value ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 0 ] .
+pd:SessionShape a sh:NodeShape ; sh:targetClass game:GameSession ; sh:property [ sh:path pd:hasPlayer ; sh:minCount 1 ; sh:maxCount 6 ; sh:class pd:PokerDicePlayer ] ; sh:property [ sh:path pd:hasRollCount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 0 ; sh:maxInclusive 3 ] .

@@ -13,7 +13,15 @@ export function createGameEngine({ store, vocabulary = {}, seed, rules = new Rul
     store, rules, validator, transactions, random, actions,
     getOperationalState: () => operationalState,
     rebuildProjection: () => (operationalState = projection(store, vocabulary)),
-    undo() { const result = transactions.undo(store); if (result.ok) operationalState = projection(store, vocabulary); return result; },
-    redo() { const result = transactions.redo(store); if (result.ok) operationalState = projection(store, vocabulary); return result; }
+    undo() {
+      const result = transactions.undo(store);
+      if (result.ok) { if (result.value.rngStateBefore != null) random.setState(result.value.rngStateBefore); operationalState = projection(store, vocabulary); }
+      return result;
+    },
+    redo() {
+      const result = transactions.redo(store);
+      if (result.ok) { if (result.value.rngStateAfter != null) random.setState(result.value.rngStateAfter); operationalState = projection(store, vocabulary); }
+      return result;
+    }
   };
 }
