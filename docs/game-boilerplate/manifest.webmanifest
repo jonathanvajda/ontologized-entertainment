@@ -1,0 +1,12 @@
+{
+  "name": "OntoEagle Game Engine",
+  "short_name": "Game Engine",
+  "description": "Client-side RDF-backed board-game engine capability harness.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b1220",
+  "theme_color": "#0f172a"
+}

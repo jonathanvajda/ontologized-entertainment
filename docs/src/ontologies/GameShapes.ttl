@@ -1,0 +1,22 @@
+@prefix game: <https://w3id.org/ontoeagle/game/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://w3id.org/ontoeagle/game/shapes> a owl:Ontology ;
+  owl:versionInfo "0.1.0" ; dcterms:title "Ontologized Entertainment Game SHACL Shapes"@en ;
+  dcterms:created "2026-09-24"^^xsd:date ; dcterms:license <https://opensource.org/license/bsd-3-clause> ;
+  rdfs:comment "Optional structural validation shapes; executable gameplay remains in trusted JavaScript rules."@en .
+
+game:GameObjectLocationShape a sh:NodeShape ; sh:targetClass game:GameObject ;
+  sh:property [ sh:path game:locatedIn ; sh:maxCount 1 ; sh:class game:BoardLocation ; sh:message "A game object may have at most one current board location."@en ] .
+game:AggregateMembershipShape a sh:NodeShape ; sh:targetClass game:GameObject ;
+  sh:property [ sh:path game:memberOf ; sh:maxCount 1 ; sh:class game:GameObjectAggregate ; sh:message "An individuated game object may belong to at most one current game aggregate."@en ] .
+game:MovementActShape a sh:NodeShape ; sh:targetClass game:MovementAct ;
+  sh:property [ sh:path game:hasOrigin ; sh:minCount 1 ; sh:maxCount 1 ; sh:class game:BoardLocation ] ;
+  sh:property [ sh:path game:hasDestination ; sh:minCount 1 ; sh:maxCount 1 ; sh:class game:BoardLocation ] .
+game:ScoreSpecificationShape a sh:NodeShape ; sh:targetClass game:ScoreSpecification ;
+  sh:property [ sh:path rdf:value ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:integer ] [ sh:datatype xsd:decimal ] ) ] .

@@ -1,0 +1,128 @@
+@prefix game: <https://w3id.org/ontoeagle/game/> .
+@prefix cco: <https://www.commoncoreontologies.org/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://w3id.org/ontoeagle/game> a owl:Ontology ;
+  owl:versionIRI <https://w3id.org/ontoeagle/game/2026-09-24> ;
+  owl:versionInfo "0.1.0" ;
+  owl:imports <https://www.commoncoreontologies.org/AgentOntology> ,
+    <https://www.commoncoreontologies.org/EventOntology> ,
+    <https://www.commoncoreontologies.org/InformationEntityOntology> ,
+    <https://www.commoncoreontologies.org/GeospatialOntology> ,
+    <https://www.commoncoreontologies.org/QualityOntology> ,
+    <https://www.commoncoreontologies.org/TimeOntology> ;
+  dcterms:title "Ontologized Entertainment Game Ontology"@en ;
+  dcterms:description "A game-agnostic CCO-aligned vocabulary for canonical semantic state in browser board games."@en ;
+  dcterms:creator "Jonathan Vajda"@en ;
+  dcterms:created "2026-09-24"^^xsd:date ;
+  dcterms:license <https://opensource.org/license/bsd-3-clause> ;
+  rdfs:label "Ontologized Entertainment Game Ontology"@en ;
+  rdfs:comment "Visual geometry, interface state, transaction deltas, and executable rules are intentionally outside this domain ontology."@en .
+
+game:Game a owl:Class ;
+  rdfs:subClassOf cco:ont00000958 ;
+  rdfs:label "Game"@en ;
+  skos:definition "An Information Content Entity that prescribes a system of play, its participants, permitted acts, and completion conditions."@en ;
+  skos:scopeNote "A running game session is represented separately as a Game Session."@en .
+
+game:GameSession a owl:Class ;
+  rdfs:subClassOf obo:BFO_0000015 ;
+  rdfs:label "Game Session"@en ;
+  skos:definition "A Process during which agents participate according to a game."@en .
+
+game:GameAct a owl:Class ;
+  rdfs:subClassOf cco:ont00000005 ;
+  rdfs:label "Game Act"@en ;
+  skos:definition "An Act performed by a game participant in accordance with, or in attempted accordance with, the rules of a game."@en .
+
+game:MovementAct a owl:Class ;
+  rdfs:subClassOf game:GameAct ; rdfs:label "Movement Act"@en ;
+  skos:definition "A Game Act that changes the game-relevant location of one or more game objects."@en .
+game:TransferAct a owl:Class ;
+  rdfs:subClassOf game:GameAct ; rdfs:label "Transfer Act"@en ;
+  skos:definition "A Game Act that changes possession, ownership, or aggregate membership of a game object."@en .
+game:RandomizationAct a owl:Class ;
+  rdfs:subClassOf game:GameAct ; rdfs:label "Randomization Act"@en ;
+  skos:definition "A Game Act whose prescribed outcome is selected using a randomization procedure."@en .
+game:ScoringAct a owl:Class ;
+  rdfs:subClassOf game:GameAct ; rdfs:label "Scoring Act"@en ;
+  skos:definition "A Game Act in which a score is determined or recorded."@en .
+
+game:Turn a owl:Class ;
+  rdfs:subClassOf obo:BFO_0000202 ; rdfs:label "Turn"@en ;
+  skos:definition "A Temporal Interval during which a designated game participant is permitted or required to perform specified game acts."@en .
+game:Round a owl:Class ;
+  rdfs:subClassOf obo:BFO_0000202 ; rdfs:label "Round"@en ;
+  skos:definition "A Temporal Interval that contains a game-prescribed collection of turns or phases."@en .
+game:Phase a owl:Class ;
+  rdfs:subClassOf obo:BFO_0000202 ; rdfs:label "Game Phase"@en ;
+  skos:definition "A Temporal Interval within a game session during which a specified subset of game acts is permitted."@en .
+
+game:GameRole a owl:Class ;
+  rdfs:subClassOf obo:BFO_0000023 ; rdfs:label "Game Role"@en ;
+  skos:definition "A Role borne by an Agent by virtue of participating in a game session."@en .
+game:PlayerRole a owl:Class ;
+  rdfs:subClassOf game:GameRole ; rdfs:label "Player Role"@en ;
+  skos:definition "A Game Role whose bearer is permitted to propose game acts."@en .
+game:CurrentPlayerRole a owl:Class ;
+  rdfs:subClassOf game:PlayerRole ; rdfs:label "Current Player Role"@en ;
+  skos:definition "A Player Role borne during a turn in which its bearer is designated as the current player."@en .
+game:WinnerRole a owl:Class ;
+  rdfs:subClassOf game:GameRole ; rdfs:label "Winner Role"@en ;
+  skos:definition "A Game Role borne by an Agent that satisfies the winning conditions of a completed game session."@en .
+
+game:GameObject a owl:Class ;
+  rdfs:subClassOf obo:BFO_0000040 ; rdfs:label "Game Object"@en ;
+  skos:definition "A Material Entity whose identity or state is relevant under the rules of a game."@en .
+game:GamePiece a owl:Class ;
+  rdfs:subClassOf game:GameObject ; rdfs:label "Game Piece"@en ;
+  skos:definition "A Game Object designed to be placed, moved, or otherwise manipulated during play."@en .
+game:Card a owl:Class ;
+  rdfs:subClassOf game:GameObject ; rdfs:label "Card"@en ;
+  skos:definition "A Game Object designed to bear game-relevant information and to be individuated during play."@en .
+game:GameObjectAggregate a owl:Class ;
+  rdfs:subClassOf obo:BFO_0000027 ; rdfs:label "Game Object Aggregate"@en ;
+  skos:definition "An Object Aggregate whose members are game objects grouped for a game-relevant purpose."@en .
+game:DrawPile a owl:Class ; rdfs:subClassOf game:GameObjectAggregate ; rdfs:label "Draw Pile"@en ; skos:definition "A Game Object Aggregate from which members may be randomly or sequentially drawn."@en .
+game:DiscardPile a owl:Class ; rdfs:subClassOf game:GameObjectAggregate ; rdfs:label "Discard Pile"@en ; skos:definition "A Game Object Aggregate containing objects discarded during play."@en .
+game:Hand a owl:Class ; rdfs:subClassOf game:GameObjectAggregate ; rdfs:label "Hand"@en ; skos:definition "A Game Object Aggregate associated with a participant and containing objects available to that participant."@en .
+
+game:BoardLocation a owl:Class ;
+  rdfs:subClassOf obo:BFO_0000029 ; rdfs:label "Board Location"@en ;
+  skos:definition "A Site that functions as a semantically significant location in a game."@en ;
+  skos:scopeNote "The visual geometry used to render a Board Location is not part of this class."@en .
+game:GameQuality a owl:Class ;
+  rdfs:subClassOf obo:BFO_0000019 ; rdfs:label "Game Quality"@en ;
+  skos:definition "A Quality of an entity that is relevant to a game rule."@en .
+
+game:Rule a owl:Class ;
+  rdfs:subClassOf cco:ont00000965 ; rdfs:label "Game Rule"@en ;
+  skos:definition "A Prescriptive Information Content Entity that prescribes permitted, required, or prohibited entities or processes in a game."@en .
+game:ActionSpecification a owl:Class ;
+  rdfs:subClassOf cco:ont00000965 ; rdfs:label "Action Specification"@en ;
+  skos:definition "A Prescriptive Information Content Entity that prescribes the parameters, preconditions, and effects of a type of game act."@en .
+game:ScoreSpecification a owl:Class ;
+  rdfs:subClassOf cco:ont00000958 ; rdfs:label "Score Specification"@en ;
+  skos:definition "An Information Content Entity that records or prescribes a game score value."@en ;
+  skos:scopeNote "Use rdf:value for a literal score when a score is asserted rather than derived."@en .
+
+game:adjacentTo a owl:ObjectProperty , owl:SymmetricProperty ;
+  rdfs:domain game:BoardLocation ; rdfs:range game:BoardLocation ; rdfs:label "adjacent to"@en ;
+  skos:definition "Relates two Board Locations when the topology prescribed for a game permits them to be treated as adjacent."@en .
+game:locatedIn a owl:ObjectProperty , owl:FunctionalProperty ;
+  rdfs:domain game:GameObject ; rdfs:range game:BoardLocation ; rdfs:label "located in"@en ;
+  skos:definition "Relates a Game Object to the Board Location in which it is currently located for gameplay purposes."@en .
+game:memberOf a owl:ObjectProperty , owl:FunctionalProperty ;
+  rdfs:domain game:GameObject ; rdfs:range game:GameObjectAggregate ; rdfs:label "member of"@en ;
+  skos:definition "Relates a Game Object to the Game Object Aggregate of which it is currently a member."@en .
+game:hasOrigin a owl:ObjectProperty ; rdfs:domain game:MovementAct ; rdfs:range game:BoardLocation ; rdfs:label "has origin"@en ; skos:definition "Relates a Movement Act to its game-relevant origin."@en .
+game:hasDestination a owl:ObjectProperty ; rdfs:domain game:MovementAct ; rdfs:range game:BoardLocation ; rdfs:label "has destination"@en ; skos:definition "Relates a Movement Act to its game-relevant destination."@en .
+game:prescribesAction a owl:ObjectProperty ; rdfs:domain game:Rule ; rdfs:range game:ActionSpecification ; rdfs:label "prescribes action"@en ; skos:definition "Relates a Game Rule to an Action Specification it prescribes."@en .
+game:hasCurrentPhase a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain game:GameSession ; rdfs:range game:Phase ; rdfs:label "has current phase"@en ; skos:definition "Relates a Game Session to the phase that currently obtains in that session."@en .
+game:participatesInSession a owl:ObjectProperty ; rdfs:domain cco:ont00001017 ; rdfs:range game:GameSession ; rdfs:label "participates in game session"@en ; skos:definition "Relates an Agent to a Game Session in which that Agent participates."@en .

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <title>OntoEagle Game Engine</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="../styles/normalize.css">
+  <link rel="stylesheet" href="../styles/skeleton.css">
+  <link rel="stylesheet" href="../styles/app-base.css">
+  <link rel="stylesheet" href="../styles/game-shell.css">
+</head>
+<body>
+  <main class="game-shell">
+    <header class="container">
+      <h1>OntoEagle game engine</h1>
+      <p class="muted">A game-neutral capability harness. The first concrete game will plug into this engine later.</p>
+    </header>
+    <section class="game-shell__main" aria-labelledby="status-heading">
+      <div class="game-board" role="region" aria-label="Future game board">
+        <div style="padding:var(--ont-gap)">
+          <h2 id="status-heading">Engine readiness</h2>
+          <p id="engine-status" class="game-status" aria-live="polite">Checking the client-side modules…</p>
+        </div>
+      </div>
+      <aside class="game-controls" aria-label="Capability summary">
+        <h2>Baseline</h2>
+        <ul>
+          <li>Canonical RDF state</li><li>Atomic validated actions</li><li>Seeded randomization</li>
+          <li>Undo, redo, and replay</li><li>IndexedDB saves</li><li>Rendering-neutral view models</li>
+        </ul>
+        <button id="run-check" class="button-primary" type="button">Run deterministic check</button>
+        <output id="check-output" class="game-status" aria-live="polite"></output>
+      </aside>
+    </section>
+    <footer class="container"><small>Static, offline-capable, and ready for localhost or GitHub Pages.</small></footer>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
