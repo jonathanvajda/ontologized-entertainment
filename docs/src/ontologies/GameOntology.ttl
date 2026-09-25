@@ -1,4 +1,4 @@
-@prefix game: <https://w3id.org/ontoeagle/game/> .
+@prefix game: <https://w3id.org/ontologized-entertainment/game/> .
 @prefix cco: <https://www.commoncoreontologies.org/> .
 @prefix obo: <http://purl.obolibrary.org/obo/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
@@ -8,8 +8,8 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<https://w3id.org/ontoeagle/game> a owl:Ontology ;
-  owl:versionIRI <https://w3id.org/ontoeagle/game/2026-09-24> ;
+<https://w3id.org/ontologized-entertainment/game> a owl:Ontology ;
+  owl:versionIRI <https://w3id.org/ontologized-entertainment/game/2026-09-24> ;
   owl:versionInfo "0.1.0" ;
   owl:imports <https://www.commoncoreontologies.org/AgentOntology> ,
     <https://www.commoncoreontologies.org/EventOntology> ,

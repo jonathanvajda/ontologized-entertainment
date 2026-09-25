@@ -1,0 +1,45 @@
+@prefix hi: <https://w3id.org/ontologized-entertainment/game/hidden-information/> .
+@prefix game: <https://w3id.org/ontologized-entertainment/game/> .
+@prefix cco: <https://www.commoncoreontologies.org/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://w3id.org/ontologized-entertainment/game/hidden-information> a owl:Ontology ;
+  owl:versionIRI <https://w3id.org/ontologized-entertainment/game/hidden-information/2026-09-24> ; owl:versionInfo "0.1.0" ;
+  owl:imports <https://w3id.org/ontologized-entertainment/game> , <https://www.commoncoreontologies.org/InformationEntityOntology> ;
+  dcterms:title "Ontologized Entertainment Hidden Information Ontology"@en ;
+  dcterms:description "A game-neutral vocabulary for audience- and phase-dependent visibility of semantic game entities."@en ;
+  dcterms:creator "Jonathan Vajda"@en ; dcterms:created "2026-09-24"^^xsd:date ;
+  dcterms:license <https://opensource.org/license/bsd-3-clause> ; rdfs:label "Hidden Information Ontology"@en ;
+  rdfs:comment "Cryptographic keys, ciphertext, initialization vectors, transport tokens, and UI concealment state are implementation artifacts and are not domain RDF."@en .
+
+hi:VisibilityPolicy a owl:Class ; rdfs:subClassOf cco:ont00000965 ; rdfs:label "Visibility Policy"@en ;
+  skos:definition "A Prescriptive Information Content Entity that prescribes which audience may be presented with a game entity and during which game phases."@en .
+hi:DisclosureEvent a owl:Class ; rdfs:subClassOf game:GameAct ; rdfs:label "Disclosure Event"@en ;
+  skos:definition "A Game Act in which information previously unavailable to an audience is intentionally made available to that audience."@en .
+hi:CommitmentSpecification a owl:Class ; rdfs:subClassOf cco:ont00000958 ; rdfs:label "Commitment Specification"@en ;
+  skos:definition "An Information Content Entity containing a cryptographic digest that commits an agent to concealed information without expressing that information."@en .
+hi:Public a owl:NamedIndividual ; rdfs:label "Public audience"@en ; skos:definition "The audience designation that permits presentation to every game participant."@en .
+
+hi:governs a owl:ObjectProperty ; rdfs:domain hi:VisibilityPolicy ; rdfs:label "governs"@en ;
+  skos:definition "Relates a Visibility Policy to an entity whose presentation it governs."@en .
+hi:visibleTo a owl:ObjectProperty ; rdfs:domain hi:VisibilityPolicy ; rdfs:label "visible to"@en ;
+  skos:definition "Relates a Visibility Policy to an Agent or audience designation permitted to receive its governed information."@en .
+hi:visibleDuringPhase a owl:ObjectProperty ; rdfs:domain hi:VisibilityPolicy ; rdfs:range game:Phase ; rdfs:label "visible during phase"@en ;
+  skos:definition "Relates a Visibility Policy to a game phase during which the governed entity may be presented."@en .
+hi:discloses a owl:ObjectProperty ; rdfs:domain hi:DisclosureEvent ; rdfs:label "discloses"@en ;
+  skos:definition "Relates a Disclosure Event to the information or game object it makes available."@en .
+hi:hasRecipient a owl:ObjectProperty ; rdfs:domain hi:DisclosureEvent ; rdfs:label "has recipient"@en ;
+  skos:definition "Relates a Disclosure Event to an Agent intended to receive the disclosed information."@en .
+hi:visibilityMode a owl:ObjectProperty ; rdfs:domain hi:VisibilityPolicy ; rdfs:label "visibility mode"@en ;
+  skos:definition "Relates a Visibility Policy to a controlled audience designation such as Public."@en .
+
+hi:digestValue a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain hi:CommitmentSpecification ; rdfs:range xsd:string ; rdfs:label "digest value"@en ;
+  skos:definition "Records the encoded cryptographic digest of a Commitment Specification."@en .
+hi:usesDigestAlgorithm a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain hi:CommitmentSpecification ; rdfs:range xsd:string ; rdfs:label "uses digest algorithm"@en ;
+  skos:definition "Records the identifier of the cryptographic digest algorithm used for a commitment."@en .

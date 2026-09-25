@@ -1,7 +1,7 @@
 # Browser File I/O Migration Notes
 
 This document describes conditional app changes if the proposed
-`@ontoeagle/browser-file-io` package is adopted. It is a plan, not an app-code
+`@ontologize-entertainment/browser-file-io` package is adopted. It is a plan, not an app-code
 change.
 
 ## OntoEagle

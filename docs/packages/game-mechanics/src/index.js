@@ -1,6 +1,7 @@
 export * from './action-engine.js';
 export * from './engine.js';
 export * from './game-loader.js';
+export * from './hidden-information/index.js';
 export * from './logger.js';
 export * from './persistence.js';
 export * from './random-engine.js';

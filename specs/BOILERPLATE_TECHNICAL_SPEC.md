@@ -797,3 +797,20 @@ Debt entries SHOULD state whether they are expected to be:
 - paid down in the current game;
 - promoted into the boilerplate;
 - intentionally retained as game-specific behavior.
+
+---
+
+## 23. Hidden Information Architecture
+
+Hidden information is implemented by optional ES modules under `game-mechanics/src/hidden-information`.
+
+- RDF visibility policies drive audience- and phase-specific projections from the ordinary canonical default graph.
+- Pass-and-play uses a conceal/reveal lifecycle but retains all canonical RDF on one device.
+- Multi-device mode keeps complete canonical RDF on the host and transfers encrypted, player-scoped RDF capsules using AES-256-GCM.
+- High-entropy player keys are independent from deterministic gameplay seeds and human-readable game codes.
+- URL fragments, QR-compatible tokens, and files provide zero-server invitation transport.
+- P-256 ECDH supports encrypted targeted disclosures.
+- Salted SHA-256 commitments support later verification of host-concealed values.
+- Cryptographic envelopes and keys remain technical artifacts rather than domain RDF.
+
+Detailed algorithms, formats, limitations, and tests are in `docs/game-boilerplate/hidden-information-technical-spec.md`.

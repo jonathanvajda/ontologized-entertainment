@@ -19,3 +19,13 @@ This matrix is the acceptance map for the two boilerplate specifications. “Ext
 | CAP-040 testability | deterministic headless ES-module tests and dependency injection |
 
 The package also implements the technical specification’s module boundaries, structured result errors, suppressible structured logging, explicit versions, import size/type checks, default-graph enforcement, and provisional-decision/debt registers. Parsing and serialization stay adapter-driven so the existing vendored N3 runtime and shared RDF I/O package remain the single dependency boundary. `docs/game-boilerplate` is a game-neutral static PWA harness for localhost and GitHub Pages; it demonstrates module loading and offline caching without prematurely defining the first game.
+
+## Hidden-information extension
+
+| Capability | Baseline implementation |
+| --- | --- |
+| CAP-041 audience/phase projection | RDF `VisibilityPolicy` index and disposable projected stores |
+| CAP-042 pass-and-play privacy | Confirmed reveal, timeout, blur concealment, and neutral handoff lifecycle |
+| CAP-043 device isolation | Host-complete RDF plus AES-GCM player RDF capsules |
+| CAP-044 zero-server invitation | Base64url URL fragments, QR-compatible tokens, copy/paste, and file-compatible objects |
+| CAP-045 disclosure/commitment | P-256 ECDH targeted envelopes and salted SHA-256 commitments |

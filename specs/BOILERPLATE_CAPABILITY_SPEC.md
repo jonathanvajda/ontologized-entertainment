@@ -730,3 +730,29 @@ When a concrete game exposes a mismatch between the boilerplate and the game's n
 - whether the issue represents acceptable technical debt or a design defect.
 
 A working local solution is preferable to premature generalization, provided the debt is explicitly recorded.
+
+---
+
+## 8. Hidden Information Extension
+
+### CAP-041 — Audience- and Phase-Scoped Projection
+
+The engine SHALL support disposable RDF projections constrained by viewer identity and game phase. Canonical RDF remains authoritative. Visibility policy is semantic state; DOM concealment is UI state.
+
+### CAP-042 — Pass-and-Play Privacy
+
+The engine SHALL support confirmed reveal, neutral device handoff, timeout, and concealment on page visibility loss. This provides presentation privacy and SHALL NOT be represented as cryptographic isolation.
+
+### CAP-043 — Multi-Device Information Isolation
+
+The engine SHALL support a host-authoritative mode in which each player device receives only public state and its own encrypted RDF partition. A player export SHALL NOT include another player's private state or the host-only solution.
+
+### CAP-044 — Zero-Server Invitation Transport
+
+The engine SHALL support encrypted player invitations through URL fragments, QR-compatible tokens, copy/paste, or files. A short game code MAY label a session but SHALL NOT be treated as a sufficient secret or state-retrieval mechanism without a rendezvous service.
+
+### CAP-045 — Targeted Disclosure and Commitment
+
+The engine SHALL support recipient-targeted micro-disclosures and salted cryptographic commitments verifiable when concealed information is later revealed.
+
+Detailed normative requirements are in `docs/game-boilerplate/hidden-information-capability-spec.md`.
