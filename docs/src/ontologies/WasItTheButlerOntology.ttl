@@ -1,0 +1,56 @@
+@prefix butler: <https://w3id.org/ontoeagle/games/was-it-the-butler/> .
+@prefix game: <https://w3id.org/ontologized-entertainment/game/> .
+@prefix hidden: <https://w3id.org/ontologized-entertainment/game/hidden-information/> .
+@prefix cco: <https://www.commoncoreontologies.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://w3id.org/ontoeagle/games/was-it-the-butler> a owl:Ontology ;
+  owl:versionIRI <https://w3id.org/ontoeagle/games/was-it-the-butler/2026-09-25> ;
+  owl:versionInfo "0.1.0" ;
+  owl:imports <https://w3id.org/ontologized-entertainment/game> , <https://w3id.org/ontologized-entertainment/game/hidden-information> , <https://www.commoncoreontologies.org/AgentOntology> , <https://www.commoncoreontologies.org/InformationEntityOntology> ;
+  dcterms:title "Was It the Butler? Ontology"@en ;
+  dcterms:description "A CCO-aligned model of cards, hands, board locations, suggestions, refutations, accusations, and the sealed solution in Was It the Butler?."@en ;
+  dcterms:creator "Ontologized Entertainment contributors"@en ;
+  dcterms:created "2026-09-25"^^xsd:date ;
+  dcterms:license <https://opensource.org/license/bsd-3-clause> ;
+  rdfs:label "Was It the Butler? Ontology"@en ;
+  rdfs:comment "Canonical game facts are RDF; transient focus, dialog, animation, and layout state are excluded."@en .
+
+butler:MysteryGameSession a owl:Class ; rdfs:subClassOf game:GameSession ; rdfs:label "Mystery game session"@en ; skos:definition "A Game Session governed by the Was It the Butler? rules profile."@en .
+butler:Detective a owl:Class ; rdfs:subClassOf cco:ont00001262 ; rdfs:label "Detective"@en ; skos:definition "A person who bears a player role in a mystery game session and controls one suspect token."@en .
+butler:EvidenceCard a owl:Class ; rdfs:subClassOf game:GamePiece ; rdfs:label "Evidence card"@en ; skos:definition "A game piece that identifies one candidate element of the mystery solution."@en .
+butler:SuspectCard a owl:Class ; rdfs:subClassOf butler:EvidenceCard ; rdfs:label "Suspect card"@en ; skos:definition "An Evidence Card that identifies a possible suspect."@en .
+butler:WeaponCard a owl:Class ; rdfs:subClassOf butler:EvidenceCard ; rdfs:label "Weapon card"@en ; skos:definition "An Evidence Card that identifies a possible weapon."@en .
+butler:RoomCard a owl:Class ; rdfs:subClassOf butler:EvidenceCard ; rdfs:label "Room card"@en ; skos:definition "An Evidence Card that identifies a possible room."@en .
+butler:PlayerHand a owl:Class ; rdfs:subClassOf game:Hand ; rdfs:label "Player hand"@en ; skos:definition "A Hand containing the Evidence Cards visible to exactly one detective during play."@en .
+butler:SealedSolution a owl:Class ; rdfs:subClassOf game:GameObjectAggregate ; rdfs:label "Sealed solution"@en ; skos:definition "A Game Object Aggregate containing exactly one suspect, weapon, and room card and governed by a hidden-information visibility policy until the session ends."@en .
+butler:Room a owl:Class ; rdfs:subClassOf game:BoardLocation ; rdfs:label "Room"@en ; skos:definition "A board location that may contain suspect tokens and ground a suggestion."@en .
+butler:SuspectToken a owl:Class ; rdfs:subClassOf game:GamePiece ; rdfs:label "Suspect token"@en ; skos:definition "A game piece whose location represents a suspect on the estate board."@en .
+butler:SuggestionAct a owl:Class ; rdfs:subClassOf game:GameAct ; rdfs:label "Suggestion act"@en ; skos:definition "A Game Act that names a suspect and weapon in the acting detective's current room."@en .
+butler:RefutationAct a owl:Class ; rdfs:subClassOf game:GameAct ; rdfs:label "Refutation act"@en ; skos:definition "A private disclosure act in which the first eligible detective shows one matching card."@en .
+butler:AccusationAct a owl:Class ; rdfs:subClassOf game:GameAct ; rdfs:label "Accusation act"@en ; skos:definition "A Game Act that asserts a complete suspect, weapon, and room solution."@en .
+
+butler:hasPlayer a owl:ObjectProperty ; rdfs:domain butler:MysteryGameSession ; rdfs:range butler:Detective ; rdfs:label "has player"@en ; skos:definition "Relates a mystery game session to a participating detective."@en .
+butler:hasCurrentPlayer a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain butler:MysteryGameSession ; rdfs:range butler:Detective ; rdfs:label "has current player"@en ; skos:definition "Relates an incomplete session to the detective currently permitted to act."@en .
+butler:memberOf a owl:ObjectProperty ; rdfs:domain butler:EvidenceCard ; rdfs:label "member of"@en ; skos:definition "Relates an Evidence Card to its Player Hand or Sealed Solution."@en .
+butler:ownedBy a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain butler:PlayerHand ; rdfs:range butler:Detective ; rdfs:label "owned by"@en ; skos:definition "Relates a Player Hand to its only authorized detective."@en .
+butler:usesToken a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain butler:Detective ; rdfs:range butler:SuspectToken ; rdfs:label "uses token"@en ; skos:definition "Relates a detective to the suspect token they control."@en .
+butler:locatedIn a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain butler:SuspectToken ; rdfs:range butler:Room ; rdfs:label "located in"@en ; skos:definition "Relates a suspect token to its current board room."@en .
+butler:refutedBy a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain butler:SuggestionAct ; rdfs:range butler:Detective ; rdfs:label "refuted by"@en ; skos:definition "Relates a suggestion to the first clockwise detective able to refute it."@en .
+butler:winner a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain butler:MysteryGameSession ; rdfs:range butler:Detective ; rdfs:label "winner"@en ; skos:definition "Relates a completed session to the detective whose correct accusation completed it."@en .
+butler:phase a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain butler:MysteryGameSession ; rdfs:range xsd:string ; rdfs:label "phase"@en ; skos:definition "Records the implementation identifier of the current turn phase."@en .
+butler:turnNumber a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain butler:MysteryGameSession ; rdfs:range xsd:integer ; rdfs:label "turn number"@en ; skos:definition "Records the one-based turn number of the session."@en .
+butler:playerOrder a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain butler:Detective ; rdfs:range xsd:integer ; rdfs:label "player order"@en ; skos:definition "Records a detective's zero-based position in clockwise order."@en .
+butler:eliminated a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain butler:Detective ; rdfs:range xsd:boolean ; rdfs:label "eliminated"@en ; skos:definition "Indicates that a detective made an incorrect accusation and no longer receives turns."@en .
+butler:solutionCommitment a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain butler:MysteryGameSession ; rdfs:range xsd:string ; rdfs:label "solution commitment"@en ; skos:definition "Records the cryptographic commitment used to detect alteration of the sealed solution."@en .
+butler:mode a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain butler:MysteryGameSession ; rdfs:range xsd:string ; rdfs:label "play mode"@en ; skos:definition "Identifies the pass-and-play or multi-device host profile used by the session."@en .
+butler:complete a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain butler:MysteryGameSession ; rdfs:range xsd:boolean ; rdfs:label "complete"@en ; skos:definition "Indicates whether the mystery game session has ended."@en .
+butler:cardCategory a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain butler:EvidenceCard ; rdfs:range xsd:string ; rdfs:label "card category"@en ; skos:definition "Records the implementation category identifier of an Evidence Card."@en .
+butler:dieOne a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain butler:MysteryGameSession ; rdfs:range xsd:integer ; rdfs:label "first die result"@en ; skos:definition "Records the first die result for the current movement phase."@en .
+butler:dieTwo a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain butler:MysteryGameSession ; rdfs:range xsd:integer ; rdfs:label "second die result"@en ; skos:definition "Records the second die result for the current movement phase."@en .
+butler:movementAllowance a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain butler:MysteryGameSession ; rdfs:range xsd:integer ; rdfs:label "movement allowance"@en ; skos:definition "Records the maximum graph distance available during the current movement phase."@en .
+butler:gameCode a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain butler:MysteryGameSession ; rdfs:range xsd:string ; rdfs:label "game code"@en ; skos:definition "Records a non-secret human-readable identifier for the local table."@en .

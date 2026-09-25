@@ -1,0 +1,10 @@
+{
+  "name": "Was It the Butler?",
+  "short_name": "The Butler?",
+  "description": "A local-first hidden-information estate mystery for three to six players.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4eedf",
+  "theme_color": "#15251f"
+}

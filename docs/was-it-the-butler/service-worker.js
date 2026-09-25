@@ -1,0 +1,38 @@
+const CACHE = 'was-it-the-butler-v1';
+const ASSETS = [
+  './', './index.html', './butler.css', './game-config.js', './game-ui.js', './player.js',
+  './manifest.webmanifest', './was-it-the-butler-RULES.md', './pass-and-play/', './host/', './player/',
+  './model/butler-game.js', './assets/manifest.json', './assets/art/entity-atlas.png', './assets/art/estate-board.png',
+  '../styles/normalize.css', '../packages/game-mechanics/src/index.js',
+  '../packages/game-mechanics/src/action-engine.js', '../packages/game-mechanics/src/engine.js',
+  '../packages/game-mechanics/src/game-loader.js', '../packages/game-mechanics/src/logger.js',
+  '../packages/game-mechanics/src/persistence.js', '../packages/game-mechanics/src/random-engine.js',
+  '../packages/game-mechanics/src/rdf-store.js', '../packages/game-mechanics/src/render-adapter.js',
+  '../packages/game-mechanics/src/result.js', '../packages/game-mechanics/src/rule-registry.js',
+  '../packages/game-mechanics/src/save-package.js', '../packages/game-mechanics/src/score-engine.js',
+  '../packages/game-mechanics/src/state-projector.js', '../packages/game-mechanics/src/transaction-log.js',
+  '../packages/game-mechanics/src/turn-engine.js', '../packages/game-mechanics/src/ui-state.js',
+  '../packages/game-mechanics/src/validator.js',
+  '../packages/game-mechanics/src/hidden-information/index.js',
+  '../packages/game-mechanics/src/hidden-information/crypto-engine.js',
+  '../packages/game-mechanics/src/hidden-information/disclosure.js',
+  '../packages/game-mechanics/src/hidden-information/encoding.js',
+  '../packages/game-mechanics/src/hidden-information/privacy-screen.js',
+  '../packages/game-mechanics/src/hidden-information/rdf-capsule.js',
+  '../packages/game-mechanics/src/hidden-information/rdf-visibility.js',
+  '../packages/game-mechanics/src/hidden-information/transport.js'
+];
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
+});
+self.addEventListener('activate', (event) => {
+  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)))).then(() => self.clients.claim()));
+});
+self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+  event.respondWith(caches.match(event.request).then((hit) => hit || fetch(event.request).then((response) => {
+    if (response.ok && new URL(event.request.url).origin === location.origin) caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
+    return response;
+  })));
+});
