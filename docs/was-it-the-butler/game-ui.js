@@ -1,5 +1,5 @@
 import { createButlerGame, restoreButlerGame, serializeHostGame } from './model/butler-game.js';
-import { ROOM_GRID, ROOMS, SUSPECTS, WEAPONS, cardById } from './game-config.js';
+import { ROOM_GRID, ROOMS, SUSPECTS, WEAPONS, cardById, cardImageUrl } from './game-config.js';
 
 const mode = document.body.dataset.mode;
 let game = null;
@@ -28,13 +28,27 @@ $('#cancel-choice').onclick = () => $('#choice').close();
 
 function renderNames() {
   const count = Number($('#count').value);
-  $('#names').innerHTML = Array.from({ length: count }, (_, index) => `<label>Detective ${index + 1}<input required maxlength="24" value="Player ${index + 1}"></label>`).join('');
+  const names = $('#names');
+  names.innerHTML = Array.from({ length: count }, (_, index) => {
+    const selected = SUSPECTS[index];
+    return `<div class="suspect-picker"><img src="${cardImageUrl(selected)}" alt="Portrait of ${selected.label}"><label>Turn ${index + 1}<select class="suspect-choice">${SUSPECTS.map((suspect,suspectIndex)=>`<option value="${suspect.id}" ${suspectIndex===index?'selected':''}>${suspect.label}</option>`).join('')}</select></label></div>`;
+  }).join('');
+  names.querySelectorAll('.suspect-choice').forEach((select) => {
+    select.onchange = () => {
+      const suspect = SUSPECTS.find((item) => item.id === select.value);
+      const image = select.closest('.suspect-picker').querySelector('img');
+      image.src = cardImageUrl(suspect);
+      image.alt = `Portrait of ${suspect.label}`;
+    };
+  });
 }
 
 $('#setup-form').onsubmit = async (event) => {
   event.preventDefault();
-  const names = [...$('#names').querySelectorAll('input')].map((input) => input.value);
-  game = await createButlerGame({ names, mode });
+  const tokenIds = [...$('#names').querySelectorAll('.suspect-choice')].map((select) => select.value);
+  if (new Set(tokenIds).size !== tokenIds.length) return note('Each player must choose a different suspect.', true);
+  const names = tokenIds.map((id) => SUSPECTS.find((suspect) => suspect.id === id).label);
+  game = await createButlerGame({ names, tokenIds, mode });
   setup.close();
   $('#save').disabled = false;
   render();
@@ -71,13 +85,12 @@ function renderBoard(state) {
     const room = ROOMS.find((item) => item.id === id);
     const button = document.createElement('button');
     button.className = 'room';
-    button.style.setProperty('--cell', room.atlas);
     button.innerHTML = `<span>${room.label}</span><b class="tokens"></b>`;
     for (const suspect of SUSPECTS.filter((item) => state.locations[item.id] === id)) {
       const token = document.createElement('i');
       token.className = 'token-chip';
       token.title = suspect.label;
-      token.style.backgroundPosition = `${(suspect.atlas % 3) * 50}% ${Math.floor(suspect.atlas / 3) * (100 / 6)}%`;
+      token.style.backgroundImage = `url("${cardImageUrl(suspect)}")`;
       button.querySelector('.tokens').append(token);
     }
     button.disabled = state.phase !== 'movement';
@@ -159,7 +172,8 @@ function privateReveal(refutation) {
   content.querySelector('#confirm-refuter').onclick = (event) => { event.currentTarget.remove(); content.querySelector('.private-cards').hidden = false; };
   refutation.matches.forEach((card) => {
     const button = document.createElement('button');
-    button.textContent = card.label;
+    button.className = 'show-card';
+    button.innerHTML = `<img src="${cardImageUrl(card)}" alt=""><span>${card.label}</span>`;
     button.onclick = () => { dialog.close(); act('resolveRefutation', { refuterIri: refutation.player.iri, cardId: card.id }); };
     content.querySelector('.private-cards').append(button);
   });
@@ -171,8 +185,9 @@ function privateHand(player) {
   const content = $('#private-content');
   content.innerHTML = `<p class="kicker">Private hand</p><h2>Pass to ${player.name}</h2><p>Only ${player.name} should continue.</p><button class="primary" id="confirm-hand">I am ${player.name}</button><section id="hand-details" hidden><div class="private-cards"></div><label class="notebook">Detective notebook<textarea rows="7" placeholder="Record deductions…"></textarea></label><button class="primary" id="close-hand">Hide my hand</button></section>`;
   for (const card of player.hand) {
-    const item = document.createElement('span');
-    item.textContent = card.label;
+    const item = document.createElement('article');
+    item.className = 'private-evidence-card';
+    item.innerHTML = `<img src="${cardImageUrl(card)}" alt="${card.label}"><span>${card.category}</span><strong>${card.label}</strong>`;
     content.querySelector('.private-cards').append(item);
   }
   const notes = content.querySelector('textarea');
@@ -202,15 +217,16 @@ function select(label, name, items) {
 }
 
 async function showInvites() {
-  const base = new URL('../player/', location.href).href;
-  const invites = await game.invitations(base);
+  const invites = await game.playerAccessCodes();
   const box = $('#invitations');
-  box.innerHTML = '<h3>Private invitations</h3><p>Send each complete link only to the named player.</p>';
+  box.innerHTML = '<h3>Turn order &amp; player codes</h3><p>Each player enters the table code shown above, their suspect, and their private code.</p><div class="player-code-list"></div>';
+  const list = box.querySelector('.player-code-list');
   invites.forEach((invite) => {
-    const details = document.createElement('details');
-    details.innerHTML = `<summary>${invite.name}</summary><textarea readonly>${invite.url}</textarea><button>Copy invitation</button>`;
-    details.querySelector('button').onclick = () => navigator.clipboard.writeText(invite.url);
-    box.append(details);
+    const suspect = SUSPECTS.find((item) => item.id === invite.suspectId);
+    const row = document.createElement('div');
+    row.className = 'player-code-row';
+    row.innerHTML = `<img src="${cardImageUrl(suspect)}" alt=""><span><small>Turn ${invite.turnOrder}</small><strong>${invite.name}</strong></span><b aria-label="Private code ${invite.handCode}">${invite.handCode}</b>`;
+    list.append(row);
   });
 }
 

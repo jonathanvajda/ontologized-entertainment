@@ -1,11 +1,27 @@
 {
-  "version": 1,
+  "version": 2,
   "board": { "src": "./art/estate-board.png", "alt": "Top-down illustrated plan of the nine-room estate" },
-  "atlas": { "src": "./art/entity-atlas.png", "columns": 3, "rows": 7 },
   "entities": {
-    "eggshell": 0, "marinara": 1, "peach": 2, "mint": 3, "mulberry": 4, "brown": 5,
-    "shovel": 6, "bat": 7, "pistol": 8, "rope": 9, "knife": 10, "guitar": 11,
-    "hall": 12, "living-room": 13, "dining-room": 14, "kitchen": 15, "library": 16,
-    "game-room": 17, "screened-porch": 18, "greenhouse": 19, "pool-room": 20
+    "eggshell": "./art/person-mrs-eggshell.png",
+    "marinara": "./art/person-lt-marinara.png",
+    "peach": "./art/person-ms-peach.png",
+    "mint": "./art/person-mrs-mint.png",
+    "mulberry": "./art/person-professor-mulberry.png",
+    "brown": "./art/person-mr-brown.png",
+    "shovel": "./art/weapon-shovel.png",
+    "bat": "./art/weapon-baseball-bat.png",
+    "pistol": "./art/weapon-pistol.png",
+    "rope": "./art/weapon-rope.png",
+    "knife": "./art/weapon-knife.png",
+    "guitar": "./art/weapon-guitar-01.png",
+    "hall": "./art/room-hallway.png",
+    "living-room": "./art/room-livingroom.png",
+    "dining-room": "./art/room-diningroom.png",
+    "kitchen": "./art/room-kitchen.png",
+    "library": "./art/room-library.png",
+    "game-room": "./art/room-gameroom.png",
+    "screened-porch": "./art/room-screened-in-porch.png",
+    "greenhouse": "./art/room-greenhouse.png",
+    "pool-room": "./art/room-pool-room.png"
   }
 }

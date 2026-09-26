@@ -1,63 +1,83 @@
-import {
-  readInvitationUrl,
-  decodeTransportToken,
-  importSymmetricKey,
-  openEncryptedRdfCapsule
-} from '../packages/game-mechanics/src/index.js';
-import { CARDS, NS } from './game-config.js';
+import { CARDS, SUSPECTS, cardImageUrl } from './game-config.js';
+import { openHandCode } from './model/compact-hand-code.js';
 
 const app = document.querySelector('#player-app');
-const input = document.querySelector('#invite-input');
+const form = document.querySelector('#access-form');
 const error = document.querySelector('#join-error');
+const suspectSelect = document.querySelector('#suspect-id');
+suspectSelect.innerHTML = SUSPECTS.map((suspect) => `<option value="${suspect.id}">${suspect.label}</option>`).join('');
 
-document.querySelector('#open-invite').onclick = () => open(input.value);
-document.querySelector('#invite-file').onchange = async (event) => open(await event.target.files[0]?.text());
+form.onsubmit = async (event) => {
+  event.preventDefault();
+  error.textContent = '';
+  const values = Object.fromEntries(new FormData(form));
+  try {
+    const cards = await openHandCode({
+      code: values.handCode,
+      tableCode: values.tableCode,
+      suspectId: values.suspectId
+    });
+    render(values, cards);
+  } catch (reason) {
+    error.textContent = reason.message || 'That access code could not be opened.';
+  }
+};
 
-const fromUrl = readInvitationUrl(location.href);
-if (fromUrl) {
-  openPayload(fromUrl);
-  history.replaceState(null, '', location.pathname);
+function render(values, cards) {
+  const suspect = SUSPECTS.find((item) => item.id === values.suspectId);
+  const playerKey = `${values.tableCode}-${values.suspectId}`.toLocaleLowerCase();
+  app.innerHTML = `<section class="player-hand"><p class="kicker">Table ${escapeText(values.tableCode.toUpperCase())}</p><h1>${suspect.label}’s private hand</h1><p class="privacy-note">Each card can be enlarged and shown directly to another player when it refutes a suggestion.</p><div class="card-grid"></div><section class="sleuth-sheet"><p class="kicker">Private deductions</p><h2>Sleuth sheet</h2><p>Your own cards are already marked. Check another item when you have ruled it out.</p><table><thead><tr><th scope="col">Person, weapon, or room</th><th scope="col">Ruled out</th></tr></thead><tbody></tbody></table></section><label class="notebook">Additional notes<textarea rows="6" placeholder="Record deductions and suspicions…"></textarea></label></section><dialog id="card-view"><button class="close-card" aria-label="Close card">×</button><img alt=""><h2></h2></dialog>`;
+  const grid = app.querySelector('.card-grid');
+  cards.forEach((card) => {
+    const button = document.createElement('button');
+    button.className = 'evidence-card';
+    button.innerHTML = `<img src="${cardImageUrl(card)}" alt=""><span>${card.category}</span><strong>${card.label}</strong><small>Tap to show</small>`;
+    button.onclick = () => showCard(card);
+    grid.append(button);
+  });
+  renderSleuthSheet(app.querySelector('.sleuth-sheet tbody'), cards, playerKey);
+  const note = app.querySelector('textarea');
+  const key = `butler-notes-${playerKey}`;
+  note.value = localStorage.getItem(key) || '';
+  note.oninput = () => localStorage.setItem(key, note.value);
+  app.querySelector('.close-card').onclick = () => app.querySelector('#card-view').close();
 }
 
-async function open(value) {
-  try {
-    let payload;
-    if (String(value).includes('#invite=')) payload = readInvitationUrl(value);
-    else {
-      try { payload = JSON.parse(value); }
-      catch { payload = decodeTransportToken(value); }
+function renderSleuthSheet(body, hand, playerKey) {
+  const ownIds = new Set(hand.map((card) => card.id));
+  const storageKey = `butler-sleuth-${playerKey}`;
+  const marked = new Set(JSON.parse(localStorage.getItem(storageKey) || '[]'));
+  for (const category of ['suspect', 'weapon', 'room']) {
+    const heading = document.createElement('tr');
+    heading.className = 'sleuth-category';
+    heading.innerHTML = `<th colspan="2">${category === 'suspect' ? 'People' : `${category[0].toUpperCase()}${category.slice(1)}s`}</th>`;
+    body.append(heading);
+    for (const card of CARDS.filter((item) => item.category === category)) {
+      const own = ownIds.has(card.id);
+      const row = document.createElement('tr');
+      row.innerHTML = `<th scope="row">${card.label}${own ? '<small>In your hand</small>' : ''}</th><td><input type="checkbox" aria-label="Rule out ${card.label}" ${own || marked.has(card.id) ? 'checked' : ''} ${own ? 'disabled' : ''}></td>`;
+      const checkbox = row.querySelector('input');
+      if (!own) checkbox.onchange = () => {
+        if (checkbox.checked) marked.add(card.id); else marked.delete(card.id);
+        localStorage.setItem(storageKey, JSON.stringify([...marked]));
+      };
+      body.append(row);
     }
-    await openPayload(payload);
-  } catch {
-    error.textContent = 'That invitation could not be opened.';
   }
 }
 
-async function openPayload(payload) {
-  const key = await importSymmetricKey(payload.key);
-  const opened = await openEncryptedRdfCapsule(payload.capsule, key);
-  const rows = opened.privateQuads;
-  const cardIris = [...new Set(rows.filter((row) => row.predicate.value.endsWith('memberOf')).map((row) => row.subject.value))];
-  const cards = cardIris.map((iri) => CARDS.find((card) => NS + 'card-' + card.id === iri)).filter(Boolean);
-  render(opened.playerIri, cards, opened.gameCode);
+function showCard(card) {
+  const dialog = app.querySelector('#card-view');
+  dialog.querySelector('img').src = cardImageUrl(card);
+  dialog.querySelector('img').alt = card.label;
+  dialog.querySelector('h2').textContent = card.label;
+  dialog.showModal();
 }
 
-function render(playerIri, cards, code) {
-  app.innerHTML = `<section class="player-hand"><p class="kicker">Table ${code}</p><h1>Your private hand</h1><p class="privacy-note">Only show a card when the host asks you to refute.</p><div class="card-grid"></div><label class="notebook">Detective notebook<textarea rows="12" placeholder="Record cards, deductions, and suspicions…"></textarea></label></section>`;
-  const grid = app.querySelector('.card-grid');
-  cards.forEach((card) => {
-    const article = document.createElement('article');
-    const col = card.atlas % 3;
-    const row = Math.floor(card.atlas / 3);
-    article.className = 'evidence-card';
-    article.innerHTML = `<i></i><span>${card.category}</span><h2>${card.label}</h2>`;
-    article.querySelector('i').style.backgroundPosition = `${col * 50}% ${row * (100 / 6)}%`;
-    grid.append(article);
-  });
-  const note = app.querySelector('textarea');
-  const key = 'butler-notes-' + playerIri;
-  note.value = localStorage.getItem(key) || '';
-  note.oninput = () => localStorage.setItem(key, note.value);
+function escapeText(value) {
+  const node = document.createElement('span');
+  node.textContent = String(value);
+  return node.innerHTML;
 }
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('../service-worker.js', { scope: '../' });

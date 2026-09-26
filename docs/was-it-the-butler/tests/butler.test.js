@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createButlerGame, restoreButlerGame, serializeHostGame } from '../model/butler-game.js';
 import { CARDS, ROOMS, SUSPECTS, WEAPONS } from '../game-config.js';
-import { readInvitationUrl, importSymmetricKey, openEncryptedRdfCapsule } from '../../packages/game-mechanics/src/index.js';
+import { openHandCode } from '../model/compact-hand-code.js';
 
 const names = ['Ada', 'Bert', 'Cy'];
 
@@ -25,6 +25,15 @@ test('seeded setup and dice sequence are deterministic', async () => {
   assert.deepEqual(left.solution, right.solution);
   assert.deepEqual(left.state().players.map((player) => player.hand.map((card) => card.id)), right.state().players.map((player) => player.hand.map((card) => card.id)));
   assert.deepEqual(left.act('roll').value, right.act('roll').value);
+});
+
+test('chosen suspects identify players and establish turn order', async () => {
+  const tokenIds = ['peach', 'marinara', 'mint'];
+  const chosenNames = ['Ms. Peach', 'Lt. Marinara', 'Mrs. Mint'];
+  const game = await createButlerGame({ names: chosenNames, tokenIds, seed: 'roles' });
+  assert.deepEqual(game.state().players.map((player) => player.tokenId), tokenIds);
+  assert.equal(game.state().players[0].name, 'Ms. Peach');
+  await assert.rejects(() => createButlerGame({ names: chosenNames, tokenIds: ['peach', 'peach', 'mint'] }));
 });
 
 test('turn flow enforces movement, suggestion, refutation, and advancement', async () => {
@@ -63,16 +72,26 @@ test('correct accusation completes the game and verifies its commitment', async 
   assert.equal(await game.verifySolution(), true);
 });
 
-test('player invitation ciphertext contains no card labels and opens only that hand', async () => {
-  const game = await createButlerGame({ names, mode: 'host', seed: 'capsule' });
-  const [invite] = await game.invitations('https://example.test/player/');
-  const payload = readInvitationUrl(invite.url);
-  const serialized = JSON.stringify(payload.capsule);
-  for (const card of CARDS) assert.equal(serialized.includes(card.label), false);
-  const opened = await openEncryptedRdfCapsule(payload.capsule, await importSymmetricKey(payload.key));
-  const expected = game.state().players[0].hand.map((card) => card.id);
-  const actual = opened.privateQuads.filter((row) => row.predicate.value.endsWith('memberOf')).map((row) => row.subject.value.split('card-')[1]);
-  assert.deepEqual(actual.sort(), expected.sort());
+test('five-letter player code reconstructs only the matching private hand', async () => {
+  const game = await createButlerGame({ names, mode: 'host', seed: 'compact-code' });
+  const [access] = await game.playerAccessCodes();
+  assert.match(access.handCode, /^[A-Z]{5}$/);
+  const opened = await openHandCode({ code: access.handCode, tableCode: access.tableCode, suspectId: access.suspectId });
+  assert.deepEqual(opened.map((card) => card.id).sort(), game.state().players[0].hand.map((card) => card.id).sort());
+  await assert.rejects(() => openHandCode({ code: access.handCode, tableCode: access.tableCode, suspectId: 'brown' }));
+});
+
+test('compact hand codes round-trip every seat for three through six players', async () => {
+  for (let count = 3; count <= 6; count += 1) {
+    const roster = Array.from({ length: count }, (_, index) => `Detective ${index + 1}`);
+    const game = await createButlerGame({ names: roster, mode: 'host', seed: `compact-${count}` });
+    const accessCodes = await game.playerAccessCodes();
+    for (let index = 0; index < count; index += 1) {
+      const access = accessCodes[index];
+      const cards = await openHandCode({ code: access.handCode, tableCode: access.tableCode, suspectId: access.suspectId });
+      assert.deepEqual(cards.map((card) => card.id).sort(), game.state().players[index].hand.map((card) => card.id).sort());
+    }
+  }
 });
 
 test('host save round-trips RDF state and deterministic random state', async () => {

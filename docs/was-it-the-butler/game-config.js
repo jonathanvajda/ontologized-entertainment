@@ -2,11 +2,11 @@ export const NS='https://w3id.org/ontoeagle/games/was-it-the-butler/';
 export const GAME_ID='https://w3id.org/ontoeagle/games/was-it-the-butler';
 export const VERSION='0.1.0';
 export const SUSPECTS=[
-  ['eggshell','Mrs. Eggshell','white',0],['marinara','Lt. Marinara','red',1],['peach','Ms. Peach','orange',2],
-  ['mint','Mrs. Mint','green',3],['mulberry','Prof. Mulberry','purple',4],['brown','Mr. Brown','brown',5]
-].map(([id,label,color,atlas])=>({id,label,color,category:'suspect',atlas}));
-export const WEAPONS=[['shovel','Shovel'],['bat','Baseball Bat'],['pistol','Pistol'],['rope','Rope'],['knife','Knife'],['guitar','Guitar']].map(([id,label],index)=>({id,label,category:'weapon',atlas:index+6}));
-export const ROOMS=[['hall','Hall'],['living-room','Living Room'],['dining-room','Dining Room'],['kitchen','Kitchen'],['library','Library'],['game-room','Game Room'],['screened-porch','Screened-in Porch'],['greenhouse','Greenhouse'],['pool-room','Pool Room']].map(([id,label],index)=>({id,label,category:'room',atlas:index+12}));
+  ['eggshell','Mrs. Eggshell','white','person-mrs-eggshell.png'],['marinara','Lt. Marinara','red','person-lt-marinara.png'],['peach','Ms. Peach','orange','person-ms-peach.png'],
+  ['mint','Mrs. Mint','green','person-mrs-mint.png'],['mulberry','Prof. Mulberry','purple','person-professor-mulberry.png'],['brown','Mr. Brown','brown','person-mr-brown.png']
+].map(([id,label,color,image])=>({id,label,color,category:'suspect',image}));
+export const WEAPONS=[['shovel','Shovel','weapon-shovel.png'],['bat','Baseball Bat','weapon-baseball-bat.png'],['pistol','Pistol','weapon-pistol.png'],['rope','Rope','weapon-rope.png'],['knife','Knife','weapon-knife.png'],['guitar','Guitar','weapon-guitar-01.png']].map(([id,label,image])=>({id,label,category:'weapon',image}));
+export const ROOMS=[['hall','Hall','room-hallway.png'],['living-room','Living Room','room-livingroom.png'],['dining-room','Dining Room','room-diningroom.png'],['kitchen','Kitchen','room-kitchen.png'],['library','Library','room-library.png'],['game-room','Game Room','room-gameroom.png'],['screened-porch','Screened-in Porch','room-screened-in-porch.png'],['greenhouse','Greenhouse','room-greenhouse.png'],['pool-room','Pool Room','room-pool-room.png']].map(([id,label,image])=>({id,label,category:'room',image}));
 export const CARDS=[...SUSPECTS,...WEAPONS,...ROOMS];
 export const ROOM_GRID=[['screened-porch','living-room','dining-room'],['kitchen','hall','library'],['game-room','greenhouse','pool-room']];
 export const ADJACENCY=Object.freeze({
@@ -18,3 +18,4 @@ export const SECRET_PASSAGES=Object.freeze({'screened-porch':'pool-room','pool-r
 export const START_ROOMS=['hall','living-room','dining-room','kitchen','library','greenhouse'];
 export const cardById=(id)=>CARDS.find(card=>card.id===id);
 export const roomById=(id)=>ROOMS.find(room=>room.id===id);
+export const cardImageUrl=(card)=>new URL(`./assets/art/${card.image}`,import.meta.url).href;

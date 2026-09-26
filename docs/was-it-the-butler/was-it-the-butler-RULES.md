@@ -55,20 +55,20 @@ This prevents accidental viewing during ordinary play, but everyone’s informat
 
 ### Local multi-device
 
-Use one host device for setup, the board, turns, dice, suggestions, and accusations. Each player opens the player page on a personal device and imports their private invitation by QR code, link, copy/paste token, or file.
+Use one host device for setup, the board, turns, dice, suggestions, and accusations. Each player opens the player page on a personal device and enters the table code, their chosen suspect, and private five-letter hand code shown by the host.
 
 The player page contains that player’s starting hand and private detective notebook. It does not automatically receive later board changes; players follow the host screen and update their notebooks themselves.
 
-The short table code identifies the game but does not download private information. Keep the complete invitation private—it is the key to that player’s hand.
+The short table code identifies the game but contains no deal or solution. A private hand code reconstructs only its chosen suspect’s starting cards. Keep that five-letter code private because anyone who sees it together with the access details can display that hand.
 
 ## 4. Setup
 
 1. Choose pass-and-play or local multi-device.
-2. Enter three to six player names and assign each player an available suspect token.
+2. Each player chooses a different suspect token. The host orders those suspects to establish turn order.
 3. The game randomly selects one suspect, one weapon, and one room for the sealed solution.
 4. The remaining 18 cards are shuffled and dealt one at a time. Some players may receive one more card than others.
 5. In pass-and-play, each player privately reviews their hand in turn.
-6. In multi-device play, the host presents a separate invitation to each player. Each player imports only their own invitation.
+6. In multi-device play, the host presents a separate five-letter hand code to each player. Each player enters only their own code and access details.
 7. Place every suspect token on its marked starting space, including tokens not assigned to a player.
 8. The host selects the first player. Play then proceeds clockwise.
 
@@ -155,11 +155,11 @@ If every player but one is eliminated, the remaining eligible player does not au
 
 ## 10. Information and fairness
 
-- Do not inspect another player’s device, invitation, or saved data.
-- Keep private invitations and exported player files secret.
+- Do not inspect another player’s device, hand code, or saved data.
+- Keep private hand codes secret.
 - The host device contains the full solution and every hand; the host operator is trusted not to inspect developer tools or storage.
 - Pass-and-play concealment is a social privacy aid, not protection against deliberate device inspection.
-- A player invitation cannot be revoked after it has been copied in the zero-server version.
+- A player hand code cannot be revoked after it has been copied in the zero-server version.
 
 ## 11. Saving
 

@@ -1,22 +1,24 @@
-import {RandomEngine,RdfStore,namedNode,literal,quad,createCommitment,verifyCommitment,generateGameCode,generateSymmetricKey,exportSymmetricKey,createEncryptedRdfCapsule,createInvitationUrl} from '../../packages/game-mechanics/src/index.js';
-import {ADJACENCY,CARDS,GAME_ID,NS,ROOMS,SECRET_PASSAGES,START_ROOMS,SUSPECTS,VERSION,WEAPONS,cardById} from '../game-config.js';
+import {RandomEngine,RdfStore,namedNode,literal,quad,createCommitment,verifyCommitment,generateGameCode} from '../../packages/game-mechanics/src/index.js';
+import {ADJACENCY,CARDS,NS,ROOMS,SECRET_PASSAGES,START_ROOMS,SUSPECTS,WEAPONS} from '../game-config.js';
+import {createHandCode} from './compact-hand-code.js';
 
 const RDF='http://www.w3.org/1999/02/22-rdf-syntax-ns#'; const XSD='http://www.w3.org/2001/XMLSchema#'; const SESSION=NS+'session';
 const P={type:RDF+'type',value:RDF+'value',label:'http://www.w3.org/2000/01/rdf-schema#label',phase:NS+'phase',mode:NS+'mode',current:NS+'hasCurrentPlayer',turn:NS+'turnNumber',complete:NS+'complete',commitment:NS+'solutionCommitment',salt:NS+'solutionSalt',category:NS+'cardCategory',member:NS+'memberOf',owner:NS+'ownedBy',order:NS+'playerOrder',eliminated:NS+'eliminated',token:NS+'usesToken',location:NS+'locatedIn',die1:NS+'dieOne',die2:NS+'dieTwo',moves:NS+'movementAllowance',suggestion:NS+'suggestion',refuter:NS+'refutedBy',winner:NS+'winner'};
 const nn=namedNode; const lit=(v,dt=XSD+'string')=>literal(v,dt); const q=(s,p,o)=>quad(nn(s),nn(p),typeof o==='string'?nn(o):o);
 const val=(store,s,p,f='')=>store.getQuads(nn(s),nn(p),null,null)[0]?.object.value??f; const vals=(store,s,p)=>store.getQuads(nn(s),nn(p),null,null).map(x=>x.object.value);
 
-export async function createButlerGame({names,mode='pass-and-play',seed=Date.now()}={}){
-  const clean=names.map(v=>String(v).trim()).filter(Boolean); if(clean.length<3||clean.length>6)throw new RangeError('Was It the Butler? requires three to six players.');if(new Set(clean.map(name=>name.toLocaleLowerCase())).size!==clean.length)throw new RangeError('Player names must be unique.');
+export async function createButlerGame({names,tokenIds,mode='pass-and-play',seed}={}){
+  const clean=names.map(v=>String(v).trim()).filter(Boolean); if(clean.length<3||clean.length>6)throw new RangeError('Was It the Butler? requires three to six players.');if(new Set(clean.map(name=>name.toLocaleLowerCase())).size!==clean.length)throw new RangeError('Player identities must be unique.');
+  const selectedTokens=tokenIds??SUSPECTS.slice(0,clean.length).map(suspect=>suspect.id);if(selectedTokens.length!==clean.length||new Set(selectedTokens).size!==clean.length||selectedTokens.some(id=>!SUSPECTS.some(suspect=>suspect.id===id)))throw new RangeError('Each player must choose a different suspect.');
   const random=new RandomEngine(seed); const solution=[random.drawOne(SUSPECTS).id,random.drawOne(WEAPONS).id,random.drawOne(ROOMS).id];
   const remaining=random.shuffle(CARDS.filter(c=>!solution.includes(c.id))); const commitment=await createCommitment(solution.slice().sort()); const code=generateGameCode(6);
   const store=new RdfStore([q(SESSION,P.type,NS+'MysteryGameSession'),q(SESSION,P.mode,lit(mode)),q(SESSION,P.phase,lit('turn-start')),q(SESSION,P.turn,lit(1,XSD+'integer')),q(SESSION,P.complete,lit(false,XSD+'boolean')),q(SESSION,P.commitment,lit(commitment.digest)),q(SESSION,P.salt,lit(commitment.salt)),q(SESSION,NS+'gameCode',lit(code)),q(NS+'sealed-solution',P.type,NS+'SealedSolution')]);
   CARDS.forEach(card=>{store.addQuads([q(NS+'card-'+card.id,P.type,NS+title(card.category)+'Card'),q(NS+'card-'+card.id,P.label,lit(card.label)),q(NS+'card-'+card.id,P.category,lit(card.category))])});
   ROOMS.forEach(room=>store.addQuads([q(NS+'room-'+room.id,P.type,NS+'Room'),q(NS+'room-'+room.id,P.label,lit(room.label))]));
   SUSPECTS.forEach(suspect=>store.addQuads([q(NS+'token-'+suspect.id,P.type,NS+'SuspectToken'),q(NS+'token-'+suspect.id,P.label,lit(suspect.label))]));
-  const players=clean.map((name,index)=>({iri:NS+'player-'+(index+1),name,order:index,tokenId:SUSPECTS[index].id,handIri:NS+'hand-'+(index+1)}));
+  const players=clean.map((name,index)=>({iri:NS+'player-'+(index+1),name,order:index,tokenId:selectedTokens[index],handIri:NS+'hand-'+(index+1)}));
   players.forEach(player=>store.addQuads([q(SESSION,NS+'hasPlayer',nn(player.iri)),q(player.iri,P.type,NS+'Detective'),q(player.iri,P.label,lit(player.name)),q(player.iri,P.order,lit(player.order,XSD+'integer')),q(player.iri,P.eliminated,lit(false,XSD+'boolean')),q(player.iri,P.token,nn(NS+'token-'+player.tokenId)),q(player.handIri,P.type,NS+'PlayerHand'),q(player.handIri,P.owner,nn(player.iri)),q(NS+'token-'+player.tokenId,P.location,nn(NS+'room-'+START_ROOMS[player.order]))]));
-  SUSPECTS.slice(players.length).forEach((suspect,index)=>store.addQuad(q(NS+'token-'+suspect.id,P.location,nn(NS+'room-'+START_ROOMS[(players.length+index)%START_ROOMS.length]))));
+  SUSPECTS.filter(suspect=>!selectedTokens.includes(suspect.id)).forEach((suspect,index)=>store.addQuad(q(NS+'token-'+suspect.id,P.location,nn(NS+'room-'+START_ROOMS[(players.length+index)%START_ROOMS.length]))));
   solution.forEach(id=>store.addQuad(q(NS+'card-'+id,P.member,nn(NS+'sealed-solution')))); remaining.forEach((card,index)=>store.addQuad(q(NS+'card-'+card.id,P.member,nn(players[index%players.length].handIri))));
   store.addQuad(q(SESSION,P.current,nn(players[0].iri)));
   return new ButlerGame({store,random,players,solution,commitment,code});
@@ -40,7 +42,7 @@ export class ButlerGame{
   _endTurn(){const s=this.state();if(!['notebook','suggestion','movement'].includes(s.phase))throw new Error('Finish the current action before ending the turn.');let next=s.currentPlayerIndex;for(let i=0;i<s.players.length;i++){next=(next+1)%s.players.length;if(!s.players[next].eliminated)break;}if(s.players.every(p=>p.eliminated)){set(this.store,SESSION,P.complete,lit(true,XSD+'boolean'));set(this.store,SESSION,P.phase,lit('complete'));return null;}set(this.store,SESSION,P.current,nn(s.players[next].iri));set(this.store,SESSION,P.turn,lit(s.turn+1,XSD+'integer'));for(const pred of[P.die1,P.die2,P.moves,P.suggestion,P.refuter])remove(this.store,SESSION,pred);set(this.store,SESSION,P.phase,lit('turn-start'));return s.players[next];}
   async verifySolution(){return verifyCommitment(this.solution.slice().sort(),this.commitment);}
   snapshot(){return{format:'butler-host-save',version:1,quads:this.store.getQuads(),rngState:this.random.getState(),players:this.players,solution:this.solution,commitment:this.commitment,code:this.code};}
-  async invitations(playerUrl){const output=[];for(const player of this.state().players){const key=await generateSymmetricKey();const privateQuads=this.store.getQuads(null,null,null,null).filter(item=>item.subject.value===player.handIri||item.object.value===player.handIri||player.hand.some(card=>item.subject.value===NS+'card-'+card.id));const capsule=await createEncryptedRdfCapsule({gameId:GAME_ID,gameVersion:VERSION,schemaVersion:'1',gameCode:this.code,playerIri:player.iri,privateQuads,key});output.push({playerIri:player.iri,name:player.name,url:createInvitationUrl(playerUrl,{capsule,key:await exportSymmetricKey(key)})});}return output;}
+  async playerAccessCodes(){const state=this.state();return Promise.all(state.players.map(async(player,index)=>({playerIri:player.iri,name:player.name,suspectId:player.tokenId,turnOrder:index+1,tableCode:this.code,handCode:await createHandCode({cardIds:player.hand.map(card=>card.id),tableCode:this.code,suspectId:player.tokenId})})));}
 }
 
 function set(store,s,p,o){remove(store,s,p);store.addQuad(q(s,p,o))}function remove(store,s,p){store.removeQuads(store.getQuads(nn(s),nn(p),null,null))}function requirePhase(s,p){if(s.complete||s.phase!==p)throw new Error(`This action requires the ${p} phase.`)}function title(s){return s[0].toUpperCase()+s.slice(1)}function parse(v){try{return v?JSON.parse(v):null}catch{return null}}

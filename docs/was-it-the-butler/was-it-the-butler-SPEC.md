@@ -12,7 +12,7 @@ Was It the Butler? is a three-to-six-player deduction game built on the Ontologi
 - pass-and-play on one device with audience/phase concealment;
 - local multi-device play with a host page and static player pages;
 - host-authoritative board, turn, movement, suggestion, and accusation state;
-- player-scoped encrypted RDF hand capsules and local notebooks;
+- player-scoped five-letter hand codes and local notebooks;
 - commitment and later verification of the concealed solution.
 
 The game has no backend and does not claim live synchronization from a short code. Multi-device player pages receive setup information once and remain useful because hands never change during normal play.
@@ -49,21 +49,17 @@ Private nodes are mounted only after named-player confirmation and removed on co
 
 ### 3.2 Multi-device
 
-The host owns complete canonical RDF. For each player it produces:
+The host owns complete canonical RDF. For each player it produces a five-letter bearer code encoding both the hand size and combinatorial rank of that hand. The rank is masked and checksummed against the public table code and chosen suspect identifier. It contains no solution and no other hand.
 
-- public identity/configuration quads;
-- that player's hand and card-detail quads;
-- the player's disclosure identity;
-- other players' public disclosure keys;
-- no solution and no other hand.
+Four capital letters can represent every possible hand of at most six cards, but leave only about three bits of redundancy after the largest hand is represented. Five letters are therefore the minimum supported width. Encoding all possible three-to-six-card hands consumes about 16.3 bits and leaves seven checksum bits. The table code is a public label and does not derive the deal. The chosen suspect supplies player identity and binds the code without claiming to add secret entropy.
 
-The capsule is AES-256-GCM encrypted and transferred with a high-entropy invitation in a URL fragment, QR code, copy/paste token, or file. The table code is a public label.
+The player page is a compact decoder and renderer rather than an RDF client. It has the shared card manifest but no host triplestore, SPARQL evaluator, or SHACL validator. It reconstructs only the hand represented by its access code and keeps notebook data locally.
 
 Player pages do not submit movement or notebook changes to the host in baseline 0.1.0. Refutations are performed in person by showing one selected card on the refuter's device. The generic targeted-disclosure module remains available for a later QR/token workflow.
 
 ### 3.3 Trust boundary
 
-The host operator is trusted because the host contains all secrets. Player-device inspection reveals that player's own hand and notebook only. Invitations are bearer credentials and cannot be revoked without adding a live service.
+The host operator is trusted because the host contains all secrets. Player-device inspection reveals that player's own hand and notebook only. Hand codes are bearer credentials and cannot be revoked without adding a live service. They prevent derivation of the actual other hands and solution because those facts are absent, but they are not cryptographic authenticators: the possible card subsets are inherently enumerable.
 
 ## 4. Entity register
 
@@ -112,32 +108,32 @@ Board topology is semantic RDF; pixel geometry and artwork are external JSON/SVG
 - membership of cards in that player's hand;
 - complete identity of those cards;
 - the player's notebook entries;
-- disclosure cryptographic material scoped to that player.
+- compact-code context scoped to that player.
 
 ### 5.3 Host-only state
 
 - sealed solution membership;
 - solution commitment salt until reveal;
 - every hand membership;
-- cryptographic content keys and invitation records;
+- player hand-code records;
 - deterministic shuffle state if it would expose the deal.
 
 ### 5.4 Current-state semantics
 
 Token location, current player, phase, and eligibility use ordinary direct triples and replacement deltas. Historical moves, suggestions, refutations, accusations, eliminations, and solution reveal remain RDF individuals.
 
-Technical ciphertext, IVs, URL fragments, and keys are not RDF.
+Technical compact-code checksums and local notebook storage are not RDF.
 
 ## 6. Setup pipeline
 
-1. Validate three-to-six unique player names and token choices.
+1. Validate three-to-six unique suspect choices and preserve their selected turn order.
 2. Generate a public table code using cryptographic randomness.
-3. Generate a host-private gameplay seed and independent per-player AES/ECDH keys.
+3. Generate a host-private gameplay seed. Suspect choices are public context and are not counted as entropy.
 4. Select one card from each category for the solution using the shared deterministic random engine seeded from host-private entropy.
 5. Canonicalize solution card IRIs, create a random commitment salt, and publish the SHA-256 commitment.
 6. Shuffle the remaining 18 cards and deal round-robin without replacement.
 7. Create canonical hand aggregates and visibility policies.
-8. For multi-device mode, create and encrypt one RDF capsule per player.
+8. For multi-device mode, encode each dealt hand as a five-letter player-scoped hand code.
 9. Validate inventory: 21 distinct cards distributed exactly once across solution and hands.
 10. Place tokens, create the first turn, and commit setup atomically.
 
@@ -197,7 +193,7 @@ On success or terminal table defeat, the host publishes solution IRIs and commit
 | Every card belongs to exactly one solution/hand aggregate | JS + SHACL SPARQL |
 | Each player has exactly one hand and token | SHACL |
 | Every sensitive card/hand/solution subject has a visibility policy | Shared coverage validator |
-| Player capsule contains no foreign hand or solution resource | JS capsule-boundary test |
+| Player hand code reconstructs exactly its scoped hand | JS compact-code boundary test |
 | Current token has exactly one location | SHACL |
 | Movement follows topology and allowance | JS |
 | Suggested room equals current room | JS |
@@ -207,7 +203,7 @@ On success or terminal table defeat, the host publishes solution IRIs and commit
 
 ## 12. Save and replay
 
-Host save contains canonical RDF, transaction history, RNG state, commitment salt, and encrypted key records. Player save contains only player-scoped capsule data and notebook state.
+Host save contains canonical RDF, transaction history, RNG state, commitment salt, and hand-code context. Player devices persist only their local notebook; the hand is reconstructed from the five-letter code and access details.
 
 Undo is available in practice mode. Competitive play disables undo after private information is revealed or an accusation is evaluated. Replay tools must respect audience policies and MUST NOT expose future hidden state during ordinary playback.
 
@@ -228,13 +224,13 @@ Undo is available in practice mode. Competitive play disables undo after private
 
 ### Host
 
-- Setup/deal, invitation distribution, public board, turns, dice, movement, suggestions, refutation status, accusations, saves, and final reveal verification.
+- Setup/deal, hand-code distribution, public board, turns, dice, movement, suggestions, refutation status, accusations, saves, and final reveal verification.
 - Never display a player's hand during ordinary multi-device play.
 
 ### Player
 
-- Import invitation from fragment, QR payload, pasted token, or file.
-- Remove successful invitation fragment from history.
+- Enter table code, chosen suspect, and five-letter private hand code.
+- Reject codes whose checksum does not match that access context.
 - Show only own hand, private notebook, current static game identity, and optional disclosure tools.
 - Work offline after import.
 
@@ -317,15 +313,17 @@ docs/was-it-the-butler/
 
 1. Finalize board topology and secret-passage layout.
 2. Create the game ontology, SHACL shapes, and complete initial fixture.
-3. Implement deterministic solution/deal, visibility policies, and capsule-boundary tests.
+3. Implement deterministic solution/deal, visibility policies, and compact hand-code boundary tests.
 4. Implement headless movement, suggestion, refutation, accusation, and commitment tests.
 5. Build pass-and-play concealment and complete a usability pass.
-6. Build host setup/invitation and player capsule import/notebook.
+6. Build host hand-code distribution and player compact-code decoder/notebook.
 7. Freeze the art manifest and generate/commission assets in consistent batches.
 8. Integrate responsive board geometry and assets.
 9. Complete offline, save/restore, accessibility, and audience-leak tests.
 
 ## 17. Open decisions
+
+The current nine-room image and direct room-adjacency graph are placeholders, not a frozen movement board. The eventual board should keep artwork separate from a responsive logical overlay: individually identified corridor squares, room zones, doorway nodes, starting spaces, and secret-passage edges in `board-topology.json`, with scalable hit regions rendered above the composite board image. Square identifiers are required internally but need not be printed for players.
 
 1. Exact board corridor geometry, starting spaces, doorway count, and secret-passage pairs.
 2. Whether movement uses one or two dice; this draft selects two and should be confirmed before fixtures.
