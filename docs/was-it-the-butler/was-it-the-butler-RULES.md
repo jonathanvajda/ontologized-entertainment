@@ -29,11 +29,11 @@ Win by making the first correct accusation naming all three solution cards.
 - Pistol
 - Rope
 - Knife
-- Guitar
+- Electric guitar
 
 ### Rooms
 
-- Hall
+- Ballroom
 - Living Room
 - Dining Room
 - Kitchen
@@ -43,7 +43,7 @@ Win by making the first correct accusation naming all three solution cards.
 - Greenhouse
 - Pool Room
 
-The deck contains 21 unique cards: six suspects, six weapons, and nine rooms. The board contains the nine rooms, connecting passages, six starting spaces, and any secret passages shown on the board.
+The deck contains 21 unique cards: six suspects, six weapons, and nine rooms. The board contains the nine card rooms, connecting passages, the shared Foyer starting area, and any secret passages shown on the board. The Foyer is a board location but is not a room card and cannot be named in a suggestion or accusation.
 
 ## 3. Choose how to play
 
@@ -64,13 +64,13 @@ The short table code identifies the game but contains no deal or solution. A pri
 ## 4. Setup
 
 1. Choose pass-and-play or local multi-device.
-2. Each player chooses a different suspect token. The host orders those suspects to establish turn order.
+2. On the setup screen, select three to six suspect portraits in the desired turn order. Selecting a portrait marks it active; selecting it again removes it. The number selected is the player count, so duplicate suspects are impossible.
 3. The game randomly selects one suspect, one weapon, and one room for the sealed solution.
 4. The remaining 18 cards are shuffled and dealt one at a time. Some players may receive one more card than others.
 5. In pass-and-play, each player privately reviews their hand in turn.
 6. In multi-device play, the host presents a separate five-letter hand code to each player. Each player enters only their own code and access details.
-7. Place every suspect token on its marked starting space, including tokens not assigned to a player.
-8. The host selects the first player. Play then proceeds clockwise.
+7. Place every suspect token in the Foyer, including tokens not assigned to a player. Use the six nonblocking positions arranged around the Foyer so every active player has an open first move.
+8. The first selected portrait takes the first turn. Play then follows the generated turn order.
 
 The host publishes a cryptographic commitment to the sealed solution during setup. When the game ends, the revealed solution can be checked against that original commitment.
 
@@ -111,6 +111,26 @@ Roll two six-sided dice on the host or shared page. Move up to the rolled total 
 
 Room interiors do not use movement squares. Multiple suspect and weapon tokens may occupy one room.
 
+### Estate layout
+
+The intended floorplan is organized in three broad bands:
+
+- Back: Pool Room, Screened-in Porch, and Greenhouse.
+- Middle: Game Room and Library on the left, Ballroom in the center, and Kitchen on the right.
+- Front: Living Room beside the Library, the central Foyer, and Dining Room beside the Kitchen.
+
+The minimum room/zone connections are:
+
+- Library—Game Room and Library—Living Room;
+- Game Room—Pool Room and Game Room—Ballroom;
+- Pool Room—Screened-in Porch;
+- Screened-in Porch—Greenhouse and Screened-in Porch—Ballroom;
+- Greenhouse—Kitchen;
+- Kitchen—Ballroom and Kitchen—Dining Room; and
+- Foyer—Living Room, Foyer—Ballroom, and Foyer—Dining Room.
+
+These are architectural relationships, not necessarily one-step moves. The final board overlay will insert individually addressable corridor squares and doorway nodes between them. Square identifiers are internal and do not need printed names. Until that overlay is finalized, the app uses room-to-room connections as a playable prototype.
+
 ## 7. Suggestions
 
 After entering or beginning the turn in a room, you may make one suggestion consisting of:
@@ -143,7 +163,9 @@ Notebook marks are aids, not authoritative game state. The game does not make de
 
 ## 9. Accusations
 
-At the beginning of your turn, before rolling, you may make one accusation naming any suspect, weapon, and room. Your token does not need to be in the accused room.
+At the beginning of your turn, before rolling, you may make one accusation naming any suspect, weapon, and room. In the current playtest profile, your token does not need to be in the accused room or the Foyer.
+
+**Open playtest decision:** a stricter variant would require returning to the Foyer before making an accusation. That makes the Foyer strategically meaningful and gives opponents warning, but it may lengthen an endgame whose deduction is already complete. The first implementation retains anywhere-at-turn-start accusations until playtesting selects the preferred rule.
 
 The host compares the accusation with the sealed solution without first displaying the solution.
 

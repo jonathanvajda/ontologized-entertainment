@@ -36,6 +36,14 @@ test('chosen suspects identify players and establish turn order', async () => {
   await assert.rejects(() => createButlerGame({ names: chosenNames, tokenIds: ['peach', 'peach', 'mint'] }));
 });
 
+test('every suspect starts in the shared Foyer and cannot suggest there', async () => {
+  const game = await createButlerGame({ names, seed: 'foyer-start' });
+  assert.deepEqual(new Set(Object.values(game.state().locations)), new Set(['foyer']));
+  const result = game.act('suggest', { suspectId: 'mint', weaponId: 'rope' });
+  assert.equal(result.ok, false);
+  assert.match(result.message, /card room/i);
+});
+
 test('turn flow enforces movement, suggestion, refutation, and advancement', async () => {
   const game = await createButlerGame({ names, seed: 42 });
   assert.equal(game.act('roll').ok, true);

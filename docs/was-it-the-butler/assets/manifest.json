@@ -5,23 +5,33 @@
     "eggshell": "./art/person-mrs-eggshell.png",
     "marinara": "./art/person-lt-marinara.png",
     "peach": "./art/person-ms-peach.png",
-    "mint": "./art/person-mrs-mint.png",
+    "mint": "./art/person-mrs-mint-02.png",
     "mulberry": "./art/person-professor-mulberry.png",
-    "brown": "./art/person-mr-brown.png",
+    "brown": "./art/person-mr-brown-02.png",
     "shovel": "./art/weapon-shovel.png",
     "bat": "./art/weapon-baseball-bat.png",
     "pistol": "./art/weapon-pistol.png",
     "rope": "./art/weapon-rope.png",
     "knife": "./art/weapon-knife.png",
-    "guitar": "./art/weapon-guitar-01.png",
-    "hall": "./art/room-hallway.png",
+    "guitar": "./art/weapon-guitar-02.png",
+    "ballroom": "./art/room-ballroom-02.png",
     "living-room": "./art/room-livingroom.png",
     "dining-room": "./art/room-diningroom.png",
     "kitchen": "./art/room-kitchen.png",
     "library": "./art/room-library.png",
-    "game-room": "./art/room-gameroom.png",
+    "game-room": "./art/room-gameroom-02.png",
     "screened-porch": "./art/room-screened-in-porch.png",
     "greenhouse": "./art/room-greenhouse.png",
     "pool-room": "./art/room-pool-room.png"
+  },
+  "boardZones": {
+    "foyer": "./art/room-ballroom-01.png"
+  },
+  "variants": {
+    "mint-01": "./art/person-mrs-mint-01.png",
+    "brown-01": "./art/person-mr-brown-01.png",
+    "guitar-01": "./art/weapon-guitar-01.png",
+    "game-room-01": "./art/room-gameroom-01.png",
+    "ballroom-01": "./art/room-ballroom-01.png"
   }
 }

@@ -3,15 +3,15 @@ import { ROOM_GRID, ROOMS, SUSPECTS, WEAPONS, cardById, cardImageUrl } from './g
 
 const mode = document.body.dataset.mode;
 let game = null;
+let selectedSuspectIds = [];
 const app = document.querySelector('#app');
-app.innerHTML = `<header class="bar"><a href="../">Was It the Butler?</a><nav><button id="rules">Rules</button><button id="load">Load</button><input id="load-file" hidden type="file" accept="application/json"><button id="save" disabled>Save</button><button id="new">New game</button></nav></header><main class="game-shell"><section class="board-panel"><div class="turn-card"><p class="kicker">Current detective</p><h1 id="current">Set the table</h1><p id="phase">Choose players to begin.</p></div><div class="estate-board" id="board"></div></section><aside class="case-panel"><div><p class="kicker">Case controls</p><h2 id="table-code">The sealed envelope</h2></div><div id="actions" class="actions"></div><div id="log" class="case-log" aria-live="polite"></div><div id="invitations"></div></aside></main><dialog id="setup"><form id="setup-form"><p class="kicker">New investigation</p><h2>Who is at the table?</h2><label>Players<select id="count">${[3, 4, 5, 6].map((n) => `<option>${n}</option>`).join('')}</select></label><div id="names"></div><button>Deal the case</button></form></dialog><dialog id="choice"><form id="choice-form"><h2 id="choice-title"></h2><div id="choice-fields"></div><menu><button type="button" id="cancel-choice">Cancel</button><button>Confirm</button></menu></form></dialog><dialog id="private"><div id="private-content"></div></dialog>`;
+app.innerHTML = `<header class="bar"><a href="../">Was It the Butler?</a><nav><button id="rules">Rules</button><button id="load">Load</button><input id="load-file" hidden type="file" accept="application/json"><button id="save" disabled>Save</button><button id="new">New game</button></nav></header><main class="game-shell"><section class="board-panel"><div class="turn-card"><p class="kicker">Current detective</p><h1 id="current">Set the table</h1><p id="phase">Choose players to begin.</p></div><div class="estate-board" id="board"></div></section><aside class="case-panel"><div><p class="kicker">Case controls</p><h2 id="table-code">The sealed envelope</h2></div><div id="actions" class="actions"></div><div id="log" class="case-log" aria-live="polite"></div><div id="invitations"></div></aside></main><dialog id="setup"><form id="setup-form"><p class="kicker">New investigation</p><h2>Choose 3–6 suspects</h2><p>Select portraits in the order they will take turns.</p><div id="suspect-setup" class="suspect-setup"></div><button id="deal-case" disabled>Choose at least 3 suspects</button></form></dialog><dialog id="choice"><form id="choice-form"><h2 id="choice-title"></h2><div id="choice-fields"></div><menu><button type="button" id="cancel-choice">Cancel</button><button>Confirm</button></menu></form></dialog><dialog id="private"><div id="private-content"></div></dialog>`;
 
 const $ = (selector) => document.querySelector(selector);
 const setup = $('#setup');
-$('#count').onchange = renderNames;
-renderNames();
+renderSuspectSetup();
 setup.showModal();
-$('#new').onclick = () => setup.showModal();
+$('#new').onclick = () => { selectedSuspectIds = []; renderSuspectSetup(); setup.showModal(); };
 $('#load').onclick = () => $('#load-file').click();
 $('#load-file').onchange = async (event) => {
   try {
@@ -26,27 +26,30 @@ $('#load-file').onchange = async (event) => {
 $('#rules').onclick = () => location.href = '../was-it-the-butler-RULES.md';
 $('#cancel-choice').onclick = () => $('#choice').close();
 
-function renderNames() {
-  const count = Number($('#count').value);
-  const names = $('#names');
-  names.innerHTML = Array.from({ length: count }, (_, index) => {
-    const selected = SUSPECTS[index];
-    return `<div class="suspect-picker"><img src="${cardImageUrl(selected)}" alt="Portrait of ${selected.label}"><label>Turn ${index + 1}<select class="suspect-choice">${SUSPECTS.map((suspect,suspectIndex)=>`<option value="${suspect.id}" ${suspectIndex===index?'selected':''}>${suspect.label}</option>`).join('')}</select></label></div>`;
+function renderSuspectSetup() {
+  const grid = $('#suspect-setup');
+  grid.innerHTML = SUSPECTS.map((suspect) => {
+    const order = selectedSuspectIds.indexOf(suspect.id);
+    const active = order >= 0;
+    return `<button type="button" class="suspect-toggle ${active ? 'active' : ''}" data-suspect="${suspect.id}" aria-pressed="${active}"><img src="${cardImageUrl(suspect)}" alt=""><span>${suspect.label}</span><i aria-hidden="true">${active ? '✓' : ''}</i>${active ? `<b>Turn ${order + 1}</b>` : ''}</button>`;
   }).join('');
-  names.querySelectorAll('.suspect-choice').forEach((select) => {
-    select.onchange = () => {
-      const suspect = SUSPECTS.find((item) => item.id === select.value);
-      const image = select.closest('.suspect-picker').querySelector('img');
-      image.src = cardImageUrl(suspect);
-      image.alt = `Portrait of ${suspect.label}`;
+  grid.querySelectorAll('.suspect-toggle').forEach((button) => {
+    button.onclick = () => {
+      const id = button.dataset.suspect;
+      if (selectedSuspectIds.includes(id)) selectedSuspectIds = selectedSuspectIds.filter((item) => item !== id);
+      else selectedSuspectIds.push(id);
+      renderSuspectSetup();
     };
   });
+  const deal = $('#deal-case');
+  deal.disabled = selectedSuspectIds.length < 3;
+  deal.textContent = selectedSuspectIds.length < 3 ? `Choose ${3 - selectedSuspectIds.length} more` : `Deal for ${selectedSuspectIds.length} players`;
 }
 
 $('#setup-form').onsubmit = async (event) => {
   event.preventDefault();
-  const tokenIds = [...$('#names').querySelectorAll('.suspect-choice')].map((select) => select.value);
-  if (new Set(tokenIds).size !== tokenIds.length) return note('Each player must choose a different suspect.', true);
+  const tokenIds = [...selectedSuspectIds];
+  if (tokenIds.length < 3 || tokenIds.length > 6) return;
   const names = tokenIds.map((id) => SUSPECTS.find((suspect) => suspect.id === id).label);
   game = await createButlerGame({ names, tokenIds, mode });
   setup.close();
@@ -85,6 +88,7 @@ function renderBoard(state) {
     const room = ROOMS.find((item) => item.id === id);
     const button = document.createElement('button');
     button.className = 'room';
+    button.dataset.room = id;
     button.innerHTML = `<span>${room.label}</span><b class="tokens"></b>`;
     for (const suspect of SUSPECTS.filter((item) => state.locations[item.id] === id)) {
       const token = document.createElement('i');
@@ -97,6 +101,17 @@ function renderBoard(state) {
     button.onclick = () => act('move', { roomId: id });
     board.append(button);
   });
+  const foyer = document.createElement('section');
+  foyer.className = 'foyer-space';
+  foyer.innerHTML = '<span>Foyer</span><small>Starting area</small><b class="tokens"></b>';
+  for (const suspect of SUSPECTS.filter((item) => state.locations[item.id] === 'foyer')) {
+    const token = document.createElement('i');
+    token.className = 'token-chip';
+    token.title = suspect.label;
+    token.style.backgroundImage = `url("${cardImageUrl(suspect)}")`;
+    foyer.querySelector('.tokens').append(token);
+  }
+  board.append(foyer);
 }
 
 function renderActions(state) {
@@ -114,7 +129,7 @@ function renderActions(state) {
     add('Roll two dice', () => act('roll'), 'primary');
     const room = state.locations[active.tokenId];
     if (['kitchen', 'library', 'screened-porch', 'pool-room'].includes(room)) add('Use secret passage', () => act('secretPassage'));
-    add('Suggest from this room', () => suggest());
+    if (ROOMS.some((candidate) => candidate.id === room)) add('Suggest from this room', () => suggest());
     add('Make accusation', () => accuse(), 'danger');
   }
   if (state.phase === 'movement') {
@@ -239,7 +254,7 @@ function note(text, error = false) {
 
 function phaseText(state) {
   return {
-    'turn-start': 'Roll, suggest from your room, use a passage, or accuse.',
+    'turn-start': 'Roll, use an available room action, or accuse.',
     movement: `Move up to ${state.moves} room connections.`,
     suggestion: 'Choose a suspect and weapon.',
     refutation: 'Players check the suggestion clockwise.',

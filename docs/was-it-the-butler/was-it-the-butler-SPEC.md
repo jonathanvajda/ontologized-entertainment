@@ -70,8 +70,8 @@ The 21 card IRIs are stable and individuated.
 | Category | Members |
 | --- | --- |
 | Suspects | Mrs. Eggshell, Lt. Marinara, Ms. Peach, Mrs. Mint, Prof. Mulberry, Mr. Brown |
-| Weapons | Shovel, Baseball Bat, Pistol, Rope, Knife, Guitar |
-| Rooms | Hall, Living Room, Dining Room, Kitchen, Library, Game Room, Screened-in Porch, Greenhouse, Pool Room |
+| Weapons | Shovel, Baseball Bat, Pistol, Rope, Knife, Electric Guitar |
+| Rooms | Ballroom, Living Room, Dining Room, Kitchen, Library, Game Room, Screened-in Porch, Greenhouse, Pool Room |
 
 Each card is both a `game:Card` and a category-specific subclass. Card art is rendering configuration outside RDF; asset identifiers map stable card IRIs to files.
 
@@ -80,6 +80,7 @@ Each card is both a `game:Card` and a category-specific subclass. Card art is re
 | Concept | Semantic model | Identity |
 | --- | --- | --- |
 | Board room | Subclass of `game:BoardLocation` / BFO Site | Stable IRI |
+| Foyer | Non-card `game:BoardLocation`; shared token start zone | Stable IRI |
 | Passage space | `butler:PassageSpace`, game board location | Stable IRI from geometry manifest |
 | Doorway connection | Asserted adjacency between passage and room | Endpoint pair |
 | Secret passage | Individuated route entity | Stable IRI |
@@ -89,6 +90,22 @@ Each card is both a `game:Card` and a category-specific subclass. Card art is re
 | Sealed solution | Three-member protected aggregate | One per session |
 
 Board topology is semantic RDF; pixel geometry and artwork are external JSON/SVG/image assets.
+
+### 4.3 Floorplan topology
+
+The board composition SHALL follow this architectural layout:
+
+| Band | Left | Center | Right |
+| --- | --- | --- | --- |
+| Back | Pool Room | Screened-in Porch | Greenhouse |
+| Middle | Game Room and Library | Ballroom | Kitchen |
+| Front | Living Room | Foyer | Dining Room |
+
+Required adjacency is Library–Game Room, Library–Living Room, Game Room–Pool Room, Game Room–Ballroom, Pool Room–Screened-in Porch, Screened-in Porch–Greenhouse, Screened-in Porch–Ballroom, Greenhouse–Kitchen, Kitchen–Ballroom, Kitchen–Dining Room, and Foyer–Living Room/Ballroom/Dining Room.
+
+Adjacency describes architectural reachability, not necessarily a single movement point. A future `board-topology.json` SHALL represent walkable corridor squares, doorways, the six Foyer starts, room entry nodes, occupancy, and optional passage edges independently of the art. Stable square IDs use grid coordinates such as `sq-r12-c08`; visible labels are not required.
+
+A logical grid around 36×36 or 40×40 is the starting design target. The exact extent should be derived from the room footprints and useful corridor length rather than fixed at 50×50. Room geometry may occupy most of the image, but the movement graph needs enough walkable corridor nodes for two-die values and blocking to matter; the prototype SHALL be playtested before limiting walkable area to 10–20 percent.
 
 ## 5. Canonical RDF and information partition
 
@@ -126,7 +143,7 @@ Technical compact-code checksums and local notebook storage are not RDF.
 
 ## 6. Setup pipeline
 
-1. Validate three-to-six unique suspect choices and preserve their selected turn order.
+1. Render all six suspect portraits as toggles. Validate that three to six are active and preserve selection order as turn order; this interaction makes a duplicate suspect unrepresentable and derives player count from the active set.
 2. Generate a public table code using cryptographic randomness.
 3. Generate a host-private gameplay seed. Suspect choices are public context and are not counted as entropy.
 4. Select one card from each category for the solution using the shared deterministic random engine seeded from host-private entropy.
@@ -135,7 +152,7 @@ Technical compact-code checksums and local notebook storage are not RDF.
 7. Create canonical hand aggregates and visibility policies.
 8. For multi-device mode, encode each dealt hand as a five-letter player-scoped hand code.
 9. Validate inventory: 21 distinct cards distributed exactly once across solution and hands.
-10. Place tokens, create the first turn, and commit setup atomically.
+10. Place every suspect token in a distinct, nonblocking Foyer start position, create the first turn from the selected order, and commit setup atomically.
 
 The public table code MUST NOT derive the deal, solution, salts, or keys.
 
@@ -279,6 +296,10 @@ Each semantic entity maps through a manifest rather than embedding filenames in 
 
 Every image requires meaningful alternative text. Decorative crops use empty alt text. Runtime derivatives SHOULD use WebP or AVIF with a PNG fallback where transparency compatibility matters.
 
+### 14.4 Current 255×255 prototype assets
+
+The active manifest uses `person-mrs-mint-02.png`, `person-mr-brown-02.png`, `weapon-guitar-02.png`, `room-gameroom-02.png`, and the distinct Ballroom card art `room-ballroom-02.png`. The corresponding `-01` files remain alternate or board-zone art. In particular, `room-ballroom-01.png` is the former Hall illustration retained for the temporary Foyer/estate-board inset; Foyer remains a distinct non-card semantic location.
+
 ## 15. Proposed package structure
 
 ```text
@@ -323,13 +344,14 @@ docs/was-it-the-butler/
 
 ## 17. Open decisions
 
-The current nine-room image and direct room-adjacency graph are placeholders, not a frozen movement board. The eventual board should keep artwork separate from a responsive logical overlay: individually identified corridor squares, room zones, doorway nodes, starting spaces, and secret-passage edges in `board-topology.json`, with scalable hit regions rendered above the composite board image. Square identifiers are required internally but need not be printed for players.
+The current nine-room image and direct room-adjacency graph are placeholders, not a frozen movement board. The eventual board should keep artwork separate from a responsive logical overlay: individually identified corridor squares, room zones, doorway nodes, Foyer starting spaces, and secret-passage edges in `board-topology.json`, with scalable hit regions rendered above the composite board image. Square identifiers are required internally but need not be printed for players.
 
-1. Exact board corridor geometry, starting spaces, doorway count, and secret-passage pairs.
+1. Exact grid extent, corridor geometry, doorway count, and secret-passage pairs; the six Foyer starts and broad room layout are decided.
 2. Whether movement uses one or two dice; this draft selects two and should be confirmed before fixtures.
 3. Whether remaining-in-room permits a new suggestion every turn; this draft permits it.
 4. Whether a failed accuser continues refuting; this draft requires it.
 5. Whether the first release includes manual encrypted disclosure tokens or physical screen showing only.
 6. Final character visual descriptions before image generation.
+7. Whether accusations remain legal anywhere at turn start or require the accuser to return to the Foyer. The prototype currently permits accusations anywhere.
 
-The ontology and action implementation should not begin until decisions 1–4 are confirmed, because they materially affect topology, legality, and tests.
+The implemented RDF model and room-level movement graph remain valid while these decisions are playtested. Square-level topology and accusation constraints MUST remain configuration/rule-layer concerns rather than artwork assumptions.
