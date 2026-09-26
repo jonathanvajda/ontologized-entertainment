@@ -101,11 +101,13 @@ The board composition SHALL follow this architectural layout:
 | Middle | Narrow side-by-side Library and Game Room | Ballroom | Kitchen above Dining Room |
 | Front | Living Room across lower-left | Foyer | Dining Room extending through lower-right |
 
-Required adjacency is Library–Game Room, Library–Living Room, Game Room–Pool Room, Game Room–Ballroom, Pool Room–Screened-in Porch, Screened-in Porch–Greenhouse, Screened-in Porch–Ballroom, Greenhouse–Kitchen, Kitchen–Ballroom, Kitchen–Dining Room, and Foyer–Living Room/Ballroom/Dining Room.
+Required adjacency is Library–Game Room, Library–Living Room, Game Room–Living Room, Game Room–Ballroom, Pool Room–Screened-in Porch, Screened-in Porch–Greenhouse, Screened-in Porch–Ballroom, Greenhouse–Kitchen, Kitchen–Ballroom, Kitchen–Dining Room, Ballroom–Dining Room, and Foyer–Living Room/Ballroom/Dining Room.
 
-Adjacency describes architectural reachability, not necessarily a single movement point. A future `board-topology.json` SHALL represent walkable corridor squares, doorways, the six Foyer starts, room entry nodes, occupancy, and optional passage edges independently of the art. Stable square IDs use grid coordinates such as `sq-r12-c08`; visible labels are not required.
+Adjacency describes architectural reachability, not necessarily a single movement point. Slanted plan marks designate hinged doors; paired slanted marks designate one double door. Parallel straight marks designate broad direct access, especially at the Ballroom, with no hallway inserted between the rooms. Exterior windows MUST occur only on exterior walls, stairs MUST terminate at a modeled landing, and door regions MUST remain unobstructed in the art. A future `board-topology.json` SHALL represent walkable squares, doors, broad openings, the six Foyer starts, room entry nodes, occupancy, and optional passage edges independently of the art. Stable square IDs use grid coordinates such as `sq-r12-c08`; visible labels are not required.
 
 A logical grid around 36×36 or 40×40 is the starting design target. The exact extent should be derived from the room footprints and useful corridor length rather than fixed at 50×50. Room geometry may occupy most of the image, but the movement graph needs enough walkable corridor nodes for two-die values and blocking to matter; the prototype SHALL be playtested before limiting walkable area to 10–20 percent.
+
+The approved proportional overlay follows the annotated plan rather than equal grid rows. Approximate regions within the usable house footprint are: Pool Room `0–32% × 0–29%`; Porch `34–66% × 0–24%`; Greenhouse `68–100% × 0–24%`; Library `0–15% × 29–65%`; Game Room `17–32% × 29–65%`; Living Room `0–32% × 66–100%`; Ballroom `34–66% × 26–75%`; Foyer `34–66% × 77–100%`; Kitchen `68–100% × 26–49%`; and Dining Room `68–100% × 51–100%`. Responsive hit regions MAY compensate for the board artwork's exterior garden border but MUST preserve those relative room dimensions.
 
 ## 5. Canonical RDF and information partition
 
@@ -298,7 +300,7 @@ Every image requires meaningful alternative text. Decorative crops use empty alt
 
 ### 14.4 Current 255×255 prototype assets
 
-The active manifest uses `estate-board-02.png`, `person-mrs-mint-02.png`, `person-mr-brown-02.png`, `weapon-guitar-02.png`, `room-gameroom-02.png`, and the distinct Ballroom card art `room-ballroom-02.png`. The corresponding `-01` files remain alternate or prior board-zone art. In particular, `room-ballroom-01.png` is the former Hall illustration retained for the temporary Foyer inset; Foyer remains a distinct non-card semantic location.
+The active manifest uses `estate-board-04.png`, `person-mrs-mint-02.png`, `person-mr-brown-02.png`, `weapon-guitar-02.png`, `room-gameroom-03.png`, and the distinct Ballroom card art `room-ballroom-02.png`. Board rooms SHALL preserve the signature visual identity of their card artwork: the Pool Room is an indoor swimming pool, while the Game Room centers a television, console/controllers, seating, and tabletop games rather than billiards. The corresponding lower-numbered files remain alternate or prior art. In particular, `room-ballroom-01.png` is the former Hall illustration retained for the temporary Foyer inset; Foyer remains a distinct non-card semantic location.
 
 ## 15. Proposed package structure
 

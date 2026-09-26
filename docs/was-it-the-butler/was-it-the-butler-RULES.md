@@ -121,15 +121,16 @@ The intended floorplan is organized in three broad bands:
 
 The minimum room/zone connections are:
 
-- Library—Game Room and Library—Living Room;
-- Game Room—Pool Room and Game Room—Ballroom;
+- Library—Living Room;
+- Game Room—Library, Game Room—Living Room, and Game Room—Ballroom;
 - Pool Room—Screened-in Porch;
 - Screened-in Porch—Greenhouse and Screened-in Porch—Ballroom;
 - Greenhouse—Kitchen;
-- Kitchen—Ballroom and Kitchen—Dining Room; and
+- Kitchen—Ballroom and Kitchen—Dining Room;
+- Ballroom—Dining Room; and
 - Foyer—Living Room, Foyer—Ballroom, and Foyer—Dining Room.
 
-These are architectural relationships, not necessarily one-step moves. The final board overlay will insert individually addressable corridor squares and doorway nodes between them. Square identifiers are internal and do not need printed names. Until that overlay is finalized, the app uses room-to-room connections as a playable prototype.
+These are architectural relationships, not necessarily one-step moves. Marked hinged doors and double doors are entry nodes. Wide parallel openings, especially around the Ballroom, are direct room-to-room access without intervening corridors. The final board overlay will insert individually addressable movement squares and doorway/opening nodes only where the floorplan requires them; it must not manufacture hallways between rooms that share a wall. Square identifiers are internal and do not need printed names. Until that overlay is finalized, the app uses room-to-room connections as a playable prototype.
 
 ## 7. Suggestions
 

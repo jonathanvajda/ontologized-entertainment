@@ -6,16 +6,16 @@ export const SUSPECTS=[
   ['mint','Mrs. Mint','green','person-mrs-mint-02.png'],['mulberry','Prof. Mulberry','purple','person-professor-mulberry.png'],['brown','Mr. Brown','brown','person-mr-brown-02.png']
 ].map(([id,label,color,image])=>({id,label,color,category:'suspect',image}));
 export const WEAPONS=[['shovel','Shovel','weapon-shovel.png'],['bat','Baseball Bat','weapon-baseball-bat.png'],['pistol','Pistol','weapon-pistol.png'],['rope','Rope','weapon-rope.png'],['knife','Knife','weapon-knife.png'],['guitar','Electric Guitar','weapon-guitar-02.png']].map(([id,label,image])=>({id,label,category:'weapon',image}));
-export const ROOMS=[['ballroom','Ballroom','room-ballroom-02.png'],['living-room','Living Room','room-livingroom.png'],['dining-room','Dining Room','room-diningroom.png'],['kitchen','Kitchen','room-kitchen.png'],['library','Library','room-library.png'],['game-room','Game Room','room-gameroom-02.png'],['screened-porch','Screened-in Porch','room-screened-in-porch.png'],['greenhouse','Greenhouse','room-greenhouse.png'],['pool-room','Pool Room','room-pool-room.png']].map(([id,label,image])=>({id,label,category:'room',image}));
+export const ROOMS=[['ballroom','Ballroom','room-ballroom-02.png'],['living-room','Living Room','room-livingroom.png'],['dining-room','Dining Room','room-diningroom.png'],['kitchen','Kitchen','room-kitchen.png'],['library','Library','room-library.png'],['game-room','Game Room','room-gameroom-03.png'],['screened-porch','Screened-in Porch','room-screened-in-porch.png'],['greenhouse','Greenhouse','room-greenhouse.png'],['pool-room','Pool Room','room-pool-room.png']].map(([id,label,image])=>({id,label,category:'room',image}));
 export const CARDS=[...SUSPECTS,...WEAPONS,...ROOMS];
 export const ROOM_GRID=[['pool-room','screened-porch','greenhouse'],['library','game-room','ballroom','kitchen'],['living-room','dining-room']];
 export const ADJACENCY=Object.freeze({
   foyer:['living-room','ballroom','dining-room'],
-  'living-room':['foyer','library'], library:['living-room','game-room'],
-  'game-room':['library','pool-room','ballroom'], 'pool-room':['game-room','screened-porch'],
+  'living-room':['foyer','library','game-room'], library:['living-room','game-room'],
+  'game-room':['library','living-room','ballroom'], 'pool-room':['screened-porch'],
   'screened-porch':['pool-room','greenhouse','ballroom'], greenhouse:['screened-porch','kitchen'],
-  kitchen:['greenhouse','ballroom','dining-room'], 'dining-room':['kitchen','foyer'],
-  ballroom:['game-room','screened-porch','kitchen','foyer']
+  kitchen:['greenhouse','ballroom','dining-room'], 'dining-room':['kitchen','ballroom','foyer'],
+  ballroom:['game-room','screened-porch','kitchen','dining-room','foyer']
 });
 export const SECRET_PASSAGES=Object.freeze({kitchen:'library',library:'kitchen'});
 export const START_LOCATION='foyer';

@@ -1,8 +1,8 @@
-const CACHE = 'was-it-the-butler-v9';
+const CACHE = 'was-it-the-butler-v11';
 const ASSETS = [
   './', './index.html', './butler.css', './game-config.js', './game-ui.js', './player.js',
   './manifest.webmanifest', './was-it-the-butler-RULES.md', './pass-and-play/', './host/', './player/',
-  './model/butler-game.js', './model/compact-hand-code.js', './assets/manifest.json', './assets/art/estate-board-01.png', './assets/art/estate-board-02.png',
+  './model/butler-game.js', './model/compact-hand-code.js', './assets/manifest.json', './assets/art/estate-board-01.png', './assets/art/estate-board-02.png', './assets/art/estate-board-03.png', './assets/art/estate-board-04.png',
   './assets/art/person-mrs-eggshell.png', './assets/art/person-lt-marinara.png',
   './assets/art/person-ms-peach.png', './assets/art/person-mrs-mint-01.png', './assets/art/person-mrs-mint-02.png',
   './assets/art/person-professor-mulberry.png', './assets/art/person-mr-brown-01.png', './assets/art/person-mr-brown-02.png',
@@ -11,7 +11,7 @@ const ASSETS = [
   './assets/art/weapon-knife.png', './assets/art/weapon-guitar-01.png', './assets/art/weapon-guitar-02.png',
   './assets/art/room-ballroom-01.png', './assets/art/room-ballroom-02.png', './assets/art/room-livingroom.png',
   './assets/art/room-diningroom.png', './assets/art/room-kitchen.png',
-  './assets/art/room-library.png', './assets/art/room-gameroom-01.png', './assets/art/room-gameroom-02.png',
+  './assets/art/room-library.png', './assets/art/room-gameroom-01.png', './assets/art/room-gameroom-02.png', './assets/art/room-gameroom-03.png',
   './assets/art/room-screened-in-porch.png', './assets/art/room-greenhouse.png',
   './assets/art/room-pool-room.png',
   '../styles/normalize.css', '../packages/game-mechanics/src/index.js',

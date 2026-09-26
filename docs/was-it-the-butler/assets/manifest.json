@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "board": { "src": "./art/estate-board-02.png", "alt": "Top-down illustrated plan of the nine-room estate and its Foyer" },
+  "board": { "src": "./art/estate-board-04.png", "alt": "Top-down illustrated plan of the nine-room estate and its Foyer" },
   "entities": {
     "eggshell": "./art/person-mrs-eggshell.png",
     "marinara": "./art/person-lt-marinara.png",
@@ -19,7 +19,7 @@
     "dining-room": "./art/room-diningroom.png",
     "kitchen": "./art/room-kitchen.png",
     "library": "./art/room-library.png",
-    "game-room": "./art/room-gameroom-02.png",
+    "game-room": "./art/room-gameroom-03.png",
     "screened-porch": "./art/room-screened-in-porch.png",
     "greenhouse": "./art/room-greenhouse.png",
     "pool-room": "./art/room-pool-room.png"
@@ -29,10 +29,13 @@
   },
   "variants": {
     "estate-board-01": "./art/estate-board-01.png",
+    "estate-board-02": "./art/estate-board-02.png",
+    "estate-board-03": "./art/estate-board-03.png",
     "mint-01": "./art/person-mrs-mint-01.png",
     "brown-01": "./art/person-mr-brown-01.png",
     "guitar-01": "./art/weapon-guitar-01.png",
     "game-room-01": "./art/room-gameroom-01.png",
+    "game-room-02": "./art/room-gameroom-02.png",
     "ballroom-01": "./art/room-ballroom-01.png"
   }
 }
