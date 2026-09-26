@@ -116,8 +116,8 @@ Room interiors do not use movement squares. Multiple suspect and weapon tokens m
 The intended floorplan is organized in three broad bands:
 
 - Back: Pool Room, Screened-in Porch, and Greenhouse.
-- Middle: Game Room and Library on the left, Ballroom in the center, and Kitchen on the right.
-- Front: Living Room beside the Library, the central Foyer, and Dining Room beside the Kitchen.
+- Middle: two narrow, side-by-side Library and Game Room spaces on the left, Ballroom in the center, and Kitchen above Dining Room on the right.
+- Front: Living Room across the lower-left, the central Foyer, and Dining Room extending through the lower-right.
 
 The minimum room/zone connections are:
 

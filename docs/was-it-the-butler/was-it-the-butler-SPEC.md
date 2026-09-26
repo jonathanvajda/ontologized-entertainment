@@ -98,8 +98,8 @@ The board composition SHALL follow this architectural layout:
 | Band | Left | Center | Right |
 | --- | --- | --- | --- |
 | Back | Pool Room | Screened-in Porch | Greenhouse |
-| Middle | Game Room and Library | Ballroom | Kitchen |
-| Front | Living Room | Foyer | Dining Room |
+| Middle | Narrow side-by-side Library and Game Room | Ballroom | Kitchen above Dining Room |
+| Front | Living Room across lower-left | Foyer | Dining Room extending through lower-right |
 
 Required adjacency is Library–Game Room, Library–Living Room, Game Room–Pool Room, Game Room–Ballroom, Pool Room–Screened-in Porch, Screened-in Porch–Greenhouse, Screened-in Porch–Ballroom, Greenhouse–Kitchen, Kitchen–Ballroom, Kitchen–Dining Room, and Foyer–Living Room/Ballroom/Dining Room.
 
@@ -298,7 +298,7 @@ Every image requires meaningful alternative text. Decorative crops use empty alt
 
 ### 14.4 Current 255×255 prototype assets
 
-The active manifest uses `person-mrs-mint-02.png`, `person-mr-brown-02.png`, `weapon-guitar-02.png`, `room-gameroom-02.png`, and the distinct Ballroom card art `room-ballroom-02.png`. The corresponding `-01` files remain alternate or board-zone art. In particular, `room-ballroom-01.png` is the former Hall illustration retained for the temporary Foyer/estate-board inset; Foyer remains a distinct non-card semantic location.
+The active manifest uses `estate-board-02.png`, `person-mrs-mint-02.png`, `person-mr-brown-02.png`, `weapon-guitar-02.png`, `room-gameroom-02.png`, and the distinct Ballroom card art `room-ballroom-02.png`. The corresponding `-01` files remain alternate or prior board-zone art. In particular, `room-ballroom-01.png` is the former Hall illustration retained for the temporary Foyer inset; Foyer remains a distinct non-card semantic location.
 
 ## 15. Proposed package structure
 
