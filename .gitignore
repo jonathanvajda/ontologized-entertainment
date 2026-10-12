@@ -1,0 +1,26 @@
+# Installed dependencies and generated test output
+node_modules/
+test-results/
+playwright-report/
+coverage/
+.nyc_output/
+.cache/
+
+# Python bytecode and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local configuration, logs and operating-system metadata
+.env
+.env.*
+!.env.example
+!.env.sample
+*.log
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Private game exports downloaded into the repository root
+/query-whom-private-save*.json
