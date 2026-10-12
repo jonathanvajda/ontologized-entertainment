@@ -45,7 +45,7 @@ function normalizeContext({ tableCode, suspectId }) {
   const table = String(tableCode).toUpperCase().replace(/[^A-Z0-9]/g, '');
   const suspect = String(suspectId).toLowerCase().replace(/[^a-z-]/g, '');
   if (!table || !suspect) throw new Error('Table code and suspect are required.');
-  return `butler-hand-v2|${table}|${suspect}`;
+  return `everything-is-sus-hand-v2|${table}|${suspect}`;
 }
 
 function handOffset(handSize) {

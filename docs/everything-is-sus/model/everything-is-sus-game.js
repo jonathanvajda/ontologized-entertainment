@@ -7,8 +7,8 @@ const P={type:RDF+'type',value:RDF+'value',label:'http://www.w3.org/2000/01/rdf-
 const nn=namedNode; const lit=(v,dt=XSD+'string')=>literal(v,dt); const q=(s,p,o)=>quad(nn(s),nn(p),typeof o==='string'?nn(o):o);
 const val=(store,s,p,f='')=>store.getQuads(nn(s),nn(p),null,null)[0]?.object.value??f; const vals=(store,s,p)=>store.getQuads(nn(s),nn(p),null,null).map(x=>x.object.value);
 
-export async function createButlerGame({names,tokenIds,mode='pass-and-play',seed}={}){
-  const clean=names.map(v=>String(v).trim()).filter(Boolean); if(clean.length<3||clean.length>6)throw new RangeError('Was It the Butler? requires three to six players.');if(new Set(clean.map(name=>name.toLocaleLowerCase())).size!==clean.length)throw new RangeError('Player identities must be unique.');
+export async function createEverythingsSusGame({names,tokenIds,mode='pass-and-play',seed}={}){
+  const clean=names.map(v=>String(v).trim()).filter(Boolean); if(clean.length<3||clean.length>6)throw new RangeError('Everything?s Sus requires three to six players.');if(new Set(clean.map(name=>name.toLocaleLowerCase())).size!==clean.length)throw new RangeError('Player identities must be unique.');
   const selectedTokens=tokenIds??SUSPECTS.slice(0,clean.length).map(suspect=>suspect.id);if(selectedTokens.length!==clean.length||new Set(selectedTokens).size!==clean.length||selectedTokens.some(id=>!SUSPECTS.some(suspect=>suspect.id===id)))throw new RangeError('Each player must choose a different suspect.');
   const random=new RandomEngine(seed); const solution=[random.drawOne(SUSPECTS).id,random.drawOne(WEAPONS).id,random.drawOne(ROOMS).id];
   const remaining=random.shuffle(CARDS.filter(c=>!solution.includes(c.id))); const commitment=await createCommitment(solution.slice().sort()); const code=generateGameCode(6);
@@ -22,10 +22,10 @@ export async function createButlerGame({names,tokenIds,mode='pass-and-play',seed
   SUSPECTS.filter(suspect=>!selectedTokens.includes(suspect.id)).forEach(suspect=>store.addQuad(q(NS+'token-'+suspect.id,P.location,nn(NS+'room-'+START_LOCATION))));
   solution.forEach(id=>store.addQuad(q(NS+'card-'+id,P.member,nn(NS+'sealed-solution')))); remaining.forEach((card,index)=>store.addQuad(q(NS+'card-'+card.id,P.member,nn(players[index%players.length].handIri))));
   store.addQuad(q(SESSION,P.current,nn(players[0].iri)));
-  return new ButlerGame({store,random,players,solution,commitment,code});
+  return new EverythingsSusGame({store,random,players,solution,commitment,code});
 }
 
-export class ButlerGame{
+export class EverythingsSusGame{
   constructor({store,random,players,solution,commitment,code}){Object.assign(this,{store,random,players,solution,commitment,code});}
   state(){
     const currentIri=val(this.store,SESSION,P.current); const playerStates=this.players.map(player=>({...player,eliminated:val(this.store,player.iri,P.eliminated)==='true',hand:CARDS.filter(card=>val(this.store,NS+'card-'+card.id,P.member)===player.handIri)}));
@@ -42,11 +42,11 @@ export class ButlerGame{
   _accuse({suspectId,weaponId,roomId}){const s=this.state();requirePhase(s,'turn-start');if(!SUSPECTS.some(x=>x.id===suspectId)||!WEAPONS.some(x=>x.id===weaponId)||!ROOMS.some(x=>x.id===roomId))throw new Error('Choose one suspect, one weapon, and one room.');const guess=[suspectId,weaponId,roomId];const correct=guess.every(id=>this.solution.includes(id));if(correct){set(this.store,SESSION,P.complete,lit(true,XSD+'boolean'));set(this.store,SESSION,P.phase,lit('complete'));set(this.store,SESSION,P.winner,nn(s.currentPlayerIri));}else{set(this.store,s.currentPlayerIri,P.eliminated,lit(true,XSD+'boolean'));set(this.store,SESSION,P.phase,lit('notebook'));}return correct;}
   _endTurn(){const s=this.state();if(!['notebook','suggestion','movement'].includes(s.phase))throw new Error('Finish the current action before ending the turn.');let next=s.currentPlayerIndex;for(let i=0;i<s.players.length;i++){next=(next+1)%s.players.length;if(!s.players[next].eliminated)break;}if(s.players.every(p=>p.eliminated)){set(this.store,SESSION,P.complete,lit(true,XSD+'boolean'));set(this.store,SESSION,P.phase,lit('complete'));return null;}set(this.store,SESSION,P.current,nn(s.players[next].iri));set(this.store,SESSION,P.turn,lit(s.turn+1,XSD+'integer'));for(const pred of[P.die1,P.die2,P.moves,P.suggestion,P.refuter])remove(this.store,SESSION,pred);set(this.store,SESSION,P.phase,lit('turn-start'));return s.players[next];}
   async verifySolution(){return verifyCommitment(this.solution.slice().sort(),this.commitment);}
-  snapshot(){return{format:'butler-host-save',version:1,quads:this.store.getQuads(),rngState:this.random.getState(),players:this.players,solution:this.solution,commitment:this.commitment,code:this.code};}
+  snapshot(){return{format:'everything-is-sus-host-save',version:1,quads:this.store.getQuads(),rngState:this.random.getState(),players:this.players,solution:this.solution,commitment:this.commitment,code:this.code};}
   async playerAccessCodes(){const state=this.state();return Promise.all(state.players.map(async(player,index)=>({playerIri:player.iri,name:player.name,suspectId:player.tokenId,turnOrder:index+1,tableCode:this.code,handCode:await createHandCode({cardIds:player.hand.map(card=>card.id),tableCode:this.code,suspectId:player.tokenId})})));}
 }
 
 function set(store,s,p,o){remove(store,s,p);store.addQuad(q(s,p,o))}function remove(store,s,p){store.removeQuads(store.getQuads(nn(s),nn(p),null,null))}function requirePhase(s,p){if(s.complete||s.phase!==p)throw new Error(`This action requires the ${p} phase.`)}function title(s){return s[0].toUpperCase()+s.slice(1)}function parse(v){try{return v?JSON.parse(v):null}catch{return null}}
 function roomDistance(start,target){if(start===target)return 0;const queue=[[start,0]],seen=new Set([start]);while(queue.length){const[node,d]=queue.shift();for(const next of ADJACENCY[node]||[]){if(next===target)return d+1;if(!seen.has(next)){seen.add(next);queue.push([next,d+1])}}}return Infinity}
 export const serializeHostGame=game=>JSON.stringify(game.snapshot());
-export function restoreButlerGame(text){const d=typeof text==='string'?JSON.parse(text):text;return new ButlerGame({store:new RdfStore(d.quads),random:new RandomEngine(d.rngState),players:d.players,solution:d.solution,commitment:d.commitment,code:d.code})}
+export function restoreEverythingsSusGame(text){const d=typeof text==='string'?JSON.parse(text):text;return new EverythingsSusGame({store:new RdfStore(d.quads),random:new RandomEngine(d.rngState),players:d.players,solution:d.solution,commitment:d.commitment,code:d.code})}

@@ -37,7 +37,7 @@ function render(values, cards) {
   });
   renderSleuthSheet(app.querySelector('.sleuth-sheet tbody'), cards, playerKey);
   const note = app.querySelector('textarea');
-  const key = `butler-notes-${playerKey}`;
+  const key = `everything-is-sus-notes-${playerKey}`;
   note.value = localStorage.getItem(key) || '';
   note.oninput = () => localStorage.setItem(key, note.value);
   app.querySelector('.close-card').onclick = () => app.querySelector('#card-view').close();
@@ -45,7 +45,7 @@ function render(values, cards) {
 
 function renderSleuthSheet(body, hand, playerKey) {
   const ownIds = new Set(hand.map((card) => card.id));
-  const storageKey = `butler-sleuth-${playerKey}`;
+  const storageKey = `everything-is-sus-sleuth-${playerKey}`;
   const marked = new Set(JSON.parse(localStorage.getItem(storageKey) || '[]'));
   for (const category of ['suspect', 'weapon', 'room']) {
     const heading = document.createElement('tr');

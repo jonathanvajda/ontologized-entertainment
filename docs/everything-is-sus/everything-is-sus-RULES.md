@@ -1,4 +1,4 @@
-# Was It the Butler? — Game Rules
+# Everything?s Sus — Game Rules
 
 **Rules status:** Initial implementation draft  
 **Players:** 3–6  

@@ -1,5 +1,5 @@
-export const NS='https://w3id.org/ontoeagle/games/was-it-the-butler/';
-export const GAME_ID='https://w3id.org/ontoeagle/games/was-it-the-butler';
+export const NS='https://w3id.org/ontoeagle/games/everything-is-sus/';
+export const GAME_ID='https://w3id.org/ontoeagle/games/everything-is-sus';
 export const VERSION='0.1.0';
 export const SUSPECTS=[
   ['eggshell','Mrs. Eggshell','white','person-mrs-eggshell.png'],['marinara','Lt. Marinara','red','person-lt-marinara.png'],['peach','Ms. Peach','orange','person-ms-peach.png'],

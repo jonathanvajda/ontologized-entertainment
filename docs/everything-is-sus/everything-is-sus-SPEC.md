@@ -1,4 +1,4 @@
-# Was It the Butler? — Capability and Technical Specification
+# Everything?s Sus — Capability and Technical Specification
 
 **Status:** Refined implementation draft  
 **Game version:** 0.1.0  
@@ -7,7 +7,7 @@
 
 ## 1. Overview
 
-Was It the Butler? is a three-to-six-player deduction game built on the Ontologized Entertainment RDF game engine and hidden-information extension. It supports:
+Everything?s Sus is a three-to-six-player deduction game built on the Ontologized Entertainment RDF game engine and hidden-information extension. It supports:
 
 - pass-and-play on one device with audience/phase concealment;
 - local multi-device play with a host page and static player pages;
@@ -21,9 +21,9 @@ The game has no backend and does not claim live synchronization from a short cod
 
 | Field | Value |
 | --- | --- |
-| Game IRI | `https://w3id.org/ontologize-entertainment/games/was-it-the-butler` |
-| Ontology namespace | `https://w3id.org/ontologize-entertainment/games/was-it-the-butler/` |
-| Prefix | `butler:` |
+| Game IRI | `https://w3id.org/ontologize-entertainment/games/everything-is-sus` |
+| Ontology namespace | `https://w3id.org/ontologize-entertainment/games/everything-is-sus/` |
+| Prefix | `everything-is-sus:` |
 | Game version | `0.1.0` |
 | Rules profile | `estate-mystery-1` |
 | Save format | `1` |
@@ -31,10 +31,10 @@ The game has no backend and does not claim live synchronization from a short cod
 Static routes:
 
 ```text
-docs/was-it-the-butler/index.html          mode landing
-docs/was-it-the-butler/pass-and-play/     one-device game
-docs/was-it-the-butler/host/              multi-device host
-docs/was-it-the-butler/player/            player hand + notebook
+docs/everything-is-sus/index.html          mode landing
+docs/everything-is-sus/pass-and-play/     one-device game
+docs/everything-is-sus/host/              multi-device host
+docs/everything-is-sus/player/            player hand + notebook
 ```
 
 The landing page presents two primary choices: **Pass and play** and **Multiple devices**. The multiple-device panel then exposes **Host a game** and **Join as a player**.
@@ -81,7 +81,7 @@ Each card is both a `game:Card` and a category-specific subclass. Card art is re
 | --- | --- | --- |
 | Board room | Subclass of `game:BoardLocation` / BFO Site | Stable IRI |
 | Foyer | Non-card `game:BoardLocation`; shared token start zone | Stable IRI |
-| Passage space | `butler:PassageSpace`, game board location | Stable IRI from geometry manifest |
+| Passage space | `everything-is-sus:PassageSpace`, game board location | Stable IRI from geometry manifest |
 | Doorway connection | Asserted adjacency between passage and room | Endpoint pair |
 | Secret passage | Individuated route entity | Stable IRI |
 | Suspect token | Individuated `game:GamePiece` | One per suspect |
@@ -289,7 +289,7 @@ Each semantic entity maps through a manifest rather than embedding filenames in 
 
 ```js
 {
-  entityIri: 'https://w3id.org/ontoeagle/games/was-it-the-butler/MrsEggshell',
+  entityIri: 'https://w3id.org/ontoeagle/games/everything-is-sus/MrsEggshell',
   cardImage: './assets/cards/suspect-mrs-eggshell.webp',
   tokenImage: './assets/tokens/suspect-mrs-eggshell.webp',
   alt: 'Mrs. Eggshell in a white evening jacket'
@@ -305,7 +305,7 @@ The active manifest uses `estate-board-04.png`, `person-mrs-mint-02.png`, `perso
 ## 15. Proposed package structure
 
 ```text
-docs/was-it-the-butler/
+docs/everything-is-sus/
 ├── index.html
 ├── pass-and-play/index.html
 ├── host/index.html
@@ -313,8 +313,8 @@ docs/was-it-the-butler/
 ├── manifest.webmanifest
 ├── service-worker.js
 ├── ontology/
-│   ├── WasItTheButlerOntology.ttl
-│   ├── WasItTheButlerShapes.ttl
+│   ├── EverythingsSusOntology.ttl
+│   ├── EverythingsSusShapes.ttl
 │   └── initial-state.ttl
 ├── rules/
 ├── model/

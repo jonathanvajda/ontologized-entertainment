@@ -45,9 +45,9 @@ test('encrypted RDF capsules expose only the supplied audience partition', async
 });
 
 test('commitments verify exact canonical values and reject changes', async () => {
-  const commitment = await createCommitment({ room: 'library', suspect: 'butler' });
-  assert.equal(await verifyCommitment({ suspect: 'butler', room: 'library' }, commitment), true);
-  assert.equal(await verifyCommitment({ room: 'hall', suspect: 'butler' }, commitment), false);
+  const commitment = await createCommitment({ room: 'library', suspect: 'peach' });
+  assert.equal(await verifyCommitment({ suspect: 'peach', room: 'library' }, commitment), true);
+  assert.equal(await verifyCommitment({ room: 'hall', suspect: 'peach' }, commitment), false);
 });
 
 test('ECDH disclosures decrypt only for the targeted identity', async () => {

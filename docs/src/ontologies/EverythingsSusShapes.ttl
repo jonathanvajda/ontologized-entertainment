@@ -1,0 +1,13 @@
+@prefix everything-is-sus: <https://w3id.org/ontoeagle/games/everything-is-sus/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://w3id.org/ontoeagle/games/everything-is-sus/shapes> a owl:Ontology ; owl:versionInfo "0.1.0" ; dcterms:title "Everything?s Sus SHACL Shapes"@en ; dcterms:license <https://opensource.org/license/bsd-3-clause> ; rdfs:comment "Structural constraints for the Everything?s Sus canonical RDF state."@en .
+everything-is-sus:SessionShape a sh:NodeShape ; sh:targetClass everything-is-sus:MysteryGameSession ; sh:property [ sh:path everything-is-sus:hasPlayer ; sh:minCount 3 ; sh:maxCount 6 ; sh:class everything-is-sus:Detective ] ; sh:property [ sh:path everything-is-sus:hasCurrentPlayer ; sh:minCount 1 ; sh:maxCount 1 ; sh:class everything-is-sus:Detective ] ; sh:property [ sh:path everything-is-sus:phase ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ; sh:property [ sh:path everything-is-sus:turnNumber ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 1 ] ; sh:property [ sh:path everything-is-sus:solutionCommitment ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] .
+everything-is-sus:DetectiveShape a sh:NodeShape ; sh:targetClass everything-is-sus:Detective ; sh:property [ sh:path everything-is-sus:usesToken ; sh:minCount 1 ; sh:maxCount 1 ; sh:class everything-is-sus:SuspectToken ] ; sh:property [ sh:path everything-is-sus:playerOrder ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 0 ; sh:maxInclusive 5 ] ; sh:property [ sh:path everything-is-sus:eliminated ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ] .
+everything-is-sus:HandShape a sh:NodeShape ; sh:targetClass everything-is-sus:PlayerHand ; sh:property [ sh:path everything-is-sus:ownedBy ; sh:minCount 1 ; sh:maxCount 1 ; sh:class everything-is-sus:Detective ] .
+everything-is-sus:TokenShape a sh:NodeShape ; sh:targetClass everything-is-sus:SuspectToken ; sh:property [ sh:path everything-is-sus:locatedIn ; sh:minCount 1 ; sh:maxCount 1 ; sh:or ( [ sh:class everything-is-sus:Room ] [ sh:class everything-is-sus:Foyer ] ) ] .
+everything-is-sus:EvidenceCardShape a sh:NodeShape ; sh:targetClass everything-is-sus:EvidenceCard ; sh:property [ sh:path everything-is-sus:memberOf ; sh:minCount 1 ; sh:maxCount 1 ] .

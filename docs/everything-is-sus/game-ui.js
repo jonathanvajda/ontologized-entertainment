@@ -1,11 +1,11 @@
-import { createButlerGame, restoreButlerGame, serializeHostGame } from './model/butler-game.js';
+import { createEverythingsSusGame, restoreEverythingsSusGame, serializeHostGame } from './model/everything-is-sus-game.js';
 import { ROOM_GRID, ROOMS, SUSPECTS, WEAPONS, cardById, cardImageUrl } from './game-config.js';
 
 const mode = document.body.dataset.mode;
 let game = null;
 let selectedSuspectIds = [];
 const app = document.querySelector('#app');
-app.innerHTML = `<header class="bar"><a href="../">Was It the Butler?</a><nav><button id="rules">Rules</button><button id="load">Load</button><input id="load-file" hidden type="file" accept="application/json"><button id="save" disabled>Save</button><button id="new">New game</button></nav></header><main class="game-shell"><section class="board-panel"><div class="turn-card"><p class="kicker">Current detective</p><h1 id="current">Set the table</h1><p id="phase">Choose players to begin.</p></div><div class="estate-board" id="board"></div></section><aside class="case-panel"><div><p class="kicker">Case controls</p><h2 id="table-code">The sealed envelope</h2></div><div id="actions" class="actions"></div><div id="log" class="case-log" aria-live="polite"></div><div id="invitations"></div></aside></main><dialog id="setup"><form id="setup-form"><p class="kicker">New investigation</p><h2>Choose 3–6 suspects</h2><p>Select portraits in the order they will take turns.</p><div id="suspect-setup" class="suspect-setup"></div><button id="deal-case" disabled>Choose at least 3 suspects</button></form></dialog><dialog id="choice"><form id="choice-form"><h2 id="choice-title"></h2><div id="choice-fields"></div><menu><button type="button" id="cancel-choice">Cancel</button><button>Confirm</button></menu></form></dialog><dialog id="private"><div id="private-content"></div></dialog>`;
+app.innerHTML = `<header class="bar"><a href="../">Everything?s Sus</a><nav><button id="rules">Rules</button><button id="load">Load</button><input id="load-file" hidden type="file" accept="application/json"><button id="save" disabled>Save</button><button id="new">New game</button></nav></header><main class="game-shell"><section class="board-panel"><div class="turn-card"><p class="kicker">Current detective</p><h1 id="current">Set the table</h1><p id="phase">Choose players to begin.</p></div><div class="estate-board" id="board"></div></section><aside class="case-panel"><div><p class="kicker">Case controls</p><h2 id="table-code">The sealed envelope</h2></div><div id="actions" class="actions"></div><div id="log" class="case-log" aria-live="polite"></div><div id="invitations"></div></aside></main><dialog id="setup"><form id="setup-form"><p class="kicker">New investigation</p><h2>Choose 3–6 suspects</h2><p>Select portraits in the order they will take turns.</p><div id="suspect-setup" class="suspect-setup"></div><button id="deal-case" disabled>Choose at least 3 suspects</button></form></dialog><dialog id="choice"><form id="choice-form"><h2 id="choice-title"></h2><div id="choice-fields"></div><menu><button type="button" id="cancel-choice">Cancel</button><button>Confirm</button></menu></form></dialog><dialog id="private"><div id="private-content"></div></dialog>`;
 
 const $ = (selector) => document.querySelector(selector);
 const setup = $('#setup');
@@ -15,7 +15,7 @@ $('#new').onclick = () => { selectedSuspectIds = []; renderSuspectSetup(); setup
 $('#load').onclick = () => $('#load-file').click();
 $('#load-file').onchange = async (event) => {
   try {
-    game = restoreButlerGame(await event.target.files[0].text());
+    game = restoreEverythingsSusGame(await event.target.files[0].text());
     setup.close();
     $('#save').disabled = false;
     render();
@@ -23,7 +23,7 @@ $('#load-file').onchange = async (event) => {
     note('Saved investigation restored.');
   } catch { note('That save file could not be restored.', true); }
 };
-$('#rules').onclick = () => location.href = '../was-it-the-butler-RULES.md';
+$('#rules').onclick = () => location.href = '../everything-is-sus-RULES.md';
 $('#cancel-choice').onclick = () => $('#choice').close();
 
 function renderSuspectSetup() {
@@ -51,7 +51,7 @@ $('#setup-form').onsubmit = async (event) => {
   const tokenIds = [...selectedSuspectIds];
   if (tokenIds.length < 3 || tokenIds.length > 6) return;
   const names = tokenIds.map((id) => SUSPECTS.find((suspect) => suspect.id === id).label);
-  game = await createButlerGame({ names, tokenIds, mode });
+  game = await createEverythingsSusGame({ names, tokenIds, mode });
   setup.close();
   $('#save').disabled = false;
   render();
@@ -64,7 +64,7 @@ $('#save').onclick = () => {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.download = 'butler-host-save.json';
+  anchor.download = 'everything-is-sus-host-save.json';
   anchor.click();
   URL.revokeObjectURL(url);
 };
@@ -206,7 +206,7 @@ function privateHand(player) {
     content.querySelector('.private-cards').append(item);
   }
   const notes = content.querySelector('textarea');
-  const notesKey = `butler-pass-notes-${player.iri}`;
+  const notesKey = `everything-is-sus-pass-notes-${player.iri}`;
   notes.value = localStorage.getItem(notesKey) || '';
   notes.oninput = () => localStorage.setItem(notesKey, notes.value);
   content.querySelector('#confirm-hand').onclick = (event) => { event.currentTarget.remove(); content.querySelector('#hand-details').hidden = false; };
