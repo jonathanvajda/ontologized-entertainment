@@ -1,0 +1,11 @@
+{
+  "name": "Query Whom — a game of good questions",
+  "short_name": "Query Whom",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f3eb",
+  "theme_color": "#143c38",
+  "icons": [{ "src": "./assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

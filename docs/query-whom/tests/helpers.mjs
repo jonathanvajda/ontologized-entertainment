@@ -1,0 +1,10 @@
+import { readFile } from 'node:fs/promises';
+import { N3 } from '../scripts/runtime.mjs';
+import { encodeGame } from '../js/protocol.js';
+export { N3 };
+export const root = new URL('../', import.meta.url);
+export const manifest = JSON.parse(await readFile(new URL('assets/catalog-manifest.json', root), 'utf8'));
+export const catalogQuads = new N3.Parser().parse(await readFile(new URL('assets/catalog-v1.ttl', root), 'utf8'));
+export const baseStore = new N3.Store(catalogQuads);
+export const code = await encodeGame({ size: 24, seed: Uint8Array.from({ length: 16 }, (_, i) => i) });
+export const args = { N3, manifest, baseStore, code, playerRole: 'creator', choose: items => items[0] };

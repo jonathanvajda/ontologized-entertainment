@@ -1,0 +1,103 @@
+@prefix qw: <https://w3id.org/ontologized-entertainment/query-whom/> .
+@prefix cco: <https://www.commoncoreontologies.org/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix game: <https://w3id.org/ontologized-entertainment/game/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<https://w3id.org/ontologized-entertainment/query-whom> a owl:Ontology ; owl:versionInfo "1.0.0" ; owl:imports <https://www.commoncoreontologies.org/2026-08-13/CommonCoreOntologiesMerged>, <https://w3id.org/ontologized-entertainment/game> ; rdfs:label "Query Whom application ontology" ; rdfs:comment "Characters are represented in the game’s modeled world. Portrait files are depictions, not persons. Broad descriptive shortcuts follow the approved model. Ethnicity mappings retain source provenance." .
+
+qw:Head a owl:Class ; rdfs:subClassOf cco:ont00000084 ; rdfs:label "Head" ; skos:definition "A bodily component consisting of the head of a represented person." .
+qw:Sideburns a owl:Class ; rdfs:subClassOf cco:ont00000157 ; rdfs:label "Sideburns" ; skos:definition "Facial hair growing along the sides of a represented person’s face." .
+qw:QueryWhomSession a owl:Class ; rdfs:subClassOf game:GameSession ; rdfs:label "Query Whom session" ; skos:definition "A local process of playing Query Whom." .
+qw:CandidateRole a owl:Class ; rdfs:subClassOf obo:BFO_0000023 ; rdfs:label "Candidate role" ; skos:definition "A role borne by a represented person in the context of a local game session." .
+qw:ActiveCandidateRole a owl:Class ; rdfs:subClassOf qw:CandidateRole ; rdfs:label "Active candidate role" ; skos:definition "A candidate role currently considered eligible for an opponent guess." .
+qw:EliminatedCandidateRole a owl:Class ; rdfs:subClassOf qw:CandidateRole ; rdfs:label "Eliminated candidate role" ; skos:definition "A candidate role currently excluded from opponent consideration." .
+qw:RevealTargetAct a owl:Class ; rdfs:subClassOf game:GameAct ; rdfs:label "Reveal target act" ; skos:definition "An act disclosing the local target to its owner." .
+qw:EliminateCandidateAct a owl:Class ; rdfs:subClassOf game:GameAct ; rdfs:label "Eliminate candidate act" ; skos:definition "An act excluding a local candidate." .
+qw:RestoreCandidateAct a owl:Class ; rdfs:subClassOf game:GameAct ; rdfs:label "Restore candidate act" ; skos:definition "An act restoring a local candidate." .
+qw:CreateSessionAct a owl:Class ; rdfs:subClassOf game:GameAct ; rdfs:label "Create session act" ; skos:definition "An act establishing a local game session." .
+qw:AsianEthnicity a owl:Class ; rdfs:subClassOf cco:ont00000780 ; rdfs:label "Asian" ; skos:definition "An application ethnicity category corresponding to the supplied Asian heritage categories." .
+qw:BlondeHairColor a owl:Class ; rdfs:subClassOf cco:ont00000026 ; rdfs:label "Blonde" ; skos:definition "A hair color quality classified as Blonde in the source catalog." ; qw:sourceCategoryLabel "Blonde" .
+qw:BlackHairColor a owl:Class ; rdfs:subClassOf cco:ont00000026 ; rdfs:label "Black" ; skos:definition "A hair color quality classified as Black in the source catalog." ; qw:sourceCategoryLabel "Black" .
+qw:BrownHairColor a owl:Class ; rdfs:subClassOf cco:ont00000026 ; rdfs:label "Brown" ; skos:definition "A hair color quality classified as Brown in the source catalog." ; qw:sourceCategoryLabel "Brown" .
+qw:RedHairColor a owl:Class ; rdfs:subClassOf cco:ont00000026 ; rdfs:label "Red" ; skos:definition "A hair color quality classified as Red in the source catalog." ; qw:sourceCategoryLabel "Red" .
+qw:BlackGoingGreyWhiteHairColor a owl:Class ; rdfs:subClassOf cco:ont00000026 ; rdfs:label "Black going grey/white" ; skos:definition "A hair color quality classified as Black going grey/white in the source catalog." ; qw:sourceCategoryLabel "Black going grey/white" .
+qw:BrownGoingGreyWhiteHairColor a owl:Class ; rdfs:subClassOf cco:ont00000026 ; rdfs:label "Brown going grey/white" ; skos:definition "A hair color quality classified as Brown going grey/white in the source catalog." ; qw:sourceCategoryLabel "Brown going grey/white" .
+qw:WhiteGreyHairColor a owl:Class ; rdfs:subClassOf cco:ont00000026 ; rdfs:label "Fully white/grey" ; skos:definition "A hair color quality classified as Fully white/grey in the source catalog." ; qw:sourceCategoryLabel "Fully white/grey" .
+qw:BlueEyeColor a owl:Class ; rdfs:subClassOf cco:ont00000044 ; rdfs:label "Blue" ; skos:definition "An eye color quality classified as Blue in the source catalog." ; qw:sourceCategoryLabel "Blue" .
+qw:BrownEyeColor a owl:Class ; rdfs:subClassOf cco:ont00000044 ; rdfs:label "Brown" ; skos:definition "An eye color quality classified as Brown in the source catalog." ; qw:sourceCategoryLabel "Brown" .
+qw:DarkBrownEyeColor a owl:Class ; rdfs:subClassOf cco:ont00000044 ; rdfs:label "Dark brown" ; skos:definition "An eye color quality classified as Dark brown in the source catalog." ; qw:sourceCategoryLabel "Dark brown" .
+qw:GreenEyeColor a owl:Class ; rdfs:subClassOf cco:ont00000044 ; rdfs:label "Green" ; skos:definition "An eye color quality classified as Green in the source catalog." ; qw:sourceCategoryLabel "Green" .
+qw:HazelEyeColor a owl:Class ; rdfs:subClassOf cco:ont00000044 ; rdfs:label "Hazel" ; skos:definition "An eye color quality classified as Hazel in the source catalog." ; qw:sourceCategoryLabel "Hazel" .
+qw:WhiteEthnicity a owl:Class ; rdfs:subClassOf cco:ont00000780 ; rdfs:label "White" ; skos:definition "An application ethnicity quality mapped from the source Race category Caucasian; this is a curated convention, not an equivalence to a statistical classification." ; qw:sourceCategoryLabel "Caucasian" .
+qw:BlackOrAfricanAmericanEthnicity a owl:Class ; rdfs:subClassOf cco:ont00000780 ; rdfs:label "Black or African American" ; skos:definition "An application ethnicity quality mapped from the source Race category African; this is a curated convention, not an equivalence to a statistical classification." ; qw:sourceCategoryLabel "African" .
+qw:HispanicOrLatinoEthnicity a owl:Class ; rdfs:subClassOf cco:ont00000780 ; rdfs:label "Hispanic or Latino" ; skos:definition "An application ethnicity quality mapped from the source Race category Hispanic; this is a curated convention, not an equivalence to a statistical classification." ; qw:sourceCategoryLabel "Hispanic" .
+qw:EastAsianEthnicity a owl:Class ; rdfs:subClassOf qw:AsianEthnicity ; rdfs:label "East Asian" ; skos:definition "An application ethnicity quality mapped from the source Race category East Asian; this is a curated convention, not an equivalence to a statistical classification." ; qw:sourceCategoryLabel "East Asian" .
+qw:SouthAsianEthnicity a owl:Class ; rdfs:subClassOf qw:AsianEthnicity ; rdfs:label "South Asian" ; skos:definition "An application ethnicity quality mapped from the source Race category South Asian; this is a curated convention, not an equivalence to a statistical classification." ; qw:sourceCategoryLabel "South Asian" .
+qw:ThickChinAndNeckBeardFacialHair a owl:Class ; rdfs:subClassOf cco:ont00000157 ; rdfs:label "Thick chin-and-neck beard" ; skos:definition "A portion of facial hair described as Thick chin-and-neck beard in the source catalog." ; qw:sourceCategoryLabel "Thick chin-and-neck beard" .
+qw:GoateeFacialHair a owl:Class ; rdfs:subClassOf cco:ont00000157 ; rdfs:label "Goatee" ; skos:definition "A portion of facial hair described as Goatee in the source catalog." ; qw:sourceCategoryLabel "Goatee" .
+qw:MustacheAndBeardThinFacialHair a owl:Class ; rdfs:subClassOf cco:ont00000157 ; rdfs:label "Mustache and beard, thin" ; skos:definition "A portion of facial hair described as Mustache and beard, thin in the source catalog." ; qw:sourceCategoryLabel "Mustache and beard, thin" .
+qw:MustacheOnlyHandlebarFacialHair a owl:Class ; rdfs:subClassOf cco:ont00000157 ; rdfs:label "Mustache only, handlebar" ; skos:definition "A portion of facial hair described as Mustache only, handlebar in the source catalog." ; qw:sourceCategoryLabel "Mustache only, handlebar" .
+qw:MustacheAndBeardThickAndBushyFacialHair a owl:Class ; rdfs:subClassOf cco:ont00000157 ; rdfs:label "Mustache and beard, thick and bushy" ; skos:definition "A portion of facial hair described as Mustache and beard, thick and bushy in the source catalog." ; qw:sourceCategoryLabel "Mustache and beard, thick and bushy" .
+qw:MustacheOnlyThickFacialHair a owl:Class ; rdfs:subClassOf cco:ont00000157 ; rdfs:label "Mustache only, thick" ; skos:definition "A portion of facial hair described as Mustache only, thick in the source catalog." ; qw:sourceCategoryLabel "Mustache only, thick" .
+qw:MustacheOnlyThinFacialHair a owl:Class ; rdfs:subClassOf cco:ont00000157 ; rdfs:label "Mustache only, thin" ; skos:definition "A portion of facial hair described as Mustache only, thin in the source catalog." ; qw:sourceCategoryLabel "Mustache only, thin" .
+qw:MustacheAndBeardTrimmedAndWellGroomedFacialHair a owl:Class ; rdfs:subClassOf cco:ont00000157 ; rdfs:label "Mustache and beard, trimmed and well-groomed" ; skos:definition "A portion of facial hair described as Mustache and beard, trimmed and well-groomed in the source catalog." ; qw:sourceCategoryLabel "Mustache and beard, trimmed and well-groomed" .
+
+qw:sourceCategoryLabel a owl:AnnotationProperty .
+qw:personNumber a owl:DatatypeProperty ; rdfs:range xsd:positiveInteger ; rdfs:label "person number" .
+qw:sourcePersonLabel a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "source person label" .
+qw:sourceRaceLabel a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "source race label" .
+qw:sourceFacialHairLabel a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "source facial hair label" .
+qw:portraitPath a owl:DatatypeProperty ; rdfs:range xsd:anyURI ; rdfs:label "portrait path" .
+qw:gameCode a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "game code" .
+qw:playerRole a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "player role" .
+qw:targetRevealed a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "target revealed" .
+qw:createdAt a owl:DatatypeProperty ; rdfs:range xsd:dateTime ; rdfs:label "created at" .
+qw:actionSequence a owl:DatatypeProperty ; rdfs:range xsd:positiveInteger ; rdfs:label "action sequence" .
+qw:hasAgeYears a owl:DatatypeProperty ; rdfs:range xsd:nonNegativeInteger ; rdfs:label "has age years" .
+qw:hasAgeGroup a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has age group" .
+qw:hasAgeAppearance a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has age appearance" .
+qw:hasHairLength a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has hair length" .
+qw:hasHairTexture a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has hair texture" .
+qw:isBald a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "is bald" .
+qw:hasHairstyle a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has hairstyle" .
+qw:hasBangs a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "has bangs" .
+qw:hasBeard a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "has beard" .
+qw:hasMustache a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "has mustache" .
+qw:hasEyeDirection a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has eye direction" .
+qw:hasEyeOpenness a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has eye openness" .
+qw:hasEyebrowThickness a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has eyebrow thickness" .
+qw:hasEyebrowShape a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has eyebrow shape" .
+qw:hasNoseSize a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has nose size" .
+qw:hasNoseShape a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has nose shape" .
+qw:hasRosyCheeks a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "has rosy cheeks" .
+qw:hasFreckles a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "has freckles" .
+qw:hasDimples a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "has dimples" .
+qw:hasSmile a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "has smile" .
+qw:hasTeethVisible a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "has teeth visible" .
+qw:hasMouthOpen a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "has mouth open" .
+qw:hasExpression a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has expression" .
+qw:hasFaceShape a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has face shape" .
+qw:hasEarSize a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has ear size" .
+qw:hasSkinTone a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has skin tone" .
+qw:hasGlasses a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "has glasses" .
+qw:hasHat a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "has hat" .
+qw:hasHatType a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has hat type" .
+qw:hasHatColor a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has hat color" .
+qw:hasHatAccessory a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has hat accessory" .
+qw:hasEarrings a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "has earrings" .
+qw:hasEarringType a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has earring type" .
+qw:hasBow a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "has bow" .
+qw:hasCollar a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "has collar" .
+qw:hasNecklace a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "has necklace" .
+qw:hasHairAccessory a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has hair accessory" .
+qw:hasClothingColor a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "has clothing color" .
+qw:boardIncludes a owl:ObjectProperty ; rdfs:domain qw:QueryWhomSession ; rdfs:range cco:ont00001262 ; skos:definition "Relates a local session to a person on its immutable board." .
+qw:hasOwnTarget a owl:ObjectProperty ; rdfs:domain qw:QueryWhomSession ; rdfs:range cco:ont00001262 ; skos:definition "Relates a local session to the privately assigned target on this device." .
+qw:inSession a owl:ObjectProperty ; rdfs:domain qw:CandidateRole ; rdfs:range qw:QueryWhomSession ; skos:definition "Scopes a candidate role to its local session." .
+qw:actInSession a owl:ObjectProperty ; rdfs:domain game:GameAct ; rdfs:range qw:QueryWhomSession ; skos:definition "Relates a retained game act to its local session." .
+qw:affectsPerson a owl:ObjectProperty ; rdfs:domain game:GameAct ; rdfs:range cco:ont00001262 ; skos:definition "Relates a local act to the represented person it affects." .
