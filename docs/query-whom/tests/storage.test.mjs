@@ -3,6 +3,22 @@ import assert from 'node:assert/strict';
 import { IDBFactory } from 'fake-indexeddb';
 import { openStorage } from '../js/storage.js';
 
+test('ten games saved through separate connections retain independent progress', async () => {
+  const factory = new IDBFactory();
+  const connections = await Promise.all(Array.from({ length: 10 }, () => openStorage(factory)));
+  try {
+    await Promise.all(connections.map((storage, i) => storage.save(`game-${i}`, { state: `initial-${i}` })));
+    await Promise.all(connections.map((storage, i) => storage.save(`game-${i}`, { state: `progress-${i}` }, 1)));
+    const records = await connections[0].list(); assert.equal(records.length, 10);
+    for (let i = 0; i < 10; i++) {
+      const record = await connections[i].read('sessions', `game-${i}`);
+      assert.equal(record.revision, 2); assert.equal(record.value.state, `progress-${i}`);
+    }
+    await assert.rejects(connections[1].save('game-0', { state: 'stale' }, 1), /another tab/);
+    assert.equal((await connections[0].read('sessions', 'game-0')).value.state, 'progress-0');
+  } finally { connections.forEach(storage => storage.db.close()); }
+});
+
 test('atomic snapshots and active pointer preserve tables and reject stale writes', async () => {
   const db = await openStorage(new IDBFactory());
   assert.equal(await db.save('one',{state:'first'},0),1);

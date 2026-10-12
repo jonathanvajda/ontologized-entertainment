@@ -46,6 +46,45 @@ async function checkA11y(page,name) {
   assert.deepEqual(result.violations.map(v=>({id:v.id,help:v.help,nodes:v.nodes.map(n=>n.target)})),[],`Accessibility: ${name}`);
 }
 try {
+  const multiContext = await browser.newContext();
+  const tabs = [];
+  for (let i = 0; i < 10; i++) {
+    const page = await pageFor(multiContext);
+    await page.locator('#create-form button').click();
+    await page.locator('#share-view').waitFor({ state: 'visible' });
+    tabs.push({ page, id: await page.evaluate(() => sessionStorage.getItem('query-whom-current-session')) });
+  }
+  assert.equal(new Set(tabs.map(tab => tab.id)).size, 10);
+  for (const { page, id } of tabs) {
+    await page.reload(); await page.locator('#reveal-view').waitFor({ state: 'visible' });
+    assert.equal(await page.evaluate(() => sessionStorage.getItem('query-whom-current-session')), id);
+    await page.locator('#reveal-button').click();
+    await page.locator('#revealed-person').waitFor({ state: 'visible' });
+    await page.locator('#start-board').click();
+    await page.locator('.person-card:not(.own) .card-toggle').first().click();
+    await page.waitForFunction(() => document.querySelector('#candidate-count').textContent.startsWith('22'));
+  }
+  const fresh = await pageFor(multiContext);
+  assert.equal(await fresh.locator('#saved-list button[data-session-id]').count(), 10);
+  const inviter = tabs[0].page;
+  await inviter.locator('#share-again').click();
+  const link = await inviter.locator('#share-link').inputValue();
+  await fresh.goto(link); await fresh.locator('#reveal-view').waitFor({ state: 'visible' });
+  const joinedId = await fresh.evaluate(() => sessionStorage.getItem('query-whom-current-session'));
+  assert(!tabs.some(tab => tab.id === joinedId));
+  const joined = await saveRecord(fresh, joinedId);
+  await fresh.goto(link); await fresh.locator('#reveal-view').waitFor({ state: 'visible' });
+  assert.equal((await saveRecord(fresh, joinedId)).value.state, joined.value.state);
+  for (const { page, id } of tabs) {
+    await page.reload(); await page.locator('#board-view').waitFor({ state: 'visible' });
+    assert.match(await page.locator('#candidate-count').textContent(), /^22/);
+    assert.equal(await page.evaluate(() => sessionStorage.getItem('query-whom-current-session')), id);
+  }
+  await fresh.goto(url + '#invite=bad'); await fresh.locator('#notice').waitFor({ state: 'visible' });
+  assert.match(await fresh.locator('#notice').textContent(), /Unable to join invitation/);
+  assert.equal(await fresh.locator('#saved-list button[data-session-id]').count(), 11);
+  await multiContext.close();
+  console.log('Passed ten independent tabs, invite joining, repeat invites and invalid-link save preservation.');
   const hostContext=await browser.newContext({viewport:{width:1280,height:900}}), guestContext=await browser.newContext({viewport:{width:390,height:844}});
   const host=await pageFor(hostContext); await checkA11y(host,'home'); await host.screenshot({path:fileURLToPath(new URL('home.png',results)),fullPage:true});
   await host.addScriptTag({url:new URL('../vendor/mermaid.min.js',url).href});

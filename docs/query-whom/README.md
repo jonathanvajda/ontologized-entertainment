@@ -159,3 +159,9 @@ The lockfile audits the fixed QR dependencies and development tooling.
 - Runtime checks are JavaScript invariants; ontology entailment is not a gameplay engine.
 - Old incompatible saves are retained with an error; v1 has no speculative migration.
 - Browser CI covers Chromium; physical iOS/Android camera and permission flows still need device testing.
+
+### Multiple tables and invitation links
+
+Each tab remembers its own current table across refreshes. Fresh tabs open Your tables rather than selecting another tab?s game. Pause & leave lets you switch tables in one tab. Independent tables have separate atomic IndexedDB records; competing writes to the same table are rejected by revision checks.
+
+Copy invite link shares a deployment-relative URL containing only the public board code in its fragment. Opening it joins the board with a private local draw, or resumes an existing joined table for that code. Other saved tables remain intact. QR and Copy code still share the original code.

@@ -6,6 +6,7 @@ import { sortedCards } from './catalog.js';
 import { Q } from './vocabulary.js';
 import { createTaskQueue } from './task-queue.js';
 import { QrScanner } from './scanner.js';
+import { inviteUrl, readInvite } from './invite.js';
 import { importSaveJson, exportSaveJson } from '../../packages/game-mechanics/src/save-package.js';
 
 const $ = id => document.getElementById(id);
@@ -13,6 +14,8 @@ let graph, storage, session, revision = 0, busy = false, stopped = false, ownVis
 let preferences = { sortMode: 'shuffle', hideEliminated: false }, registration, returnFromShare = false;
 let lastFocus;
 let endRecord = null, endingForNewGame = false;
+const tabSessionKey = 'query-whom-current-session';
+const rememberSession = () => sessionStorage.setItem(tabSessionKey, session.sessionIri);
 const notice = message => { $('notice').textContent = message; $('notice').hidden = !message; };
 const message = error => error instanceof Error ? error.message : String(error);
 const people = () => new Map(graph.catalog.map(person => [person.id, person]));
@@ -52,6 +55,7 @@ async function persist() {
   const save = await session.save(preferences);
   try { revision = await storage.save(session.sessionIri, save, revision); }
   catch (error) { stopped = true; throw new Error(`${message(error)} Reload before continuing; ended games will not be reopened automatically.`); }
+  rememberSession();
 }
 async function act(type, parameters) {
   if (stopped) throw new Error('Reload before continuing this game.');
@@ -142,6 +146,7 @@ function qrCanvas(code, pixels = 280) {
 function showShare(fromBoard = false) {
   returnFromShare = fromBoard;
   const code = session.definition.code; $('share-code').textContent = formatCode(code);
+  $('share-link').value = inviteUrl(code, location.href);
   $('share-qr').replaceChildren(qrCanvas(code)); $('share-continue').textContent = fromBoard ? 'Back to my board →' : 'Continue to my person →'; view('share');
 }
 function showSession() {
@@ -154,6 +159,7 @@ async function resume(record) {
   const restored = await QueryWhomSession.restore({ N3: globalThis.N3, baseStore: graph.store, manifest: graph.manifest, save: record.value });
   const nextRevision = await storage.save(restored.sessionIri, record.value, record.revision);
   session = restored; revision = nextRevision; preferences = uiPreferences(record.value.uiState); stopped = false; showSession();
+  rememberSession();
 }
 async function start(code, playerRole) {
   const definition = await decodeGame(code);
@@ -171,6 +177,7 @@ async function start(code, playerRole) {
   if (playerRole === 'creator') showShare(); else showSession();
 }
 async function showHome() {
+  sessionStorage.removeItem(tabSessionKey);
   scanner.stop(); session = null; stopped = false; ownVisible = false; view('home');
   $('reveal-image').removeAttribute('src'); $('reveal-name').textContent = '';
   $('dock-image').removeAttribute('src'); $('dock-name').textContent = '';
@@ -289,6 +296,12 @@ $('pause-instead').addEventListener('click', () => task(async () => {
   await showHome(); notice('Game paused for later. You can now create or join another game.');
 }));
 $('copy-code').addEventListener('click', () => task(async () => { if (!navigator.clipboard?.writeText) throw new Error('Clipboard is unavailable. Select and copy the displayed code.'); await navigator.clipboard.writeText(formatCode(session.definition.code)); notice('Invitation copied.'); }));
+$('copy-invite').addEventListener('click', () => task(async () => {
+  const url = inviteUrl(session.definition.code, location.href);
+  $('share-link').value = url;
+  if (!navigator.clipboard?.writeText) throw new Error('Clipboard is unavailable. Select and copy the invitation link below.');
+  await navigator.clipboard.writeText(url); notice('Invitation link copied.');
+}));
 $('fullscreen-qr').addEventListener('click', () => { $('large-qr').replaceChildren(qrCanvas(session.definition.code, 450)); openDialog('qr-dialog'); });
 $('share-continue').addEventListener('click', () => { if (returnFromShare) { view('board'); renderBoard(); } else showSession(); });
 $('reveal-button').addEventListener('click', () => task(async () => {
@@ -321,6 +334,7 @@ $('import-file').addEventListener('change', () => {
   if (existing && !confirm('Replace this table’s existing local save with the imported save?')) return;
   const nextRevision = await storage.save(restored.sessionIri, parsed.value, existing?.revision || 0, { allowReopen: true });
   session = restored; revision = nextRevision; preferences = uiPreferences(parsed.value.uiState); stopped = false; showSession();
+  rememberSession();
   });
 });
 
@@ -350,11 +364,26 @@ async function init() {
   document.querySelectorAll('.portrait-wall figure').forEach(figure => { const id = Number(/person-(\d+)/.exec(figure.querySelector('img').src)[1]); figure.querySelector('figcaption').textContent = people().get(id).name; });
   $('offline-status').textContent = 'Preparing offline play…';
   offline().catch(() => $('offline-status').textContent = 'Offline caching unavailable');
-  const active = await storage.read('settings', 'active');
+  if (await followInvite()) return;
+  const active = sessionStorage.getItem(tabSessionKey);
   if (active) {
-    const record = await storage.read('sessions', active.value);
+    const record = await storage.read('sessions', active);
     if (record && record.status !== 'ended') { try { await resume(record); return; } catch (error) { notice(`Saved game could not be resumed: ${message(error)} It has been retained.`); } }
   }
   await showHome();
 }
+async function followInvite() {
+  if (!new URLSearchParams(location.hash.slice(1)).has('invite')) return false;
+  try {
+    const code = await readInvite(location.href);
+    history.replaceState(null, '', location.pathname + location.search);
+    await start(code, 'joiner');
+  } catch (error) {
+    await showHome(); notice(`Unable to join invitation: ${message(error)}`);
+  }
+  return true;
+}
+window.addEventListener('hashchange', () => {
+  if (storage && graph) task(followInvite);
+});
 init().catch(error => { notice(`Unable to start: ${message(error)} No existing saves were changed.`); $('offline-status').textContent = 'Setup unavailable'; document.querySelectorAll('#create-form button,#join-form button,#scan-button,#import-button').forEach(button => button.disabled = true); });

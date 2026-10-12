@@ -1,5 +1,5 @@
 {
-  "version": "a66c962ebbfcd90fc82ebc8a",
+  "version": "22dfe095b27375608d646b91",
   "files": [
     {
       "path": "../packages/game-mechanics/src/action-engine.js",
@@ -151,7 +151,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "455ba6886e675714433391a9acdbf6e440e56448e8a0f6dd0421ab83dea09d4b"
+      "sha256": "5ca169304a21ea0baf1fa94d214369b6cf8a090003c102914c763de7ba051730"
     },
     {
       "path": "app.css",
@@ -491,11 +491,11 @@
     },
     {
       "path": "index.html",
-      "sha256": "e7ac5c40a918e327ee8d9a041b3372e4c4bba28659eed122b5ed8f548c226f80"
+      "sha256": "9bf8784411cc481834952f30889975a330503e3c92709561b7cea1dda8c330a0"
     },
     {
       "path": "js/app.js",
-      "sha256": "0cfb8576345a18f578ac21c296461f84fd580bff10ba579f9fa8551dbeb0eba1"
+      "sha256": "bfc366d9a541d6e314715b506d5f7144489b49288cd1ac4c498655c51f597521"
     },
     {
       "path": "js/catalog.js",
@@ -504,6 +504,10 @@
     {
       "path": "js/graph-loader.js",
       "sha256": "ae2c34236fc6ffe525f40a7390904c21a635a24f30a89c1e4b9f5f635c98dc26"
+    },
+    {
+      "path": "js/invite.js",
+      "sha256": "de092d4e35a3bafb233312922ae10feaae9539683d66e2a22f799373917b8b82"
     },
     {
       "path": "js/protocol.js",
