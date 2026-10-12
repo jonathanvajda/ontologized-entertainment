@@ -1,4 +1,5 @@
 import { Q, TYPE, PART, BEARER, PERSON, personIri, prefixes, hairClasses, eyeClasses, ethnicityClasses, traitFields } from './vocabulary.js';
+import { DECK_VERSION } from './protocol.js';
 
 export function projectCatalog(store, manifest) {
   const objects = (s, p) => store.getQuads(s, p, null, null).map(q => q.object.value);
@@ -49,7 +50,7 @@ export function projectCatalog(store, manifest) {
       portrait: `assets/portraits/person-${String(id).padStart(2, '0')}-960.webp`,
       traits, sourcePersonLabel: one(iri, Q('sourcePersonLabel')), sourceRaceLabel: one(iri, Q('sourceRaceLabel')) });
   }
-  if (manifest && (manifest.deckVersion !== 1 || manifest.personCount !== result.length)) throw new Error('Unsupported catalog manifest.');
+  if (manifest && (manifest.deckVersion !== DECK_VERSION || manifest.personCount !== result.length)) throw new Error('Unsupported catalog manifest.');
   return result;
 }
 

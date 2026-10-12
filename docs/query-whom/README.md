@@ -39,6 +39,18 @@ No npm package is loaded by the shipped game at runtime.
 `ontology/query-whom.ttl` extends CCO and the shared Game Ontology.
 `assets/catalog-v1.ttl` imports that vocabulary and the pinned CCO merged
 ontology. Its 40 character instances are generated from the supplied CSV.
+The current deck is version 3; the existing `catalog-v1` filenames remain stable
+asset paths, while the ontology version, manifest and shared codes identify the
+revised deck. Version 2 revises six portraits, gives Noah red hair and Joshua
+brown hair, and opens Ella's eyes with a forward gaze. Joshua is Person 7;
+Person 13 is Levi and remains unchanged. Earlier deck codes/saves are rejected
+with a version message and retained locally, so players start a new table with
+the revised catalog rather than mixing different trait sets.
+Version 3 swaps Elijah's and Theodore's hair textures (Elijah straight,
+Theodore curly) and moves freckles from Joshua to Noah. All other traits are
+preserved. The swaps retain 9 straight-haired and 10 curly-haired characters,
+and 6 characters with freckles. Exact edit prompts and before/after counts
+are recorded in `portraits/portrait-revisions-v3.json`.
 `ontology/oliver-example.md` is a complete Mermaid instance graph generated
 from Oliver’s actual triples, including explicit type edges.
 

@@ -1,4 +1,5 @@
 import { mergeProjectPrefixes } from '../../packages/namespace-registry/src/prefix-map.js';
+import { DECK_VERSION } from './protocol.js';
 
 export const prefixes = mergeProjectPrefixes({}, {
   qw: 'https://w3id.org/ontologized-entertainment/query-whom/',
@@ -21,7 +22,7 @@ export const CCO_COMMIT = 'be13b74cccf85617739c5288f9fdac805437386c';
 export const CCO_SHA256 = 'a9453382b25b40781c181d6ba44981f228abb76d90d548846713adba9baadb42';
 export const CCO_VERSION = 'https://www.commoncoreontologies.org/2026-08-13/CommonCoreOntologiesMerged';
 export const APP_ONTOLOGY = prefixes.qw.slice(0, -1);
-export const CATALOG_ONTOLOGY = Q('catalog/v1');
+export const CATALOG_ONTOLOGY = Q(`catalog/v${DECK_VERSION}`);
 
 export const hairClasses = {
   Blonde: 'BlondeHairColor', Black: 'BlackHairColor', Brown: 'BrownHairColor', Red: 'RedHairColor',

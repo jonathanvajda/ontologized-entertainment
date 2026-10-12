@@ -8,7 +8,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
-<https://w3id.org/ontologized-entertainment/query-whom/catalog/v1> a owl:Ontology ; owl:versionInfo "1" ; owl:imports <https://w3id.org/ontologized-entertainment/query-whom>, <https://www.commoncoreontologies.org/2026-08-13/CommonCoreOntologiesMerged> ; rdfs:label "Query Whom character catalog v1" .
+<https://w3id.org/ontologized-entertainment/query-whom/catalog/v2> a owl:Ontology ; owl:versionInfo "2" ; owl:imports <https://w3id.org/ontologized-entertainment/query-whom>, <https://www.commoncoreontologies.org/2026-08-13/CommonCoreOntologiesMerged> ; rdfs:label "Query Whom character catalog v2" .
 
 qw:person-01 a cco:ont00001262 .
 qw:person-01 rdfs:label "Oliver" .
@@ -218,7 +218,7 @@ qw:person-04-head a qw:Head .
 qw:person-04-head obo:BFO_0000178 qw:person-04-scalp-hair .
 qw:person-04-scalp-hair a cco:ont00000058 .
 qw:person-04-scalp-hair obo:BFO_0000196 qw:person-04-hair-color .
-qw:person-04-hair-color a qw:BlackHairColor .
+qw:person-04-hair-color a qw:RedHairColor .
 qw:person-04-head obo:BFO_0000178 qw:person-04-left-eye .
 qw:person-04-left-eye a cco:ont00000500 .
 qw:person-04-left-eye obo:BFO_0000196 qw:person-04-left-eye-color .
@@ -419,7 +419,7 @@ qw:person-07-head a qw:Head .
 qw:person-07-head obo:BFO_0000178 qw:person-07-scalp-hair .
 qw:person-07-scalp-hair a cco:ont00000058 .
 qw:person-07-scalp-hair obo:BFO_0000196 qw:person-07-hair-color .
-qw:person-07-hair-color a qw:RedHairColor .
+qw:person-07-hair-color a qw:BrownHairColor .
 qw:person-07-head obo:BFO_0000178 qw:person-07-left-eye .
 qw:person-07-left-eye a cco:ont00000500 .
 qw:person-07-left-eye obo:BFO_0000196 qw:person-07-left-eye-color .
@@ -2540,8 +2540,8 @@ qw:person-39-head qw:hasBeard "false"^^xsd:boolean .
 qw:person-39-head qw:hasMustache "false"^^xsd:boolean .
 qw:person-39-left-eye qw:hasEyeDirection "Forward" .
 qw:person-39-right-eye qw:hasEyeDirection "Forward" .
-qw:person-39-left-eye qw:hasEyeOpenness "Closed" .
-qw:person-39-right-eye qw:hasEyeOpenness "Closed" .
+qw:person-39-left-eye qw:hasEyeOpenness "Open" .
+qw:person-39-right-eye qw:hasEyeOpenness "Open" .
 qw:person-39-head qw:hasEyebrowThickness "Thin" .
 qw:person-39-head qw:hasEyebrowShape "Straight" .
 qw:person-39-head qw:hasNoseSize "Small" .

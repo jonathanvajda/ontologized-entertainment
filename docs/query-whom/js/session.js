@@ -3,7 +3,7 @@ import { quadKey } from '../../packages/game-mechanics/src/rdf-store.js';
 import { parseRdfTextWithN3, serializeRdfDatasetWithN3 } from '../../packages/rdf-io/src/n3-adapter.js';
 import { normalizeQuad } from '../../packages/rdf-io/src/rdf-model.js';
 import { Q, TYPE, BEARER, personIri, prefixes } from './vocabulary.js';
-import { decodeGame, reconstructBoard, eligibleTargets, privateChoice, HashRandom } from './protocol.js';
+import { decodeGame, reconstructBoard, eligibleTargets, privateChoice, HashRandom, DECK_VERSION } from './protocol.js';
 
 const ACTIVE = Q('ActiveCandidateRole'), ELIMINATED = Q('EliminatedCandidateRole');
 const SESSION_PREFIX = Q('session/');
@@ -152,7 +152,7 @@ export class QueryWhomSession {
     const state = await serializeRdfDatasetWithN3(new this.N3.Store(quads), { format: 'turtle', prefixes, runtime: { N3: this.N3 } });
     const save = createSavePackage({ game: { id: 'query-whom', version: '1.0.0' }, schemaVersion: '1.0.0', state,
       transactions: this.engine.transactions.entries(), rngState: this.engine.random.getState(), uiState });
-    save.manifest.catalogHash = this.manifest.catalogHash; save.manifest.deckVersion = 1; save.manifest.protocolVersion = 1;
+    save.manifest.catalogHash = this.manifest.catalogHash; save.manifest.deckVersion = DECK_VERSION; save.manifest.protocolVersion = 1;
     return save;
   }
   static async create({ N3, baseStore, manifest, code, playerRole, choose = privateChoice }) {
@@ -164,7 +164,7 @@ export class QueryWhomSession {
   static async restore({ N3, baseStore, manifest, save }) {
     const result = validateSavePackage(save, { gameId: 'query-whom' });
     if (!result.ok) throw new Error(result.message);
-    if (save.manifest.schemaVersion !== '1.0.0' || save.manifest.gameVersion !== '1.0.0' || save.manifest.catalogHash !== manifest.catalogHash || save.manifest.deckVersion !== 1 || save.manifest.protocolVersion !== 1) throw new Error('This save needs a different game or catalog version.');
+    if (save.manifest.schemaVersion !== '1.0.0' || save.manifest.gameVersion !== '1.0.0' || save.manifest.catalogHash !== manifest.catalogHash || save.manifest.deckVersion !== DECK_VERSION || save.manifest.protocolVersion !== 1) throw new Error('This save needs a different game or catalog version.');
     if (save.transactions.length > 10000) throw new Error('Save history is too large.');
     const parsed = parseRdfTextWithN3(save.state, { format: 'turtle', runtime: { N3 } }).quads;
     if (parsed.some(q => !isSessionQuad(q) || q.graph.termType !== 'DefaultGraph')) throw new Error('Save contains non-session RDF.');

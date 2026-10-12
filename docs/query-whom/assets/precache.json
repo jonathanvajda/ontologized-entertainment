@@ -1,5 +1,5 @@
 {
-  "version": "4917273bbbf15c6293f4de81",
+  "version": "d93a1b577bd2497119c6a5e6",
   "files": [
     {
       "path": "../packages/game-mechanics/src/action-engine.js",
@@ -151,7 +151,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "d3018a0c7f195eb20e9e3016ee2ebf2094e36d925b5976ecff7fc62137be8ba5"
+      "sha256": "c9b0f8abaeaecce9384edb9c0f2a6b7b3cbf6cc03ec8f910bbacaec114b19a13"
     },
     {
       "path": "app.css",
@@ -159,11 +159,11 @@
     },
     {
       "path": "assets/catalog-manifest.json",
-      "sha256": "9b4671c2b3e2f2ae8c880c2823cb5878b1eef4fdba6778e914bcfa9925b1152f"
+      "sha256": "177624894cbf62f30cf67d32d2dcfe9dc2efb60b2f775e3051d721270f96b502"
     },
     {
       "path": "assets/catalog-v1.ttl",
-      "sha256": "ca9be1f36661c4d7c9e60c938206a9bce39c2912c78320022abd27fc2fc0eed5"
+      "sha256": "a79cacdb7abd7a54bde739fd993cc3f1f886592f9280df061b136eb78d10f4b6"
     },
     {
       "path": "assets/icon.svg",
@@ -195,11 +195,11 @@
     },
     {
       "path": "assets/portraits/person-04-320.webp",
-      "sha256": "5fa945ec2b174cf49d4252dc55ba9ba25d815314afb7682136c9c2006b88bbb8"
+      "sha256": "69598f9fd893ea7004ba379fa9edb33d68a5d5b11fee11305096c519e7d59cdc"
     },
     {
       "path": "assets/portraits/person-04-960.webp",
-      "sha256": "b6d99e272d0ab20abbcffc598ebd75e5a0e734d42840e91f75c54a48612f7627"
+      "sha256": "d169f1a76b9a02c9dfe17e8f5dd1017a1b3e46361426b81fb99ba58be00e7e11"
     },
     {
       "path": "assets/portraits/person-05-320.webp",
@@ -211,19 +211,19 @@
     },
     {
       "path": "assets/portraits/person-06-320.webp",
-      "sha256": "3270c81cc28b9fac210a7839d5a33b8e37f5e21e4acd63858748263cce2c9e9c"
+      "sha256": "815cb88ef4650b51fb68054ce3bd6c8458397750218690e3232d4e1894b940d3"
     },
     {
       "path": "assets/portraits/person-06-960.webp",
-      "sha256": "2786b91f5389a34c9a44a37212038c4660a4b1722eb936d2eb0b04135b56ba8b"
+      "sha256": "a2d643df01bf2710ebf49461472094e75c6ee771cfa33ef647a7d2c2595cf442"
     },
     {
       "path": "assets/portraits/person-07-320.webp",
-      "sha256": "642163fbfb6d9ab7ebad733ec445cbc407b02456b227cfca9aa473e5da473f82"
+      "sha256": "f7b998749de8c328d724293d5be5be569d6664a3d124d59702856e9072f1b210"
     },
     {
       "path": "assets/portraits/person-07-960.webp",
-      "sha256": "a7c38e1eb81d68aa4e0a6d4eced0e90adf99abb965303e507abed346f6b087ae"
+      "sha256": "2cfd747e582f6c9459fdca23f74a0d06907abe1cc81fbbadecb157b447ab12b4"
     },
     {
       "path": "assets/portraits/person-08-320.webp",
@@ -243,11 +243,11 @@
     },
     {
       "path": "assets/portraits/person-10-320.webp",
-      "sha256": "0dfcbee1ba6298bcbc6bc3dbeb5d6ed4d444bed94cb724257354239b052e0da0"
+      "sha256": "4f62b1df4e43ba40fb8d683ce2b1d7f3978d4974ab9e6206dc0fdddd6555ac58"
     },
     {
       "path": "assets/portraits/person-10-960.webp",
-      "sha256": "3a5bdc4b6ea580ed91e256c752c69c806ce65e351f0baf863518d38544eb1c83"
+      "sha256": "0b0be2f3a7e5bc7090e29c171dc3198224f7a80e33cb95abae4746fe1cef4ca6"
     },
     {
       "path": "assets/portraits/person-11-320.webp",
@@ -259,11 +259,11 @@
     },
     {
       "path": "assets/portraits/person-12-320.webp",
-      "sha256": "d1134f0a5a108d737d5ea11aea463dd4c257a834a664e4f2c25657b0c93e74d0"
+      "sha256": "f5840c9046faf18a3b5808ecccad8155e1d9ebe55f1e5816ff3a82549b3981a5"
     },
     {
       "path": "assets/portraits/person-12-960.webp",
-      "sha256": "be6db53ef033ad83c29e626a6d0cea644b369d81107d94341cf0a72af7c26a6b"
+      "sha256": "457056fe1388ca13a5e24fe6f48847ba994ab05a5ebbd1bebab505fe4a214604"
     },
     {
       "path": "assets/portraits/person-13-320.webp",
@@ -475,11 +475,11 @@
     },
     {
       "path": "assets/portraits/person-39-320.webp",
-      "sha256": "8381aa13531ef25509fc1846fef9dc3ff90e9c475d24673f9695df6817cc3c71"
+      "sha256": "e84ba497ba1ba85feb9f2bc0a6c342270118f18ad756a2bcccc81e56524567d1"
     },
     {
       "path": "assets/portraits/person-39-960.webp",
-      "sha256": "a4e7951df8e1a85661cd47c57ab82708f61755035bb12afacf88e0ca3bf0d960"
+      "sha256": "81334c5866c3034d5c05017597dd0d259505284b3bfde48a43b5a9c81f37dd29"
     },
     {
       "path": "assets/portraits/person-40-320.webp",
@@ -499,15 +499,15 @@
     },
     {
       "path": "js/catalog.js",
-      "sha256": "9720e3911f0aea56d0a9049d43ec115b85a3be07433e00e6d0d771326a4238d5"
+      "sha256": "752961c8379c242b66045aed5d470a59f5a1cbdddf172a6c26d6189afd96c07a"
     },
     {
       "path": "js/graph-loader.js",
-      "sha256": "f8579a716ad1bff4fa84c09d3795c6726bd514e631d54e09d2089cd0d4c2a120"
+      "sha256": "ae2c34236fc6ffe525f40a7390904c21a635a24f30a89c1e4b9f5f635c98dc26"
     },
     {
       "path": "js/protocol.js",
-      "sha256": "2c792b5c6086b0ca2a10954fe137be50a8b70e581b063cfaeb050c857713925a"
+      "sha256": "e7318884a325ede1ded096c1775d3b031e195e8d1a9526ed53f93cb1cabfa063"
     },
     {
       "path": "js/scanner.js",
@@ -515,7 +515,7 @@
     },
     {
       "path": "js/session.js",
-      "sha256": "d2eb4bc3656385188ddd958fc7d3b36254ad2646a055005fa5fb1628ecb1ce74"
+      "sha256": "469a5710b1b0122c66050e73dd0b6fa1dd204858de034e0e6d53a8a957d75b04"
     },
     {
       "path": "js/storage.js",
@@ -527,7 +527,7 @@
     },
     {
       "path": "js/vocabulary.js",
-      "sha256": "306ea019377c330e489ca8fd30844484feb6d7efe8f0d417770070568e3cf29b"
+      "sha256": "d9925eac32597edd8c16f1754144140dcf9217b690a75d8513acdc27f04aac25"
     },
     {
       "path": "manifest.webmanifest",

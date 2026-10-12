@@ -23,6 +23,29 @@ test('bald persons have no scalp-hair or scalp-hair-color instance', () => {
     assert.equal(baseStore.countQuads(personIri(person.id) + '-hair-color', null, null, null), 0);
   }
 });
+test('revised named characters retain their intended CSV and RDF traits', () => {
+  const catalog = projectCatalog(baseStore, manifest);
+  assert.equal(catalog[3].name, 'Noah'); assert.equal(catalog[3].hairColor, 'Red');
+  assert.equal(catalog[6].name, 'Joshua'); assert.equal(catalog[6].hairColor, 'Brown');
+  assert.equal(catalog[12].name, 'Levi'); assert.equal(catalog[12].hairColor, 'Brown');
+  assert.equal(catalog[38].name, 'Ella'); assert.equal(catalog[38].traits['Eye openness'], 'Open');
+  assert.equal(catalog[38].traits['Eye direction'], 'Forward');
+  assert.equal(catalog[9].ethnicity, 'East Asian');
+  assert.equal(catalog[11].ethnicity, 'Black or African American');
+  assert.equal(catalog[5].ethnicity, 'South Asian'); assert.equal(catalog[5].traits.Mustache, 'No');
+  assert.equal(catalog[3].traits.Freckles, 'Yes'); assert.equal(catalog[6].traits.Freckles, 'No');
+  assert.equal(catalog[9].traits['Hair texture'], 'Straight');
+  assert.equal(catalog[11].traits['Hair texture'], 'Curly');
+  assert.equal(manifest.deckVersion, 3);
+});
+test('texture and freckle swaps preserve the full catalog distributions', () => {
+  const catalog = projectCatalog(baseStore, manifest);
+  const counts = field => catalog.reduce((result, person) => {
+    const value = person.traits[field]; result[value] = (result[value] || 0) + 1; return result;
+  }, {});
+  assert.deepEqual(counts('Hair texture'), { Coily: 8, Curly: 10, 'Not applicable': 3, Straight: 9, Wavy: 10 });
+  assert.deepEqual(counts('Freckles'), { No: 34, Yes: 6 });
+});
 test('CCO identity, class ancestry, local import closure and hashes', async () => {
   const ccoBytes = await readFile(new URL('ontology/CommonCoreOntologiesMerged.ttl', root));
   assert.equal(createHash('sha256').update(ccoBytes).digest('hex'), CCO_SHA256);

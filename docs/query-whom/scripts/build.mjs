@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import { N3, browserLibrary } from './runtime.mjs';
 import { prefixes, Q, TYPE, PART, BEARER, PERSON, CCO_COMMIT, CCO_SHA256, CCO_VERSION, APP_ONTOLOGY, CATALOG_ONTOLOGY, hairClasses, eyeClasses, ethnicityClasses, traitFields } from '../js/vocabulary.js';
 import { projectCatalog } from '../js/catalog.js';
+import { DECK_VERSION } from '../js/protocol.js';
 
 const root = new URL('../', import.meta.url), check = process.argv.includes('--check');
 const path = (relative) => new URL(relative, root);
@@ -68,7 +69,7 @@ for (const [property, domain, range, definition] of [
 ]) ontology += `qw:${property} a owl:ObjectProperty ; rdfs:domain ${domain} ; rdfs:range ${range} ; skos:definition ${lit(definition)} .\n`;
 await output('ontology/query-whom.ttl', ontology);
 
-let catalog = header + `<${CATALOG_ONTOLOGY}> a owl:Ontology ; owl:versionInfo "1" ; owl:imports <${APP_ONTOLOGY}>, <${CCO_VERSION}> ; rdfs:label "Query Whom character catalog v1" .\n\n`;
+let catalog = header + `<${CATALOG_ONTOLOGY}> a owl:Ontology ; owl:versionInfo "${DECK_VERSION}" ; owl:imports <${APP_ONTOLOGY}>, <${CCO_VERSION}> ; rdfs:label "Query Whom character catalog v${DECK_VERSION}" .\n\n`;
 const ids = new Set();
 for (const row of rows) {
   const match = /^Person (\d+)$/.exec(row.Person); assert(match, 'Invalid person number');
@@ -138,7 +139,7 @@ for (let id = 1; id <= 40; id++) for (const suffix of ['.png', '-320.webp', '-96
   const relative = `${suffix === '.png' ? 'portraits' : 'assets/portraits'}/person-${String(id).padStart(2, '0')}${suffix}`;
   files[relative] = hash(await readFile(path(relative)));
 }
-const manifest = { gameVersion: '1.0.0', schemaVersion: '1.0.0', protocolVersion: 1, deckVersion: 1, personCount: 40,
+const manifest = { gameVersion: '1.0.0', schemaVersion: '1.0.0', protocolVersion: 1, deckVersion: DECK_VERSION, personCount: 40,
   cco: { commit: CCO_COMMIT, versionIri: CCO_VERSION, sha256: files['ontology/CommonCoreOntologiesMerged.ttl'] }, imports, files };
 manifest.catalogHash = hash(Buffer.from(catalog));
 await output('assets/catalog-manifest.json', JSON.stringify(manifest, null, 2) + '\n');

@@ -1,6 +1,7 @@
 import { parseRdfTextWithN3 } from '../../packages/rdf-io/src/n3-adapter.js';
 import { CATALOG_ONTOLOGY, CCO_COMMIT, CCO_SHA256, prefixes } from './vocabulary.js';
 import { projectCatalog } from './catalog.js';
+import { DECK_VERSION } from './protocol.js';
 
 export async function sha256(bytes) {
   return [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(b => b.toString(16).padStart(2, '0')).join('');
@@ -10,7 +11,7 @@ export async function loadKnowledgeGraph(N3, base = new URL('../', import.meta.u
   const response = await fetch(manifestUrl, { cache: 'no-cache' });
   if (!response.ok) throw new Error('The character manifest could not be loaded.');
   const manifest = await response.json();
-  if (manifest.cco?.commit !== CCO_COMMIT || manifest.cco?.sha256 !== CCO_SHA256 || manifest.files?.['ontology/CommonCoreOntologiesMerged.ttl'] !== CCO_SHA256 || manifest.schemaVersion !== '1.0.0' || manifest.deckVersion !== 1 || manifest.protocolVersion !== 1) throw new Error('Unsupported knowledge graph version.');
+  if (manifest.cco?.commit !== CCO_COMMIT || manifest.cco?.sha256 !== CCO_SHA256 || manifest.files?.['ontology/CommonCoreOntologiesMerged.ttl'] !== CCO_SHA256 || manifest.schemaVersion !== '1.0.0' || manifest.deckVersion !== DECK_VERSION || manifest.protocolVersion !== 1) throw new Error('Unsupported knowledge graph version.');
   const store = new N3.Store(), resources = new Map(), visited = new Set();
   async function visit(iri) {
     const relative = manifest.imports[iri];

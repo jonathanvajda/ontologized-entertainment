@@ -1,6 +1,6 @@
 export const ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
 export const PROTOCOL_VERSION = 1;
-export const DECK_VERSION = 1;
+export const DECK_VERSION = 3;
 const digest = async (bytes) => new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
 
 export function base32Encode(bytes) {
