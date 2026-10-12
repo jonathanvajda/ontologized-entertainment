@@ -8,7 +8,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
-<https://w3id.org/ontologized-entertainment/query-whom/catalog/v2> a owl:Ontology ; owl:versionInfo "2" ; owl:imports <https://w3id.org/ontologized-entertainment/query-whom>, <https://www.commoncoreontologies.org/2026-08-13/CommonCoreOntologiesMerged> ; rdfs:label "Query Whom character catalog v2" .
+<https://w3id.org/ontologized-entertainment/query-whom/catalog/v3> a owl:Ontology ; owl:versionInfo "3" ; owl:imports <https://w3id.org/ontologized-entertainment/query-whom>, <https://www.commoncoreontologies.org/2026-08-13/CommonCoreOntologiesMerged> ; rdfs:label "Query Whom character catalog v3" .
 
 qw:person-01 a cco:ont00001262 .
 qw:person-01 rdfs:label "Oliver" .
@@ -250,7 +250,7 @@ qw:person-04-head qw:hasEyebrowShape "Arched" .
 qw:person-04-head qw:hasNoseSize "Medium" .
 qw:person-04-head qw:hasNoseShape "Rounded" .
 qw:person-04-head qw:hasRosyCheeks "true"^^xsd:boolean .
-qw:person-04-head qw:hasFreckles "false"^^xsd:boolean .
+qw:person-04-head qw:hasFreckles "true"^^xsd:boolean .
 qw:person-04-head qw:hasDimples "false"^^xsd:boolean .
 qw:person-04-head qw:hasSmile "false"^^xsd:boolean .
 qw:person-04-head qw:hasTeethVisible "false"^^xsd:boolean .
@@ -451,7 +451,7 @@ qw:person-07-head qw:hasEyebrowShape "Arched" .
 qw:person-07-head qw:hasNoseSize "Medium" .
 qw:person-07-head qw:hasNoseShape "Upturned" .
 qw:person-07-head qw:hasRosyCheeks "false"^^xsd:boolean .
-qw:person-07-head qw:hasFreckles "true"^^xsd:boolean .
+qw:person-07-head qw:hasFreckles "false"^^xsd:boolean .
 qw:person-07-head qw:hasDimples "false"^^xsd:boolean .
 qw:person-07-head qw:hasSmile "true"^^xsd:boolean .
 qw:person-07-head qw:hasTeethVisible "true"^^xsd:boolean .
@@ -634,7 +634,7 @@ qw:person-10 qw:hasAgeYears "37"^^xsd:nonNegativeInteger .
 qw:person-10 qw:hasAgeGroup "32-46" .
 qw:person-10 qw:hasAgeAppearance "Middle-aged" .
 qw:person-10-scalp-hair qw:hasHairLength "Short" .
-qw:person-10-scalp-hair qw:hasHairTexture "Curly" .
+qw:person-10-scalp-hair qw:hasHairTexture "Straight" .
 qw:person-10 qw:isBald "false"^^xsd:boolean .
 qw:person-10-scalp-hair qw:hasHairstyle "Swept back" .
 qw:person-10-head qw:hasBangs "true"^^xsd:boolean .
@@ -764,7 +764,7 @@ qw:person-12 qw:hasAgeYears "43"^^xsd:nonNegativeInteger .
 qw:person-12 qw:hasAgeGroup "32-46" .
 qw:person-12 qw:hasAgeAppearance "Middle-aged" .
 qw:person-12-scalp-hair qw:hasHairLength "Short" .
-qw:person-12-scalp-hair qw:hasHairTexture "Straight" .
+qw:person-12-scalp-hair qw:hasHairTexture "Curly" .
 qw:person-12 qw:isBald "false"^^xsd:boolean .
 qw:person-12-scalp-hair qw:hasHairstyle "Side part" .
 qw:person-12-head qw:hasBangs "false"^^xsd:boolean .
