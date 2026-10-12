@@ -22,3 +22,51 @@ test('artifact records retain schema content and its integrity metadata', async 
   const artifact = await db.read('artifacts','schema.ttl'); assert.equal(artifact.text,'data'); assert.equal(artifact.sha256,'hash');
   db.db.close();
 });
+test('pause clears automatic resume but preserves progress for explicit resume', async () => {
+  const storage = await openStorage(new IDBFactory());
+  await storage.save('game', { state: 'progress' });
+  assert.equal(await storage.pause('game', 1), 2);
+  assert.equal(await storage.read('settings', 'active'), undefined);
+  const record = await storage.read('sessions', 'game');
+  assert.equal(record.status, 'paused'); assert.equal(record.value.state, 'progress');
+  assert.equal((await storage.list()).length, 1);
+  await storage.save('game', record.value, record.revision);
+  assert.equal((await storage.read('sessions', 'game')).status, 'active');
+  assert.equal((await storage.read('settings', 'active')).value, 'game');
+  storage.db.close();
+});
+test('ending without history removes the save and rejects stale resurrection', async () => {
+  const storage = await openStorage(new IDBFactory());
+  await storage.save('game', { state: 'progress' });
+  await storage.end('game', 1);
+  assert.equal(await storage.read('sessions', 'game'), undefined);
+  assert.equal(await storage.read('settings', 'active'), undefined);
+  assert.equal((await storage.list()).length, 0);
+  await assert.rejects(storage.save('game', { state: 'stale' }, 1), /another tab/);
+  assert.equal(await storage.read('sessions', 'game'), undefined);
+  storage.db.close();
+});
+test('finished history stays out of resume lists and cannot be silently reopened', async () => {
+  const storage = await openStorage(new IDBFactory());
+  await storage.save('game', { state: 'progress' });
+  await storage.end('game', 1, { keepHistory: true });
+  const record = await storage.read('sessions', 'game');
+  assert.equal(record.status, 'ended'); assert.equal(record.revision, 2); assert(record.endedAt);
+  assert.equal((await storage.list()).length, 0);
+  assert.equal((await storage.list({ includeEnded: true })).length, 1);
+  await assert.rejects(storage.save('game', { state: 'stale' }, 2), /ended/);
+  await assert.rejects(storage.pause('game', 2), /ended/);
+  await storage.removeFinished('game', 2);
+  assert.equal((await storage.list({ includeEnded: true })).length, 0);
+  storage.db.close();
+});
+test('ending a saved table does not clear another table’s active pointer', async () => {
+  const storage = await openStorage(new IDBFactory());
+  await storage.save('paused', { state: 'one' }); await storage.pause('paused', 1);
+  await storage.save('current', { state: 'two' });
+  await assert.rejects(storage.end('paused', 1), /another tab/);
+  await storage.end('paused', 2, { keepHistory: true });
+  assert.equal((await storage.read('settings', 'active')).value, 'current');
+  assert.equal((await storage.list()).length, 1);
+  storage.db.close();
+});

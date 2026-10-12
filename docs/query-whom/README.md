@@ -10,8 +10,15 @@ person is marked YOU and cannot be restored to the opponent candidate list.
 
 The first load needs HTTPS (or localhost) and a modern browser with Web Crypto
 and IndexedDB. Wait for “Ready to play offline” before disconnecting. Camera
-access is optional; manual code entry always works. The home screen keeps old
-tables available. The private dock is concealed on resume until you open it.
+access is optional; manual code entry always works. Use **Pause & leave** to
+save a table for later; refresh or returning to the site shows paused tables
+on the home screen for explicit resume. Closing a tab directly also preserves
+the last automatically saved progress. Use **End game** when finished: choose
+to remove its local save (the default) or keep a record in **Finished games**.
+Finished records are not resumable tables; they can be exported or removed.
+**New game** asks you to end the current table first, with an explicit
+**Pause & start new instead** alternative. Other players' devices remain
+independent. The private dock is concealed on resume until you open it.
 The application does not track turns, record questions, or declare a winner.
 
 ## Development
@@ -111,7 +118,12 @@ imports never replace existing saves. Imports replay trusted actions and
 compare their deltas against the saved state. Unsupported versions are rejected.
 
 Rejoining the same board in the same role resumes an existing save rather than
-redrawing a secret. New games keep previous tables. Save exports deliberately
+redrawing a secret. Only explicitly paused tables remain resumable when
+starting another game. Session-record lifecycle metadata controls pause/history
+management separately from the saved RDF checkpoint; legacy records without
+a status remain resumable. Revision checks prevent another tab from reopening
+an ended game. An explicitly confirmed import can reopen an archived checkpoint.
+Save exports deliberately
 include the local secret; share codes and QR contain only the public payload.
 Do not send a private export to an opponent. Production logs contain no session
 state. Camera frames and QR images are not retained; tracks stop on cancellation,

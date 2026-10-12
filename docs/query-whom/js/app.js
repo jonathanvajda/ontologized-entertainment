@@ -12,6 +12,7 @@ const $ = id => document.getElementById(id);
 let graph, storage, session, revision = 0, busy = false, stopped = false, ownVisible = false;
 let preferences = { sortMode: 'shuffle', hideEliminated: false }, registration, returnFromShare = false;
 let lastFocus;
+let endRecord = null, endingForNewGame = false;
 const notice = message => { $('notice').textContent = message; $('notice').hidden = !message; };
 const message = error => error instanceof Error ? error.message : String(error);
 const people = () => new Map(graph.catalog.map(person => [person.id, person]));
@@ -19,6 +20,7 @@ const people = () => new Map(graph.catalog.map(person => [person.id, person]));
 function view(name) {
   for (const key of ['home', 'share', 'reveal', 'board']) $(key + '-view').hidden = key !== name;
   $('home-button').hidden = name === 'home';
+  $('end-game-button').hidden = name === 'home';
   $('update-app').hidden = !registration?.waiting || Boolean(session);
   $('main').focus({ preventScroll: true }); window.scrollTo(0, 0);
 }
@@ -49,7 +51,7 @@ function lockGame() {
 async function persist() {
   const save = await session.save(preferences);
   try { revision = await storage.save(session.sessionIri, save, revision); }
-  catch (error) { stopped = true; throw new Error(`${message(error)} Your last completed save is retained. Reload before continuing.`); }
+  catch (error) { stopped = true; throw new Error(`${message(error)} Reload before continuing; ended games will not be reopened automatically.`); }
 }
 async function act(type, parameters) {
   if (stopped) throw new Error('Reload before continuing this game.');
@@ -148,6 +150,7 @@ function showSession() {
   else { $('revealed-person').hidden = true; $('reveal-button').hidden = false; view('reveal'); }
 }
 async function resume(record) {
+  if (record.status === 'ended') throw new Error('This game has ended. Start a new game instead.');
   const restored = await QueryWhomSession.restore({ N3: globalThis.N3, baseStore: graph.store, manifest: graph.manifest, save: record.value });
   const nextRevision = await storage.save(restored.sessionIri, record.value, record.revision);
   session = restored; revision = nextRevision; preferences = uiPreferences(record.value.uiState); stopped = false; showSession();
@@ -169,6 +172,8 @@ async function start(code, playerRole) {
 }
 async function showHome() {
   scanner.stop(); session = null; stopped = false; ownVisible = false; view('home');
+  $('reveal-image').removeAttribute('src'); $('reveal-name').textContent = '';
+  $('dock-image').removeAttribute('src'); $('dock-name').textContent = '';
   const records = await storage.list(); $('saved-games').hidden = !records.length;
   const fragment = document.createDocumentFragment();
   for (const record of records) {
@@ -182,9 +187,54 @@ async function showHome() {
       summary = `${role === 'creator' ? 'Created' : 'Joined'} table · ${count} people`;
     } catch { summary = 'Saved table · needs review'; }
     button.textContent = `Resume ${summary.toLowerCase()} · ${new Date(record.updatedAt).toLocaleDateString()} ${new Date(record.updatedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
-    button.addEventListener('click', () => task(() => resume(record))); fragment.append(button);
+    button.addEventListener('click', () => task(() => resume(record)));
+    const row = document.createElement('div'); row.className = 'saved-game-row'; row.append(button);
+    const end = document.createElement('button'); end.textContent = 'End game';
+    end.setAttribute('aria-label', `End ${summary.toLowerCase()}`);
+    end.addEventListener('click', () => askEndGame(record)); row.append(end); fragment.append(row);
   }
   $('saved-list').replaceChildren(fragment);
+  const finished = (await storage.list({ includeEnded: true })).filter(record => record.status === 'ended');
+  $('finished-games').hidden = !finished.length;
+  const history = document.createDocumentFragment();
+  for (const record of finished) {
+    const row = document.createElement('div'); row.className = 'saved-game-row';
+    row.dataset.finishedSessionId = record.id;
+    const label = document.createElement('span'); label.className = 'finished-game-label';
+    label.textContent = `Ended ${new Date(record.endedAt).toLocaleString()}`; row.append(label);
+    const exportButton = document.createElement('button'); exportButton.textContent = 'Export record';
+    exportButton.addEventListener('click', () => { downloadSave(record.value); notice('Finished-game record exported. It includes your private person.'); });
+    const remove = document.createElement('button'); remove.textContent = 'Remove';
+    remove.addEventListener('click', () => { if (confirm('Remove this finished-game record from this device?')) task(async () => { await storage.removeFinished(record.id, record.revision); await showHome(); }); });
+    row.append(exportButton, remove); history.append(row);
+  }
+  $('finished-list').replaceChildren(history);
+}
+
+async function pauseCurrentGame() {
+  let paused = false;
+  if (session) {
+    const record = stopped ? await storage.read('sessions', session.sessionIri) : { id: session.sessionIri, revision };
+    if (record && record.status !== 'ended') {
+      revision = await storage.pause(record.id, record.revision); paused = true;
+    }
+  }
+  await showHome();
+  notice(paused ? 'Game paused. Resume it from Your tables when you return.' : 'Your saved games are listed below.');
+}
+function askEndGame(record, forNewGame = false) {
+  if (!record || record.status === 'ended') throw new Error('This game has already ended.');
+  endRecord = record; endingForNewGame = forNewGame;
+  $('end-game-title').textContent = forNewGame ? 'End this game and start a new one?' : 'End this game?';
+  $('confirm-end-game').textContent = forNewGame ? 'End & start new' : 'End game';
+  $('pause-instead').textContent = forNewGame ? 'Pause & start new instead' : 'Pause for later instead';
+  $('end-game-dialog').querySelector('input[value="remove"]').checked = true;
+  openDialog('end-game-dialog');
+}
+function downloadSave(save) {
+  const url = URL.createObjectURL(new Blob([exportSaveJson(save)], { type: 'application/json' }));
+  const a = document.createElement('a'); a.href = url; a.download = 'query-whom-private-save.json'; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 const scanner = new QrScanner({ video: $('scan-video'), onMessage: text => $('scan-message').textContent = text,
@@ -221,7 +271,23 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 window.addEventListener('pagehide', () => scanner.stop());
-$('home-button').addEventListener('click', () => task(showHome));
+$('home-button').addEventListener('click', () => task(pauseCurrentGame));
+$('end-game-button').addEventListener('click', () => task(async () => askEndGame(await storage.read('sessions', session.sessionIri))));
+$('confirm-end-game').addEventListener('click', () => task(async () => {
+  const record = endRecord, startNew = endingForNewGame;
+  const keepHistory = $('end-game-dialog').querySelector('input[name="end-save"]:checked').value === 'history';
+  await storage.end(record.id, record.revision, { keepHistory });
+  $('end-game-dialog').close(); endRecord = null;
+  await showHome();
+  notice(startNew ? 'Previous game ended. Choose your next board or join a friend.' : keepHistory ? 'Game ended. Its record is in Finished games.' : 'Game ended and its local save was removed.');
+  if (startNew) $('board-size').focus();
+}));
+$('pause-instead').addEventListener('click', () => task(async () => {
+  const record = endRecord;
+  await storage.pause(record.id, record.revision);
+  $('end-game-dialog').close(); endRecord = null;
+  await showHome(); notice('Game paused for later. You can now create or join another game.');
+}));
 $('copy-code').addEventListener('click', () => task(async () => { if (!navigator.clipboard?.writeText) throw new Error('Clipboard is unavailable. Select and copy the displayed code.'); await navigator.clipboard.writeText(formatCode(session.definition.code)); notice('Invitation copied.'); }));
 $('fullscreen-qr').addEventListener('click', () => { $('large-qr').replaceChildren(qrCanvas(session.definition.code, 450)); openDialog('qr-dialog'); });
 $('share-continue').addEventListener('click', () => { if (returnFromShare) { view('board'); renderBoard(); } else showSession(); });
@@ -232,7 +298,7 @@ $('reveal-button').addEventListener('click', () => task(async () => {
 }));
 $('start-board').addEventListener('click', () => { ownVisible = true; renderBoard(); view('board'); $('reveal-image').removeAttribute('src'); });
 $('share-again').addEventListener('click', () => { ownVisible = false; renderDock(); showShare(true); });
-$('restart-button').addEventListener('click', () => { if (confirm('Start a new game? This table will remain saved under My games.')) task(showHome); });
+$('restart-button').addEventListener('click', () => task(async () => askEndGame(await storage.read('sessions', session.sessionIri), true)));
 $('show-own').addEventListener('click', () => { ownVisible = true; renderDock(); $('hide-own').focus(); });
 $('hide-own').addEventListener('click', () => { ownVisible = false; renderDock(); $('show-own').focus(); });
 $('dock-portrait').addEventListener('click', () => inspect(people().get(session.project().ownTargetId), true));
@@ -240,8 +306,7 @@ $('sort-mode').addEventListener('change', () => task(async () => { preferences.s
 $('hide-eliminated').addEventListener('change', () => task(async () => { preferences.hideEliminated = $('hide-eliminated').checked; await persist(); renderBoard(); }));
 $('eliminated-button').addEventListener('click', () => { renderEliminated(); openDialog('eliminated-dialog'); });
 $('export-button').addEventListener('click', () => task(async () => {
-  const json = exportSaveJson(await session.save(preferences)), url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
-  const a = document.createElement('a'); a.href = url; a.download = 'query-whom-private-save.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+  downloadSave(await session.save(preferences));
   notice('Save exported. This private file includes your secret person; keep it on your own device.');
 }));
 $('import-button').addEventListener('click', () => $('import-file').click());
@@ -254,7 +319,7 @@ $('import-file').addEventListener('change', () => {
   const restored = await QueryWhomSession.restore({ N3: globalThis.N3, baseStore: graph.store, manifest: graph.manifest, save: parsed.value });
   const existing = await storage.read('sessions', restored.sessionIri);
   if (existing && !confirm('Replace this table’s existing local save with the imported save?')) return;
-  const nextRevision = await storage.save(restored.sessionIri, parsed.value, existing?.revision || 0);
+  const nextRevision = await storage.save(restored.sessionIri, parsed.value, existing?.revision || 0, { allowReopen: true });
   session = restored; revision = nextRevision; preferences = uiPreferences(parsed.value.uiState); stopped = false; showSession();
   });
 });
@@ -288,7 +353,7 @@ async function init() {
   const active = await storage.read('settings', 'active');
   if (active) {
     const record = await storage.read('sessions', active.value);
-    if (record) { try { await resume(record); return; } catch (error) { notice(`Saved game could not be resumed: ${message(error)} It has been retained.`); } }
+    if (record && record.status !== 'ended') { try { await resume(record); return; } catch (error) { notice(`Saved game could not be resumed: ${message(error)} It has been retained.`); } }
   }
   await showHome();
 }

@@ -20,7 +20,7 @@
   <a class="skip-link" href="#main">Skip to game</a>
   <header class="masthead">
     <a class="brand" href="./" aria-label="Query Whom! home"><span class="brand-mark" aria-hidden="true">?</span><span>query <strong>whom!</strong><small>A GAME OF GOOD QUESTIONS</small></span></a>
-    <div class="header-actions"><span id="offline-status" class="connection">Loading the character library…</span><button id="update-app" hidden>Update available</button><button id="home-button" hidden>My games</button><a class="collection-link" href="../">The collection ↗</a></div>
+    <div class="header-actions"><span id="offline-status" class="connection">Loading the character library…</span><button id="update-app" hidden>Update available</button><button id="home-button" hidden>Pause &amp; leave</button><button id="end-game-button" hidden>End game</button><a class="collection-link" href="../">The collection ↗</a></div>
   </header>
   <main id="main" tabindex="-1">
     <div id="notice" role="status" aria-live="polite" hidden></div>
@@ -34,6 +34,7 @@
         <section class="setup-panel join-panel" aria-labelledby="join-title"><span class="panel-number">02 / PULL UP A CHAIR</span><h2 id="join-title">Have an invitation?</h2><p>Scan your friend’s QR or enter their game code.</p><button id="scan-button" class="scan-button" disabled><span aria-hidden="true">▣</span> Scan a QR code</button><form id="join-form"><label for="join-code">Or enter the code</label><div class="join-input"><input id="join-code" type="text" maxlength="80" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABCD-EFGH-…" aria-describedby="code-help"><button class="primary" type="submit" disabled>Join →</button></div><small id="code-help">37 letters and numbers. Spaces and dashes are fine.</small></form></section>
       </div>
       <section id="saved-games" hidden aria-labelledby="saved-title"><h2 id="saved-title">Your tables</h2><div id="saved-list"></div></section>
+      <details id="finished-games" hidden><summary>Finished games</summary><p>These games have ended. You can export their records or remove them.</p><div id="finished-list"></div></details>
       <div class="home-footer"><p>Ask questions out loud or in your own chat.<br>Each player keeps their eliminations on their own device.</p><div><button id="import-button">Import a saved game</button><input id="import-file" type="file" accept="application/json,.json" hidden><a href="./README.md">How to play &amp; credits ↗</a></div></div>
     </section>
 
@@ -53,6 +54,7 @@
   <dialog id="eliminated-dialog" aria-labelledby="eliminated-title"><button class="dialog-close" data-close aria-label="Close eliminated people">×</button><h2 id="eliminated-title">Eliminated people</h2><p>Changed your mind? Restore someone to your board.</p><div id="eliminated-list"></div></dialog>
   <dialog id="qr-dialog" aria-label="Enlarged sharing QR"><button class="dialog-close" data-close aria-label="Close QR">×</button><div id="large-qr"></div><p>Scan from your friend’s Join screen.</p></dialog>
   <dialog id="scan-dialog" aria-labelledby="scan-title"><button class="dialog-close" data-close aria-label="Cancel scan">×</button><h2 id="scan-title">Scan your friend’s QR</h2><p id="scan-message" role="status">Allow camera access, then point at the game QR.</p><video id="scan-video" playsinline muted autoplay></video><button id="scan-cancel">Cancel — use a code instead</button></dialog>
+  <dialog id="end-game-dialog" aria-labelledby="end-game-title"><button class="dialog-close" data-close aria-label="Cancel ending game">×</button><h2 id="end-game-title">End this game?</h2><p>Your friend’s game stays on their device. Choose what happens to your local save.</p><fieldset class="end-options"><legend>Your saved progress</legend><label><input type="radio" name="end-save" value="remove" checked> Remove the save</label><label><input type="radio" name="end-save" value="history"> Keep in finished-game history</label></fieldset><div class="button-row"><button id="confirm-end-game" class="primary">End game</button><button id="pause-instead">Pause for later instead</button></div></dialog>
   <noscript>This game needs JavaScript enabled. It runs locally in your browser.</noscript>
 </body>
 </html>

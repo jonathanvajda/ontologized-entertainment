@@ -33,12 +33,13 @@ async function pageFor(context) {
   assert.equal(await page.locator('#notice').isVisible(),false,await page.locator('#notice').textContent());
   return page;
 }
-async function saveRecord(page) {
-  return page.evaluate(async()=> {
+async function saveRecord(page, sessionId = null) {
+  return page.evaluate(async(sessionId)=> {
     const db = await new Promise((resolve,reject)=>{const req=indexedDB.open('query-whom-v1'); req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});
     const get = (store,id)=>new Promise((resolve,reject)=>{const req=db.transaction(store).objectStore(store).get(id);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});
-    const active=await get('settings','active'), record=await get('sessions',active.value);db.close(); return record;
-  });
+    const active=await get('settings','active'), id=sessionId || active?.value;
+    const record=id ? await get('sessions',id) : null;db.close(); return record;
+  },sessionId);
 }
 async function checkA11y(page,name) {
   const result = await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
@@ -135,7 +136,8 @@ try {
   await host.locator('#import-file').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{"manifest":{"saveFormatVersion":99}}')});
   await host.evaluate(() => { window.__releaseHomeList(); delete window.__releaseHomeList; delete window.__homeListHeld; });
   await host.locator('#notice').waitFor({state:'visible'}); assert.match(await host.locator('#notice').textContent(),/version/);
-  assert.equal((await saveRecord(host)).id,snapshot.id);
+  assert.equal(await saveRecord(host),null);
+  assert.equal((await saveRecord(host,snapshot.id)).id,snapshot.id);
   // Camera failure path retains manual input.
   await host.locator('#scan-button').click(); await host.locator('#scan-dialog').waitFor({state:'visible'});
   await host.locator('#scan-message').filter({hasText:'unavailable'}).waitFor({timeout:15000}); await host.locator('#scan-cancel').click();
@@ -154,6 +156,10 @@ try {
   }
   await guest.setViewportSize({width:390,height:844}); assert(await guest.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   await guest.screenshot({path:fileURLToPath(new URL('mobile.png',results)),fullPage:true});
+  await guest.locator('#restart-button').click(); await guest.locator('#end-game-dialog').waitFor({state:'visible'});
+  assert(await guest.locator('#end-game-dialog').evaluate(dialog=>dialog.scrollWidth<=dialog.clientWidth+1),'Mobile end-game choices must not overflow');
+  assert(await guest.locator('.end-options label').evaluateAll(labels=>labels.every(label=>label.getBoundingClientRect().height>=44)));
+  await checkA11y(guest,'mobile end-game choices'); await guest.keyboard.press('Escape');
   // Simulate a release in the HTTP server, without mutating repository files.
   await host.locator(`#saved-list button[data-session-id="${snapshot.id}"]`).click(); await host.locator('#board-view').waitFor({state:'visible'});
   const oldSave=await saveRecord(host),precache=JSON.parse(await readFile(new URL('../assets/precache.json',import.meta.url),'utf8'));
@@ -165,9 +171,55 @@ try {
   await host.waitForFunction(async()=>Boolean((await navigator.serviceWorker.getRegistration()).waiting));
   assert.equal(await host.locator('#update-app').isVisible(),false,'Update cannot replace an active game');
   await host.locator('#home-button').click(); await host.locator('#update-app').waitFor({state:'visible'});
-  await Promise.all([host.waitForNavigation(),host.locator('#update-app').click()]); await host.locator('#board-view').waitFor({state:'visible'});
+  await Promise.all([host.waitForNavigation(),host.locator('#update-app').click()]); await host.locator('#home-view').waitFor({state:'visible'});
+  assert.equal(await saveRecord(host),null);
+  await host.locator(`#saved-list button[data-session-id="${oldSave.id}"]`).click(); await host.locator('#board-view').waitFor({state:'visible'});
   assert.equal((await saveRecord(host)).id,oldSave.id); assert.match(await host.locator('#candidate-count').textContent(),/^22/);
   console.log('Passed private export/import, Mermaid syntax and deliberate service-worker updates.');
+  // Explicit pause persists through navigation/refresh and keeps the same private assignment.
+  const beforePause=await saveRecord(host);
+  await host.locator('#home-button').click(); await host.locator('#home-view').waitFor({state:'visible'});
+  await host.waitForFunction(()=>document.querySelector('#main').getAttribute('aria-busy')!=='true');
+  assert.equal(await saveRecord(host),null);
+  assert.equal((await saveRecord(host,beforePause.id)).status,'paused');
+  await host.reload(); await host.locator('#home-view').waitFor({state:'visible'});
+  await host.locator(`#saved-list button[data-session-id="${beforePause.id}"]`).click(); await host.locator('#board-view').waitFor({state:'visible'});
+  assert.equal((await saveRecord(host)).value.state,beforePause.value.state);
+  // New game defaults to ending/removing; cancellation keeps the current table intact.
+  await host.locator('#restart-button').click(); await host.locator('#end-game-dialog').waitFor({state:'visible'});
+  assert.equal(await host.locator('input[name="end-save"][value="remove"]').isChecked(),true);
+  await checkA11y(host,'end-game choices');
+  await host.locator('#end-game-dialog [data-close]').click(); assert.equal(await host.locator('#board-view').isVisible(),true);
+  assert.equal((await saveRecord(host)).id,beforePause.id);
+  await host.locator('#restart-button').click(); await host.locator('#confirm-end-game').click();
+  await host.locator('#home-view').waitFor({state:'visible'});
+  assert.equal(await saveRecord(host,beforePause.id),undefined); assert.equal(await saveRecord(host),null);
+  await host.reload(); await host.locator('#home-view').waitFor({state:'visible'});
+  assert.equal(await host.locator(`#saved-list button[data-session-id="${beforePause.id}"]`).count(),0);
+  // Ending a saved table from home also supports finished history rather than resume.
+  await host.locator('#saved-list button[data-session-id]').first().click(); await host.locator('#reveal-view').waitFor({state:'visible'});
+  const archived=await saveRecord(host);
+  await host.locator('#end-game-button').click(); await host.locator('input[name="end-save"][value="history"]').check();
+  await host.locator('#confirm-end-game').click(); await host.locator('#home-view').waitFor({state:'visible'});
+  assert.equal((await saveRecord(host,archived.id)).status,'ended');
+  assert.equal(await host.locator(`#saved-list button[data-session-id="${archived.id}"]`).count(),0);
+  await host.locator('#finished-games summary').click();
+  assert.equal(await host.locator(`#finished-list [data-finished-session-id="${archived.id}"]`).isVisible(),true);
+  assert.equal(await host.locator('#finished-list button').filter({hasText:'Resume'}).count(),0);
+  const [historyDownload]=await Promise.all([host.waitForEvent('download'),host.locator('#finished-list button').filter({hasText:'Export record'}).click()]);
+  assert.equal(JSON.parse(await readFile(await historyDownload.path(),'utf8')).state,archived.value.state);
+  host.once('dialog',dialog=>dialog.accept()); await host.locator('#finished-list button').filter({hasText:'Remove'}).click();
+  await host.waitForFunction(()=>document.querySelector('#finished-games').hidden);
+  assert.equal(await saveRecord(host,archived.id),undefined);
+  // Explicitly pausing from New game keeps a resumable table rather than ending it.
+  await host.locator('#create-form button').click(); await host.locator('#share-continue').click();
+  await host.locator('#reveal-button').click(); await host.locator('#start-board').click();
+  const pauseInstead=await saveRecord(host);
+  await host.locator('#restart-button').click(); await host.locator('#pause-instead').click();
+  await host.locator('#home-view').waitFor({state:'visible'});
+  assert.equal((await saveRecord(host,pauseInstead.id)).status,'paused');
+  assert.equal(await host.locator(`#saved-list button[data-session-id="${pauseInstead.id}"]`).count(),1);
+  console.log('Passed pause/resume, end/remove, optional finished history, cancellation and New game lifecycle.');
   assert.deepEqual(errors,[],'Uncaught browser errors'); assert.deepEqual(external,[],'External runtime requests');
   console.log('Browser QA passed: shared QR/boards, distinct secrets, transitions, resume, offline reload/play, imports, camera fallback, accessibility and 20/24/40-card layouts.');
 } finally { await browser.close(); await new Promise(resolve=>server.close(resolve)); }

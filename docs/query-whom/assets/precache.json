@@ -1,5 +1,5 @@
 {
-  "version": "1c81d71c8b5459b75c9c6e2a",
+  "version": "a66c962ebbfcd90fc82ebc8a",
   "files": [
     {
       "path": "../packages/game-mechanics/src/action-engine.js",
@@ -151,11 +151,11 @@
     },
     {
       "path": "README.md",
-      "sha256": "128a44a5a7f92557f6f29590604874b8210517f51011268d4b231d2af32bc03c"
+      "sha256": "455ba6886e675714433391a9acdbf6e440e56448e8a0f6dd0421ab83dea09d4b"
     },
     {
       "path": "app.css",
-      "sha256": "3fd7336557f000b53b3bf0760ad64b613f775565f08f335b22c061e4fb0fb58e"
+      "sha256": "795d50fe2958cb973ad17a57b2f7da67bfda81b884aea65c8cdddcdeae19bb2f"
     },
     {
       "path": "assets/catalog-manifest.json",
@@ -491,11 +491,11 @@
     },
     {
       "path": "index.html",
-      "sha256": "6b69421b4ea61bf77e4b727968029585f315e72d48bfc7a68690a0bbcc53e871"
+      "sha256": "e7ac5c40a918e327ee8d9a041b3372e4c4bba28659eed122b5ed8f548c226f80"
     },
     {
       "path": "js/app.js",
-      "sha256": "e4912f5999cf720746a9122828a472cf2a74fe2507018656acad6e6e9dc801be"
+      "sha256": "0cfb8576345a18f578ac21c296461f84fd580bff10ba579f9fa8551dbeb0eba1"
     },
     {
       "path": "js/catalog.js",
@@ -519,7 +519,7 @@
     },
     {
       "path": "js/storage.js",
-      "sha256": "3d2d2f0de06d31235763d673570a96dad091a4fd58db6be1fca18dbab2b0ceca"
+      "sha256": "836dc528e598543f0d7e6bc99b7549b2c53911209a907c5e0770e38d1cb8564a"
     },
     {
       "path": "js/task-queue.js",
