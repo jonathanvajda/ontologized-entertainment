@@ -75,7 +75,7 @@ function openDialog(id) {
 }
 function inspect(person, own = false) {
   $('inspect-image').src = person.portrait; $('inspect-image').alt = person.name;
-  $('inspect-name').textContent = person.name; $('inspect-context').textContent = own ? 'YOUR SECRET PERSON · FOR YOUR EYES ONLY' : 'A CLOSER LOOK';
+  $('inspect-name').textContent = person.name; $('inspect-context').textContent = own ? 'YOUR SECRET PERSON · KEEP YOUR PICK TO YOURSELF' : 'A CLOSER LOOK';
   openDialog('inspect-dialog');
 }
 function renderDock() {

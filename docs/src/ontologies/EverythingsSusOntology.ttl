@@ -12,15 +12,15 @@
   owl:versionIRI <https://w3id.org/ontoeagle/games/everything-is-sus/2026-09-25> ;
   owl:versionInfo "0.1.0" ;
   owl:imports <https://w3id.org/ontologized-entertainment/game> , <https://w3id.org/ontologized-entertainment/game/hidden-information> , <https://www.commoncoreontologies.org/AgentOntology> , <https://www.commoncoreontologies.org/InformationEntityOntology> ;
-  dcterms:title "Everything?s Sus Ontology"@en ;
-  dcterms:description "A CCO-aligned model of cards, hands, board locations, suggestions, refutations, accusations, and the sealed solution in Everything?s Sus."@en ;
+  dcterms:title "Everything's Sus Ontology"@en ;
+  dcterms:description "A CCO-aligned model of cards, hands, board locations, suggestions, refutations, accusations, and the sealed solution in Everything's Sus."@en ;
   dcterms:creator "Ontologized Entertainment contributors"@en ;
   dcterms:created "2026-09-25"^^xsd:date ;
   dcterms:license <https://opensource.org/license/bsd-3-clause> ;
-  rdfs:label "Everything?s Sus Ontology"@en ;
+  rdfs:label "Everything's Sus Ontology"@en ;
   rdfs:comment "Canonical game facts are RDF; transient focus, dialog, animation, and layout state are excluded."@en .
 
-everything-is-sus:MysteryGameSession a owl:Class ; rdfs:subClassOf game:GameSession ; rdfs:label "Mystery game session"@en ; skos:definition "A Game Session governed by the Everything?s Sus rules profile."@en .
+everything-is-sus:MysteryGameSession a owl:Class ; rdfs:subClassOf game:GameSession ; rdfs:label "Mystery game session"@en ; skos:definition "A Game Session governed by the Everything's Sus rules profile."@en .
 everything-is-sus:Detective a owl:Class ; rdfs:subClassOf cco:ont00001262 ; rdfs:label "Detective"@en ; skos:definition "A person who bears a player role in a mystery game session and controls one suspect token."@en .
 everything-is-sus:EvidenceCard a owl:Class ; rdfs:subClassOf game:GamePiece ; rdfs:label "Evidence card"@en ; skos:definition "A game piece that identifies one candidate element of the mystery solution."@en .
 everything-is-sus:SuspectCard a owl:Class ; rdfs:subClassOf everything-is-sus:EvidenceCard ; rdfs:label "Suspect card"@en ; skos:definition "An Evidence Card that identifies a possible suspect."@en .

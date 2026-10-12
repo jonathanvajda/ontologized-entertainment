@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#143c38">
-  <meta name="description" content="One shared board. Two secret people. Ask good questions and narrow down the possibilities.">
+  <meta name="description" content="A playful two-player game of guessing and deduction. Ask yes-or-no questions, narrow down the people, and guess your friend’s person.">
   <title>Query Whom! — a game of good questions</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
@@ -26,7 +26,7 @@
     <div id="notice" role="status" aria-live="polite" hidden></div>
     <section id="home-view" aria-labelledby="home-title">
       <div class="hero">
-        <div class="hero-copy"><p class="eyebrow">TWO PLAYERS · TWO DEVICES · ENDLESS QUESTIONS</p><h1 id="home-title">A familiar face.<br>A little <em>mystery.</em></h1><p class="lede">One board, two secret people. Ask your friend yes-or-no questions and find out who they’re hiding.</p><div class="steps"><span><b>01</b> Share a board</span><span><b>02</b> Meet your person</span><span><b>03</b> Ask &amp; eliminate</span></div></div>
+        <div class="hero-copy"><p class="eyebrow">TWO PLAYERS · TWO DEVICES · ENDLESS QUESTIONS</p><h1 id="home-title">So many people.<br>Guess <em>which one!</em></h1><p class="lede">A playful game of guessing and deduction. Ask your friend yes-or-no questions, rule out people, and work out which person they are.</p><div class="steps"><span><b>01</b> Share a board</span><span><b>02</b> Meet your person</span><span><b>03</b> Narrow it down</span></div></div>
         <div class="portrait-wall" aria-hidden="true"><figure><img src="./assets/portraits/person-01-320.webp" alt=""><figcaption>Oliver</figcaption></figure><figure><img src="./assets/portraits/person-25-320.webp" alt=""><figcaption>Ava</figcaption></figure><figure><img src="./assets/portraits/person-06-320.webp" alt=""><figcaption>Samuel</figcaption></figure><figure><img src="./assets/portraits/person-39-320.webp" alt=""><figcaption>Ella</figcaption></figure><span class="mystery-stamp">WHO<br>COULD<br>IT BE?</span></div>
       </div>
       <div class="setup-grid">
@@ -38,9 +38,9 @@
       <div class="home-footer"><p>Ask questions out loud or in your own chat.<br>Each player keeps their eliminations on their own device.</p><div><button id="import-button">Import a saved game</button><input id="import-file" type="file" accept="application/json,.json" hidden><a href="./README.md">How to play &amp; credits ↗</a></div></div>
     </section>
 
-    <section id="share-view" hidden aria-labelledby="share-title" class="center-view"><p class="eyebrow">SAME BOARD. DIFFERENT SECRETS.</p><h1 id="share-title">Invite your fellow detective.</h1><p>Ask your friend to choose <strong>Join a game</strong> and scan this QR.<br>Your secret person isn’t in the code.</p><div id="share-qr" class="qr-panel"></div><p id="share-code" class="game-code"></p><div class="button-row"><button id="copy-code">Copy code</button><button id="copy-invite">Copy invite link</button><button id="fullscreen-qr">Enlarge QR</button></div><label for="share-link">Invitation link</label><input id="share-link" type="url" readonly style="width:100%"><button id="share-continue" class="primary">Continue to my person →</button></section>
+    <section id="share-view" hidden aria-labelledby="share-title" class="center-view"><p class="eyebrow">SAME PEOPLE. DIFFERENT PICKS.</p><h1 id="share-title">Who's up for a guessing game?</h1><p>Ask your friend to choose <strong>Join a game</strong> and scan this QR.<br>Your secret person isn’t in the code.</p><div id="share-qr" class="qr-panel"></div><p id="share-code" class="game-code"></p><div class="button-row"><button id="copy-code">Copy code</button><button id="copy-invite">Copy invite link</button><button id="fullscreen-qr">Enlarge QR</button></div><label for="share-link">Invitation link</label><input id="share-link" type="url" readonly style="width:100%"><button id="share-continue" class="primary">Continue to my person →</button></section>
 
-    <section id="reveal-view" hidden aria-labelledby="reveal-title" class="center-view"><div class="secret-envelope" aria-hidden="true">?</div><p class="eyebrow">FOR YOUR EYES ONLY</p><h1 id="reveal-title">Meet your secret person.</h1><p>Your friend will try to guess this person.<br>Make sure only you can see your screen.</p><button id="reveal-button" class="primary">Reveal my person</button><div id="revealed-person" hidden><img id="reveal-image" alt=""><h2 id="reveal-name"></h2><p>Answer your friend’s questions about this person.</p><button id="start-board" class="primary">Ready. Let’s play →</button></div></section>
+    <section id="reveal-view" hidden aria-labelledby="reveal-title" class="center-view"><div class="secret-envelope" aria-hidden="true">?</div><p class="eyebrow">KEEP YOUR PICK TO YOURSELF</p><h1 id="reveal-title">Meet your secret person.</h1><p>Your friend will try to guess this person.<br>Make sure only you can see your screen.</p><button id="reveal-button" class="primary">Reveal my person</button><div id="revealed-person" hidden><img id="reveal-image" alt=""><h2 id="reveal-name"></h2><p>Answer your friend’s questions about this person.</p><button id="start-board" class="primary">Ready. Let’s play →</button></div></section>
 
     <section id="board-view" hidden aria-labelledby="board-title">
       <div class="board-heading"><div><p class="eyebrow">ASK. NOTICE. NARROW IT DOWN.</p><h1 id="board-title">Who’s their person?</h1></div><div><span id="candidate-count" class="candidate-count" aria-live="polite"></span><button id="share-again">Share board</button><button id="restart-button">New game</button></div></div>

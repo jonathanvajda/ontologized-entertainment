@@ -8,7 +8,7 @@ const nn=namedNode; const lit=(v,dt=XSD+'string')=>literal(v,dt); const q=(s,p,o
 const val=(store,s,p,f='')=>store.getQuads(nn(s),nn(p),null,null)[0]?.object.value??f; const vals=(store,s,p)=>store.getQuads(nn(s),nn(p),null,null).map(x=>x.object.value);
 
 export async function createEverythingsSusGame({names,tokenIds,mode='pass-and-play',seed}={}){
-  const clean=names.map(v=>String(v).trim()).filter(Boolean); if(clean.length<3||clean.length>6)throw new RangeError('Everything?s Sus requires three to six players.');if(new Set(clean.map(name=>name.toLocaleLowerCase())).size!==clean.length)throw new RangeError('Player identities must be unique.');
+  const clean=names.map(v=>String(v).trim()).filter(Boolean); if(clean.length<3||clean.length>6)throw new RangeError('Everything's Sus requires three to six players.');if(new Set(clean.map(name=>name.toLocaleLowerCase())).size!==clean.length)throw new RangeError('Player identities must be unique.');
   const selectedTokens=tokenIds??SUSPECTS.slice(0,clean.length).map(suspect=>suspect.id);if(selectedTokens.length!==clean.length||new Set(selectedTokens).size!==clean.length||selectedTokens.some(id=>!SUSPECTS.some(suspect=>suspect.id===id)))throw new RangeError('Each player must choose a different suspect.');
   const random=new RandomEngine(seed); const solution=[random.drawOne(SUSPECTS).id,random.drawOne(WEAPONS).id,random.drawOne(ROOMS).id];
   const remaining=random.shuffle(CARDS.filter(c=>!solution.includes(c.id))); const commitment=await createCommitment(solution.slice().sort()); const code=generateGameCode(6);

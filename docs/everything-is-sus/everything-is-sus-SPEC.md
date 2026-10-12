@@ -1,4 +1,4 @@
-# Everything?s Sus — Capability and Technical Specification
+# Everything's Sus — Capability and Technical Specification
 
 **Status:** Refined implementation draft  
 **Game version:** 0.1.0  
@@ -7,7 +7,7 @@
 
 ## 1. Overview
 
-Everything?s Sus is a three-to-six-player deduction game built on the Ontologized Entertainment RDF game engine and hidden-information extension. It supports:
+Everything's Sus is a three-to-six-player deduction game built on the Ontologized Entertainment RDF game engine and hidden-information extension. It supports:
 
 - pass-and-play on one device with audience/phase concealment;
 - local multi-device play with a host page and static player pages;

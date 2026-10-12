@@ -1,6 +1,6 @@
 # Query Whom!
 
-A two-player character deduction game. Each player uses a separate device.
+A playful two-player game of guessing and deduction. Yes-or-no questions narrow down the people until you can guess the person your friend picked. Each player uses a separate device.
 Create a board of 20–40 people, share its QR or code, privately reveal your
 person, and ask yes-or-no questions out loud or through your own chat.
 Your friend guesses your person; you guess theirs. Tap a portrait to inspect
