@@ -4,6 +4,7 @@ import { openStorage } from './storage.js';
 import { decodeGame, newGameCode, formatCode } from './protocol.js';
 import { sortedCards } from './catalog.js';
 import { Q } from './vocabulary.js';
+import { createTaskQueue } from './task-queue.js';
 import { QrScanner } from './scanner.js';
 import { importSaveJson, exportSaveJson } from '../../packages/game-mechanics/src/save-package.js';
 
@@ -24,14 +25,21 @@ function view(name) {
 function uiPreferences(value) {
   return { sortMode: ['shuffle', 'name', 'hairColor', 'eyeColor', 'ethnicity', 'sex'].includes(value?.sortMode) ? value.sortMode : 'shuffle', hideEliminated: value?.hideEliminated === true };
 }
-async function task(operation) {
-  if (busy) return;
-  busy = true;
-  const enabled = [...document.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled)')];
-  enabled.forEach(element => element.disabled = true);
-  try { notice(''); await operation(); }
-  catch (error) { notice(message(error)); }
-  finally { enabled.forEach(element => element.disabled = false); busy = false; if (stopped) lockGame(); }
+const enqueueTask = createTaskQueue();
+function task(operation) {
+  return enqueueTask(async () => {
+    busy = true;
+    $('main').setAttribute('aria-busy', 'true');
+    const enabled = [...document.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled)')];
+    enabled.forEach(element => element.disabled = true);
+    try { notice(''); await operation(); }
+    catch (error) { notice(message(error)); }
+    finally {
+      enabled.forEach(element => element.disabled = false); busy = false;
+      $('main').setAttribute('aria-busy', 'false');
+      if (stopped) lockGame();
+    }
+  });
 }
 function lockGame() {
   $('board-view').querySelectorAll('button,input,select').forEach(element => element.disabled = true);
@@ -237,8 +245,10 @@ $('export-button').addEventListener('click', () => task(async () => {
   notice('Save exported. This private file includes your secret person; keep it on your own device.');
 }));
 $('import-button').addEventListener('click', () => $('import-file').click());
-$('import-file').addEventListener('change', () => task(async () => {
+$('import-file').addEventListener('change', () => {
+  // Capture the selection before waiting for an earlier operation to finish.
   const file = $('import-file').files[0]; $('import-file').value = ''; if (!file) return;
+  task(async () => {
   if (file.size > 5_000_000) throw new Error('The save file is too large.');
   const parsed = importSaveJson(await file.text(), { gameId: 'query-whom' }); if (!parsed.ok) throw new Error(parsed.message);
   const restored = await QueryWhomSession.restore({ N3: globalThis.N3, baseStore: graph.store, manifest: graph.manifest, save: parsed.value });
@@ -246,7 +256,8 @@ $('import-file').addEventListener('change', () => task(async () => {
   if (existing && !confirm('Replace this table’s existing local save with the imported save?')) return;
   const nextRevision = await storage.save(restored.sessionIri, parsed.value, existing?.revision || 0);
   session = restored; revision = nextRevision; preferences = uiPreferences(parsed.value.uiState); stopped = false; showSession();
-}));
+  });
+});
 
 async function offline() {
   if (!('serviceWorker' in navigator) || !isSecureContext) { $('offline-status').textContent = 'Offline caching unavailable'; return; }

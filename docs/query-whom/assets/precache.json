@@ -1,5 +1,5 @@
 {
-  "version": "39e61c9728c30a4a04d98904",
+  "version": "4917273bbbf15c6293f4de81",
   "files": [
     {
       "path": "../packages/game-mechanics/src/action-engine.js",
@@ -495,7 +495,7 @@
     },
     {
       "path": "js/app.js",
-      "sha256": "8384fd9300d6c868ae27d4ed28d706c4b3adaed5c301c4fa67f37d98fc35b9a4"
+      "sha256": "e4912f5999cf720746a9122828a472cf2a74fe2507018656acad6e6e9dc801be"
     },
     {
       "path": "js/catalog.js",
@@ -520,6 +520,10 @@
     {
       "path": "js/storage.js",
       "sha256": "3d2d2f0de06d31235763d673570a96dad091a4fd58db6be1fca18dbab2b0ceca"
+    },
+    {
+      "path": "js/task-queue.js",
+      "sha256": "c3d51c5113942c8841468c7265e8daf589084acb7fb2a1cd4e977b0f5d4b7165"
     },
     {
       "path": "js/vocabulary.js",

@@ -113,8 +113,27 @@ try {
   await host.locator(`#saved-list button[data-session-id="${snapshot.id}"]`).click(); await host.locator('#board-view').waitFor({state:'visible'});
   assert.equal((await saveRecord(host)).id,snapshot.id);
   // Malformed import must not replace an active pointer or any saved table.
+  // Hold the home screen's IndexedDB result to reproduce the CI race deterministically.
+  await host.evaluate(() => {
+    const getAll = IDBObjectStore.prototype.getAll;
+    IDBObjectStore.prototype.getAll = function (...args) {
+      const request = getAll.apply(this, args);
+      if (this.name === 'sessions') {
+        IDBObjectStore.prototype.getAll = getAll;
+        request.addEventListener('success', event => {
+          event.stopImmediatePropagation();
+          window.__homeListHeld = true;
+          window.__releaseHomeList = () => request.dispatchEvent(new Event('success'));
+        }, { once: true });
+      }
+      return request;
+    };
+  });
   await host.locator('#home-button').click(); await host.locator('#home-view').waitFor({state:'visible'});
+  await host.waitForFunction(() => window.__homeListHeld === true);
+  assert.equal(await host.locator('#main').getAttribute('aria-busy'), 'true');
   await host.locator('#import-file').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{"manifest":{"saveFormatVersion":99}}')});
+  await host.evaluate(() => { window.__releaseHomeList(); delete window.__releaseHomeList; delete window.__homeListHeld; });
   await host.locator('#notice').waitFor({state:'visible'}); assert.match(await host.locator('#notice').textContent(),/version/);
   assert.equal((await saveRecord(host)).id,snapshot.id);
   // Camera failure path retains manual input.
