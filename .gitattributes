@@ -1,0 +1,15 @@
+# Query Whom's integrity manifests must be reproducible on Windows and Linux.
+docs/query-whom/** text=auto eol=lf
+docs/packages/**/*.js text eol=lf
+docs/src/ontologies/GameOntology.ttl text eol=lf
+docs/styles/normalize.css text eol=lf
+docs/styles/skeleton.css text eol=lf
+docs/vendor/n3.min.js text eol=lf
+
+# Preserve exact supplied/source bytes and audited vendor downloads.
+docs/query-whom/personal-traits-40-people-alt.csv -text
+docs/query-whom/vendor/** -text
+docs/query-whom/ontology/CommonCoreOntologiesMerged.ttl -text
+docs/query-whom/ontology/CCO-LICENSE.txt -text
+docs/query-whom/**/*.png -text
+docs/query-whom/**/*.webp -text
