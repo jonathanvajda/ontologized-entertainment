@@ -1,4 +1,4 @@
-# Query Whom
+# Query Whom!
 
 A two-player character deduction game. Each player uses a separate device.
 Create a board of 20–40 people, share its QR or code, privately reveal your
@@ -142,7 +142,7 @@ The lockfile audits the fixed QR dependencies and development tooling.
 - Default-graph quadstore and shared action pipeline; no core bypass for gameplay.
 - RDF catalog is authoritative; catalog JSON is generated and never independently edited.
 - HTML/CSS Grid renderer consumes projections; no SVG or D3 dependency needed here.
-- SHA-256 random adapter is asynchronous and local to Query Whom.
+- SHA-256 random adapter is asynchronous and local to this game.
 - Explicit restoration is available; transaction-level undo is not exposed for private reveals.
 - Runtime checks are JavaScript invariants; ontology entailment is not a gameplay engine.
 - Old incompatible saves are retained with an error; v1 has no speculative migration.

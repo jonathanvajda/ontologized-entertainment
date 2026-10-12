@@ -1,6 +1,6 @@
 /* Cache only this game's packaged resources. Updates activate deliberately from My games. */
 const PREFIX = 'query-whom-';
-const cacheName = PREFIX + '5ca70770fe42b8987e214782';
+const cacheName = PREFIX + '1c81d71c8b5459b75c9c6e2a';
 const base = new URL('./', self.location.href);
 async function config() {
   const response = await fetch(new URL('assets/precache.json', base), { cache: 'no-cache' });

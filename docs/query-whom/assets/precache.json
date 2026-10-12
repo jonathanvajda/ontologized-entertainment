@@ -1,5 +1,5 @@
 {
-  "version": "5ca70770fe42b8987e214782",
+  "version": "1c81d71c8b5459b75c9c6e2a",
   "files": [
     {
       "path": "../packages/game-mechanics/src/action-engine.js",
@@ -151,7 +151,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "7367d9809da1f9ed933576a6ad718e3f3372b346a9f71866e545566a6fe970af"
+      "sha256": "128a44a5a7f92557f6f29590604874b8210517f51011268d4b231d2af32bc03c"
     },
     {
       "path": "app.css",
@@ -491,7 +491,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "304fe45a361268581c7b5c1b231e93d7985e8c192cd5d2565777978949b808d1"
+      "sha256": "6b69421b4ea61bf77e4b727968029585f315e72d48bfc7a68690a0bbcc53e871"
     },
     {
       "path": "js/app.js",
@@ -531,7 +531,7 @@
     },
     {
       "path": "manifest.webmanifest",
-      "sha256": "40f305e6d6e4f488401af69b9de99db194d04160446db10bf0b3171f522a8449"
+      "sha256": "2b858a3ed0d28f4f213fc1297d066be20add6b390cb2d9ed7517d9808455d6f5"
     },
     {
       "path": "ontology/CommonCoreOntologiesMerged.ttl",
