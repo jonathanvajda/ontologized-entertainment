@@ -1,0 +1,152 @@
+{
+  "date": "2026-10-12",
+  "deckVersion": 4,
+  "tool": "built-in image_gen",
+  "changes": [
+    {
+      "person": 22,
+      "name": "Faith",
+      "field": "Hair texture",
+      "from": "Curly",
+      "to": "Wavy"
+    },
+    {
+      "person": 22,
+      "name": "Faith",
+      "field": "Hairstyle",
+      "from": "Bob",
+      "to": "Side part"
+    },
+    {
+      "person": 22,
+      "name": "Faith",
+      "field": "Eye color",
+      "from": "Blue",
+      "to": "Brown"
+    },
+    {
+      "person": 22,
+      "name": "Faith",
+      "field": "Hat",
+      "from": "Yes",
+      "to": "No"
+    },
+    {
+      "person": 22,
+      "name": "Faith",
+      "field": "Hat type",
+      "from": "Sun hat",
+      "to": "None"
+    },
+    {
+      "person": 22,
+      "name": "Faith",
+      "field": "Hat color",
+      "from": "Maroon",
+      "to": "Not applicable"
+    },
+    {
+      "person": 22,
+      "name": "Faith",
+      "field": "Hat accessory",
+      "from": "Ribbon",
+      "to": "None"
+    },
+    {
+      "person": 22,
+      "name": "Faith",
+      "field": "Hair accessory",
+      "from": "None",
+      "to": "Hair clip"
+    },
+    {
+      "person": 24,
+      "name": "Olivia",
+      "field": "Hair length",
+      "from": "Short",
+      "to": "Long"
+    },
+    {
+      "person": 24,
+      "name": "Olivia",
+      "field": "Hairstyle",
+      "from": "Side part",
+      "to": "French braid"
+    },
+    {
+      "person": 30,
+      "name": "Elizabeth",
+      "field": "Hair length",
+      "from": "Short",
+      "to": "Long"
+    },
+    {
+      "person": 30,
+      "name": "Elizabeth",
+      "field": "Hairstyle",
+      "from": "Side part",
+      "to": "Ponytail"
+    },
+    {
+      "person": 30,
+      "name": "Elizabeth",
+      "field": "Glasses",
+      "from": "No",
+      "to": "Yes"
+    },
+    {
+      "person": 30,
+      "name": "Elizabeth",
+      "field": "Hat",
+      "from": "Yes",
+      "to": "No"
+    },
+    {
+      "person": 30,
+      "name": "Elizabeth",
+      "field": "Hat type",
+      "from": "Baseball cap",
+      "to": "None"
+    },
+    {
+      "person": 30,
+      "name": "Elizabeth",
+      "field": "Hat color",
+      "from": "Black",
+      "to": "Not applicable"
+    },
+    {
+      "person": 33,
+      "name": "Sophia",
+      "field": "Hair length",
+      "from": "Short",
+      "to": "Long"
+    }
+  ],
+  "prompts": [
+    {
+      "person": 22,
+      "name": "Faith",
+      "output": "portraits/person-22.png",
+      "editPrompt": "Use case: identity-preserve. Edit target: supplied current fictional Query Whom character portrait. Preserve existing recognizable facial geometry, age, skin tone, eye direction, expression and all features except requested changes. Match polished hand-drawn 2D cartoon style and warm cel shading exactly. Square head-only portrait on genuine transparent alpha background. Entire hair, chin and accessories must fit fully with generous transparent margins all around; zoom out as needed for long hair. No neck, torso, shoulders, clothes, text, watermark or checkerboard. Remove the maroon sun hat and its ribbon COMPLETELY. Replace tight curls with MEDIUM-LENGTH BLACK hair that is mostly smooth with gentle loose waves, clearly SIDE-PARTED, no bangs. Add one small visible maroon HAIR CLIP at the side. Change BLUE irises to BROWN, keeping open eyes looking image LEFT and happy open-mouth toothy smile. No hat, no bow, no glasses."
+    },
+    {
+      "person": 33,
+      "name": "Sophia",
+      "output": "portraits/person-33.png",
+      "editPrompt": "Use case: identity-preserve. Edit target: supplied current fictional Query Whom character portrait. Preserve existing recognizable facial geometry, age, skin tone, eye direction, expression and all features except requested changes. Match polished hand-drawn 2D cartoon style and warm cel shading exactly. Square head-only portrait on genuine transparent alpha background. Entire hair, chin and accessories must fit fully with generous transparent margins all around; zoom out as needed for long hair. No neck, torso, shoulders, clothes, text, watermark or checkerboard. Extend BROWN WAVY SIDE-PARTED hair to LONG hair, visibly extending well below the chin on both sides. Preserve this same Black/African American character's medium-brown complexion, facial structure and identity exactly. Keep her large dark glasses, forward BROWN eyes, surprised open mouth with no teeth visible. No hat, bangs or new accessories."
+    },
+    {
+      "person": 24,
+      "name": "Olivia",
+      "output": "portraits/person-24.png",
+      "editPrompt": "Use case: identity-preserve. Edit target: supplied current fictional Query Whom character portrait. Preserve existing recognizable facial geometry, age, skin tone, eye direction, expression and all features except requested changes. Match polished hand-drawn 2D cartoon style and warm cel shading exactly. Square head-only portrait on genuine transparent alpha background. Entire hair, chin and accessories must fit fully with generous transparent margins all around; zoom out as needed for long hair. No neck, torso, shoulders, clothes, text, watermark or checkerboard. Replace short brown side-parted hair with LONG BROWN hair styled in a clearly visible FRENCH BRAID: interwoven strands along crown toward back and a long woven braid brought forward along one side, extending well BELOW the chin. Straight underlying hair texture, no bangs. Preserve existing pink BOW securing the braid, pearl STUD earrings, forward DARK BROWN eyes, rosy cheeks, dimples and thoughtful closed mouth. No hat, glasses or additional hair clip."
+    },
+    {
+      "person": 30,
+      "name": "Elizabeth",
+      "output": "portraits/person-30.png",
+      "editPrompt": "Use case: identity-preserve. Edit target: supplied current fictional Query Whom character portrait. Preserve existing recognizable facial geometry, age, skin tone, eye direction, expression and all features except requested changes. Match polished hand-drawn 2D cartoon style and warm cel shading exactly. Square head-only portrait on genuine transparent alpha background. Entire hair, chin and accessories must fit fully with generous transparent margins all around; zoom out as needed for long hair. No neck, torso, shoulders, clothes, text, watermark or checkerboard. Remove the black baseball cap COMPLETELY. Give her LONG BLACK CURLY hair pulled into a neat PONYTAIL visible down one side, extending well BELOW the chin, with soft curly BANGS at the forehead. Add modest round dark-rimmed GLASSES for a slightly bookish look, both brown irises clearly visible through lenses. Preserve forward gaze, light-medium skin, mature middle-aged face, dimples and neutral CLOSED mouth, no teeth or smile. No hat, earrings, extravagant hairstyle or visible decorative hair accessory."
+    }
+  ]
+}

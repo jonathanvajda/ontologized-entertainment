@@ -36,15 +36,32 @@ test('revised named characters retain their intended CSV and RDF traits', () => 
   assert.equal(catalog[3].traits.Freckles, 'Yes'); assert.equal(catalog[6].traits.Freckles, 'No');
   assert.equal(catalog[9].traits['Hair texture'], 'Straight');
   assert.equal(catalog[11].traits['Hair texture'], 'Curly');
-  assert.equal(manifest.deckVersion, 3);
+  assert.equal(manifest.deckVersion, 4);
 });
-test('texture and freckle swaps preserve the full catalog distributions', () => {
+test('current texture and freckle distributions include the portrait revisions', () => {
   const catalog = projectCatalog(baseStore, manifest);
   const counts = field => catalog.reduce((result, person) => {
     const value = person.traits[field]; result[value] = (result[value] || 0) + 1; return result;
   }, {});
-  assert.deepEqual(counts('Hair texture'), { Coily: 8, Curly: 10, 'Not applicable': 3, Straight: 9, Wavy: 10 });
+  assert.deepEqual(counts('Hair texture'), { Coily: 8, Curly: 9, 'Not applicable': 3, Straight: 9, Wavy: 11 });
   assert.deepEqual(counts('Freckles'), { No: 34, Yes: 6 });
+});
+
+test('four revised women have matching complete RDF traits', () => {
+  const catalog = projectCatalog(baseStore, manifest);
+  const faith = catalog[21], olivia = catalog[23], elizabeth = catalog[29], sophia = catalog[32];
+  assert.equal(faith.name, 'Faith'); assert.equal(faith.eyeColor, 'Brown');
+  assert.equal(faith.traits['Hair texture'], 'Wavy'); assert.equal(faith.traits.Hairstyle, 'Side part');
+  assert.equal(faith.traits['Hair accessory'], 'Hair clip');
+  for (const person of [faith, elizabeth]) {
+    assert.equal(person.traits.Hat, 'No'); assert.equal(person.traits['Hat type'], 'None');
+    assert.equal(person.traits['Hat color'], 'Not applicable'); assert.equal(person.traits['Hat accessory'], 'None');
+  }
+  for (const person of [olivia, elizabeth, sophia]) assert.equal(person.traits['Hair length'], 'Long');
+  assert.equal(olivia.name, 'Olivia'); assert.equal(olivia.traits.Hairstyle, 'French braid'); assert.equal(olivia.traits.Bow, 'Yes');
+  assert.equal(elizabeth.name, 'Elizabeth'); assert.equal(elizabeth.traits.Hairstyle, 'Ponytail'); assert.equal(elizabeth.traits.Glasses, 'Yes');
+  assert.equal(sophia.name, 'Sophia'); assert.equal(sophia.ethnicity, 'Black or African American');
+  assert.equal(sophia.traits['Skin tone'], 'Medium-brown'); assert.equal(sophia.traits['Hair texture'], 'Wavy');
 });
 test('CCO identity, class ancestry, local import closure and hashes', async () => {
   const ccoBytes = await readFile(new URL('ontology/CommonCoreOntologiesMerged.ttl', root));

@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import { ALPHABET, base32Encode, base32Decode, normalizeCode, formatCode, encodeGame, decodeGame, reconstructBoard, HashRandom, eligibleTargets, privateChoice } from '../js/protocol.js';
 
 const seed = Uint8Array.from({ length: 16 }, (_, i) => i);
-test('locked protocol v1 / deck v3 code and ordered-board vector', async () => {
+test('locked protocol v1 / deck v4 code and ordered-board vector', async () => {
   const code = await encodeGame({ size: 24, seed });
-  assert.equal(code, '26228822263283272S5JJ4AC3E82U5JHSFCQL');
+  assert.equal(code, '2622A822263283272S5JJ4AC3E82U5JHZZT5G');
   assert.deepEqual(await reconstructBoard(await decodeGame(code)), [9,40,38,1,15,26,5,25,21,4,7,32,39,37,34,18,33,36,14,16,24,17,27,22]);
   assert.equal(normalizeCode(' ' + formatCode(code).toLowerCase() + '\n'), code);
   assert.equal(ALPHABET.length, 32);
@@ -28,7 +28,8 @@ test('strict alphabet, checksum, padding, versions and bounds', async () => {
   await assert.rejects(encodeGame({ size: 19, seed })); await assert.rejects(encodeGame({ size: 41, seed }));
   await assert.rejects(decodeGame(await encodeGame({ size: 24, seed, deckVersion: 1 })), /catalog/);
   await assert.rejects(decodeGame(await encodeGame({ size: 24, seed, deckVersion: 2 })), /catalog/);
-  await assert.rejects(decodeGame(await encodeGame({ size: 24, seed, deckVersion: 4 })), /catalog/);
+  await assert.rejects(decodeGame(await encodeGame({ size: 24, seed, deckVersion: 3 })), /catalog/);
+  await assert.rejects(decodeGame(await encodeGame({ size: 24, seed, deckVersion: 5 })), /catalog/);
   const bytes = base32Decode(code); bytes[0] = 2;
   bytes.set(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes.slice(0,20))).slice(0,3), 20);
   await assert.rejects(decodeGame(base32Encode(bytes)), /protocol/);

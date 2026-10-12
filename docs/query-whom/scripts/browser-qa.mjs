@@ -91,7 +91,7 @@ try {
   await host.evaluate(async()=>{mermaid.initialize({startOnLoad:false});const text=await (await fetch('./ontology/oliver-example.md')).text();await mermaid.parse(text.split('```mermaid\n')[1].split('\n```')[0]);});
   console.log('Passed home accessibility and protocol browser vector.');
   const vector=await host.evaluate(async()=>{const p=await import('./js/protocol.js');const code=await p.encodeGame({size:24,seed:Uint8Array.from({length:16},(_,i)=>i)});return {code,board:await p.reconstructBoard(await p.decodeGame(code))};});
-  assert.equal(vector.code,'26228822263283272S5JJ4AC3E82U5JHSFCQL'); assert.deepEqual(vector.board,[9,40,38,1,15,26,5,25,21,4,7,32,39,37,34,18,33,36,14,16,24,17,27,22]);
+  assert.equal(vector.code,'2622A822263283272S5JJ4AC3E82U5JHZZT5G'); assert.deepEqual(vector.board,[9,40,38,1,15,26,5,25,21,4,7,32,39,37,34,18,33,36,14,16,24,17,27,22]);
   await host.locator('#create-form button').click(); await host.locator('#share-view').waitFor({state:'visible'});
   const code=(await host.locator('#share-code').textContent()).replaceAll('-','');
   const qr=await host.evaluate(()=>{const canvas=document.querySelector('#share-qr canvas'),ctx=canvas.getContext('2d'),data=ctx.getImageData(0,0,canvas.width,canvas.height);return jsQR(data.data,data.width,data.height).data;});

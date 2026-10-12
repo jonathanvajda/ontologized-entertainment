@@ -8,7 +8,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
-<https://w3id.org/ontologized-entertainment/query-whom/catalog/v3> a owl:Ontology ; owl:versionInfo "3" ; owl:imports <https://w3id.org/ontologized-entertainment/query-whom>, <https://www.commoncoreontologies.org/2026-08-13/CommonCoreOntologiesMerged> ; rdfs:label "Query Whom character catalog v3" .
+<https://w3id.org/ontologized-entertainment/query-whom/catalog/v4> a owl:Ontology ; owl:versionInfo "4" ; owl:imports <https://w3id.org/ontologized-entertainment/query-whom>, <https://www.commoncoreontologies.org/2026-08-13/CommonCoreOntologiesMerged> ; rdfs:label "Query Whom character catalog v4" .
 
 qw:person-01 a cco:ont00001262 .
 qw:person-01 rdfs:label "Oliver" .
@@ -1414,11 +1414,11 @@ qw:person-22-hair-color a qw:BlackHairColor .
 qw:person-22-head obo:BFO_0000178 qw:person-22-left-eye .
 qw:person-22-left-eye a cco:ont00000500 .
 qw:person-22-left-eye obo:BFO_0000196 qw:person-22-left-eye-color .
-qw:person-22-left-eye-color a qw:BlueEyeColor .
+qw:person-22-left-eye-color a qw:BrownEyeColor .
 qw:person-22-head obo:BFO_0000178 qw:person-22-right-eye .
 qw:person-22-right-eye a cco:ont00000500 .
 qw:person-22-right-eye obo:BFO_0000196 qw:person-22-right-eye-color .
-qw:person-22-right-eye-color a qw:BlueEyeColor .
+qw:person-22-right-eye-color a qw:BrownEyeColor .
 qw:person-22 obo:BFO_0000196 qw:person-22-ethnicity .
 qw:person-22-ethnicity a qw:WhiteEthnicity .
 qw:person-22 obo:BFO_0000196 qw:person-22-sex .
@@ -1427,9 +1427,9 @@ qw:person-22 qw:hasAgeYears "18"^^xsd:nonNegativeInteger .
 qw:person-22 qw:hasAgeGroup "18-32" .
 qw:person-22 qw:hasAgeAppearance "Young adult" .
 qw:person-22-scalp-hair qw:hasHairLength "Medium" .
-qw:person-22-scalp-hair qw:hasHairTexture "Curly" .
+qw:person-22-scalp-hair qw:hasHairTexture "Wavy" .
 qw:person-22 qw:isBald "false"^^xsd:boolean .
-qw:person-22-scalp-hair qw:hasHairstyle "Bob" .
+qw:person-22-scalp-hair qw:hasHairstyle "Side part" .
 qw:person-22-head qw:hasBangs "false"^^xsd:boolean .
 qw:person-22-head qw:hasBeard "false"^^xsd:boolean .
 qw:person-22-head qw:hasMustache "false"^^xsd:boolean .
@@ -1452,16 +1452,16 @@ qw:person-22-head qw:hasFaceShape "Square" .
 qw:person-22-head qw:hasEarSize "Medium" .
 qw:person-22 qw:hasSkinTone "Light" .
 qw:person-22 qw:hasGlasses "false"^^xsd:boolean .
-qw:person-22 qw:hasHat "true"^^xsd:boolean .
-qw:person-22 qw:hasHatType "Sun hat" .
-qw:person-22 qw:hasHatColor "Maroon" .
-qw:person-22 qw:hasHatAccessory "Ribbon" .
+qw:person-22 qw:hasHat "false"^^xsd:boolean .
+qw:person-22 qw:hasHatType "None" .
+qw:person-22 qw:hasHatColor "Not applicable" .
+qw:person-22 qw:hasHatAccessory "None" .
 qw:person-22 qw:hasEarrings "false"^^xsd:boolean .
 qw:person-22 qw:hasEarringType "None" .
 qw:person-22 qw:hasBow "false"^^xsd:boolean .
 qw:person-22 qw:hasCollar "true"^^xsd:boolean .
 qw:person-22 qw:hasNecklace "false"^^xsd:boolean .
-qw:person-22-scalp-hair qw:hasHairAccessory "None" .
+qw:person-22-scalp-hair qw:hasHairAccessory "Hair clip" .
 qw:person-22 qw:hasClothingColor "White" .
 
 qw:person-23 a cco:ont00001262 .
@@ -1556,10 +1556,10 @@ qw:person-24-sex a cco:ont00001212 .
 qw:person-24 qw:hasAgeYears "26"^^xsd:nonNegativeInteger .
 qw:person-24 qw:hasAgeGroup "18-32" .
 qw:person-24 qw:hasAgeAppearance "Young adult" .
-qw:person-24-scalp-hair qw:hasHairLength "Short" .
+qw:person-24-scalp-hair qw:hasHairLength "Long" .
 qw:person-24-scalp-hair qw:hasHairTexture "Straight" .
 qw:person-24 qw:isBald "false"^^xsd:boolean .
-qw:person-24-scalp-hair qw:hasHairstyle "Side part" .
+qw:person-24-scalp-hair qw:hasHairstyle "French braid" .
 qw:person-24-head qw:hasBangs "false"^^xsd:boolean .
 qw:person-24-head qw:hasBeard "false"^^xsd:boolean .
 qw:person-24-head qw:hasMustache "false"^^xsd:boolean .
@@ -1946,10 +1946,10 @@ qw:person-30-sex a cco:ont00001212 .
 qw:person-30 qw:hasAgeYears "44"^^xsd:nonNegativeInteger .
 qw:person-30 qw:hasAgeGroup "32-46" .
 qw:person-30 qw:hasAgeAppearance "Middle-aged" .
-qw:person-30-scalp-hair qw:hasHairLength "Short" .
+qw:person-30-scalp-hair qw:hasHairLength "Long" .
 qw:person-30-scalp-hair qw:hasHairTexture "Curly" .
 qw:person-30 qw:isBald "false"^^xsd:boolean .
-qw:person-30-scalp-hair qw:hasHairstyle "Side part" .
+qw:person-30-scalp-hair qw:hasHairstyle "Ponytail" .
 qw:person-30-head qw:hasBangs "true"^^xsd:boolean .
 qw:person-30-head qw:hasBeard "false"^^xsd:boolean .
 qw:person-30-head qw:hasMustache "false"^^xsd:boolean .
@@ -1971,10 +1971,10 @@ qw:person-30-head qw:hasExpression "Neutral" .
 qw:person-30-head qw:hasFaceShape "Oval" .
 qw:person-30-head qw:hasEarSize "Small" .
 qw:person-30 qw:hasSkinTone "Light-medium" .
-qw:person-30 qw:hasGlasses "false"^^xsd:boolean .
-qw:person-30 qw:hasHat "true"^^xsd:boolean .
-qw:person-30 qw:hasHatType "Baseball cap" .
-qw:person-30 qw:hasHatColor "Black" .
+qw:person-30 qw:hasGlasses "true"^^xsd:boolean .
+qw:person-30 qw:hasHat "false"^^xsd:boolean .
+qw:person-30 qw:hasHatType "None" .
+qw:person-30 qw:hasHatColor "Not applicable" .
 qw:person-30 qw:hasHatAccessory "None" .
 qw:person-30 qw:hasEarrings "false"^^xsd:boolean .
 qw:person-30 qw:hasEarringType "None" .
@@ -2141,7 +2141,7 @@ qw:person-33-sex a cco:ont00001212 .
 qw:person-33 qw:hasAgeYears "40"^^xsd:nonNegativeInteger .
 qw:person-33 qw:hasAgeGroup "32-46" .
 qw:person-33 qw:hasAgeAppearance "Middle-aged" .
-qw:person-33-scalp-hair qw:hasHairLength "Short" .
+qw:person-33-scalp-hair qw:hasHairLength "Long" .
 qw:person-33-scalp-hair qw:hasHairTexture "Wavy" .
 qw:person-33 qw:isBald "false"^^xsd:boolean .
 qw:person-33-scalp-hair qw:hasHairstyle "Side part" .
