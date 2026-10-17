@@ -1,4 +1,4 @@
-const CACHE = 'everything-is-sus-v11';
+const CACHE = 'everything-is-sus-v12';
 const ASSETS = [
   './', './index.html', './everything-is-sus.css', './game-config.js', './game-ui.js', './player.js',
   './manifest.webmanifest', './everything-is-sus-RULES.md', './pass-and-play/', './host/', './player/',

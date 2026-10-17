@@ -1,5 +1,5 @@
 {
-  "version": "4d94b4ca6c0a1ef8e8554070",
+  "version": "562a45b3b330d0336086da75",
   "files": [
     {
       "path": "../packages/game-mechanics/src/action-engine.js",
@@ -135,7 +135,7 @@
     },
     {
       "path": "../src/ontologies/GameOntology.ttl",
-      "sha256": "27b5f5167ebc2f6fa49f86132502d48e95fed14ce4d3328d5d217c522513fae8"
+      "sha256": "2695631654b332782cd5e30c7b3f054ecb33b541d55911507a37ccb0db4bcf9b"
     },
     {
       "path": "../styles/normalize.css",
@@ -159,7 +159,7 @@
     },
     {
       "path": "assets/catalog-manifest.json",
-      "sha256": "c6b46ef0e0c3ee07b8b253ee823a026dc031f1419047af9f9a747015c7aadbff"
+      "sha256": "4517790a2efd974b82d5b3e10e51007b11c8a01639489eb2b56ef27c2b689064"
     },
     {
       "path": "assets/catalog-v1.ttl",
@@ -515,7 +515,7 @@
     },
     {
       "path": "js/scanner.js",
-      "sha256": "0d4ce9bdede7d28099b622cf7da2751ca334e5321bc5928f928d1ddc1d8926d4"
+      "sha256": "d2261508166ebb52910528223edb806d57e3d0b4580f39238391034b081cc6a6"
     },
     {
       "path": "js/session.js",
