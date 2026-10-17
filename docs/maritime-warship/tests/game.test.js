@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createMaritimeGame, validateMaritime } from '../model/game.js';
+import { createMaritimeGame, validateMaritime, incomingReports } from '../model/game.js';
 import { SHIPS, normalizeConfig, coordinate } from '../game-config.js';
 import { createSetup, decodeSetup, boardSeed, inviteUrl, formatCode } from '../network.js';
 import { generateBoardPair, legalPlacements, placementEntropy } from '../rules/board.js';
@@ -34,7 +34,7 @@ test('setup code reconstructs public rules and terrain through manual code or in
   }
   const changed = setup.code.slice(0, 9) + (setup.code[9] === '2' ? '3' : '2') + setup.code.slice(10);
   await assert.rejects(decodeSetup(changed)); await assert.rejects(decodeSetup('ABC123'));
-  assert.ok(setup.code.length <= 53);
+  assert.ok(setup.code.length <= 21);
 });
 test('only supported two-device manual-play configuration is accepted', () => {
   for (const input of [{ mode: 'PASS_AND_PLAY' }, { mode: 'AUTOMATIC' }, { rows: 7 }, { columns: 27 }, { obstacles: 5 }, { fleet: ['Carrier'] }, { names: ['A', 'a'] }, { fleet, budget: 8 }]) assert.throws(() => normalizeConfig(input));
@@ -95,7 +95,7 @@ test('a journal accepts only the local player and alternates outgoing/incoming v
   assert.equal((await record(game, 'incoming', [{ coordinate: target, type: 'Miss' }])).ok, true);
   assert.equal(game.state().currentPlayerIri, playerIri(0));
 });
-test('incoming reports are manually supplied and consistency checked without replacement outcomes', async () => {
+test('low-level incoming reports cannot contradict the known fleet outcome', async () => {
   const { game } = await fixture({}, 1); await deploy(game);
   const ship = me(game).ships[0], target = ship.cells[0], before = JSON.stringify(game.snapshot());
   assert.equal((await record(game, 'incoming', [{ coordinate: target, type: 'Miss' }])).ok, false);
@@ -124,12 +124,13 @@ test('Sunk needs no vessel class and denotes a participating non-mission capable
   assert.ok(ix.values(ix.one(ship, V.missionStasis), V.type).includes(MW + 'SunkStasis'));
   assert.equal(ix.values(ship, V.location).length, 0);
 });
-test('manual terrain reports distinguish tropical blocks from Arctic glancing misses', async () => {
+test('terrain shots are misses in both climates; blocked is not a playable result', async () => {
   for (const climate of ['WARM_WATER','ARCTIC']) {
     const { game } = await fixture({ climate, obstacles: 2 }); await deploy(game);
     const target = other(game).obstacles[0];
     assert.equal((await record(game, 'outgoing', [{ coordinate: target, type: 'Hit' }])).ok, false);
-    assert.equal((await record(game, 'outgoing', [{ coordinate: target, type: climate === 'ARCTIC' ? 'GlancingMiss' : 'Blocked' }])).ok, true);
+    assert.equal((await record(game, 'outgoing', [{ coordinate: target, type: 'Blocked' }])).ok, false);
+    assert.equal((await record(game, 'outgoing', [{ coordinate: target, type: 'Miss' }])).ok, true);
     assert.equal(game.state().index.values(game.state().results[0].shotIri, V.struckShip).length, 0);
   }
 });
@@ -168,4 +169,47 @@ test('largest Arctic board, seven-vessel setup and local inventory round-trip', 
   const { game,setup } = await fixture({ rows:26,columns:26,climate:'ARCTIC',obstacles:4,fleet:['Carrier','Battleship','Cruiser','Submarine','Destroyer','Battleship','Carrier'] });
   await deploy(game);const restored=await parseLocalSave(JSON.parse(JSON.stringify(localSave(game,setup))));
   assert.equal(me(restored.game).ships.length,7);assert.equal(other(restored.game).ships.length,0);assert.equal(restored.game.state().config.rows,26);
+});
+
+test('incoming coordinate confirmation calculates the last hit as sunk, including a single salvo', async () => {
+  const { game } = await fixture({ salvo: true }, 1); await deploy(game);
+  const ship = me(game).ships.find(s => s.length === 2), coordinates = [...ship.cells].reverse();
+  const reports = incomingReports(game.state(), coordinates);
+  assert.deepEqual(reports.map(r => r.type), ['Hit', 'Sunk']);
+  assert.equal((await game.act('receiveAttack', { coordinates })).ok, true);
+  assert.equal(me(game).ships.find(s => s.iri === ship.iri).sunk, true);
+  assert.deepEqual(game.state().results.map(r => r.type), ['Hit', 'Sunk']);
+  const before = JSON.stringify(game.snapshot());
+  assert.equal((await game.act('receiveAttack', { coordinates })).ok, false);
+  assert.equal(JSON.stringify(game.snapshot()), before);
+});
+
+test('incoming misses and the final hit derive from accumulated damage across turns', async () => {
+  const { game } = await fixture({}, 1); await deploy(game);
+  const ship = me(game).ships.find(s => s.length === 2);
+  assert.equal((await game.act('receiveAttack', { coordinates: [ship.cells[0]] })).ok, true);
+  assert.equal(game.state().results.at(-1).type, 'Hit');
+  await record(game, 'outgoing', [{ coordinate: 'A1', type: 'Miss' }]);
+  assert.equal((await game.act('receiveAttack', { coordinates: [ship.cells[1]] })).ok, true);
+  assert.equal(game.state().results.at(-1).type, 'Sunk');
+  await record(game, 'outgoing', [{ coordinate: 'A2', type: 'Miss' }]);
+  const empty = [...me(game).cells.keys()].find(c => !me(game).ships.some(s => s.cells.includes(c)));
+  assert.equal((await game.act('receiveAttack', { coordinates: [empty] })).ok, true);
+  assert.equal(game.state().results.at(-1).type, 'Miss');
+});
+
+test('ending during placement or combat preserves RDF history without inventing a winner', async () => {
+  for (const combat of [false, true]) {
+    const { game, setup } = await fixture();
+    if (combat) { await deploy(game); await record(game, 'outgoing', [{ coordinate: 'A1', type: 'Hit' }]); }
+    const count = game.state().results.length;
+    assert.equal((await game.act('renameGame', { name: 'Saturday with Sam' })).ok, true);
+    assert.equal((await game.act('endGame')).ok, true);
+    assert.equal(game.state().ended, true); assert.equal(game.state().winnerIri, '');
+    assert.equal(game.state().results.length, count);
+    assert.deepEqual(validateMaritime(game.engine.store), []);
+    const restored = await parseLocalSave(JSON.parse(JSON.stringify(localSave(game, setup))));
+    assert.equal(restored.game.state().ended, true); assert.equal(restored.game.state().name, 'Saturday with Sam');
+    assert.equal((await game.act('autoPlace')).ok, false);
+  }
 });

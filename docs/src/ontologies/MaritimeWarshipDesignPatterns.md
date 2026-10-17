@@ -29,7 +29,7 @@ This is the initial domain data model, not an implementation of the app. It foll
 | Salvo | Process whose shots are occurrent parts (`BFO_0000132`); one order resolves one or up to five shots |
 | Damage and mission status | CCO Damaged Stasis `ont00001289` directly; ship capability stases specialize fully `ont00000622`, partially `ont00000100`, and non-mission capable `ont00000557` under `ont00001132` |
 | Mission | `mw:DefendFleetMission`, a reusable `game:ActionSpecification`; capability is relative to this game mission |
-| Feedback | ICE `mw:AttackResult` with Hit, Miss, Blocked, GlancingMiss and Sunk result subclasses; CCO `is about` links to the shot; a grid has observations |
+| Feedback | ICE `mw:AttackResult` with Hit, Miss and Sunk result subclasses (Blocked and GlancingMiss retained for legacy records); CCO `is about` links to the shot; a grid has observations |
 | Turns and phases | Reuse `game:Turn`, `game:Phase`, `game:hasCurrentPhase`; individuals for setup, placement, combat, completed phases. These classes are temporal intervals, not processes |
 | Configuration, custom draft, fleet presets | `mw:MatchConfiguration`, typed parameter specifications with `rdf:value`. Row/column count, obstacle cluster count, climate, fleet composition, ship length, salvo limit, play/preset mode, draft budget, fleet ceiling, fairness tolerance, board seeds |
 | Fairness assessment | `mw:PlacementEntropyAssessment`, descriptive ICE about an area and configuration, `rdf:value` the computed legal-placement count; normally derived, optionally retained for audit |
@@ -49,11 +49,11 @@ Material subclasses describe entities **in the game's represented world**. A bro
 
 ## Local knowledge and manual verbal reports
 
-Each device stores its own fleet and its own record of the conversation. Setup-only code/QR/link sharing reconstructs public terrain and rules. There are no further app-to-app messages. Players coordinate readiness and turns verbally; the creator fires first. Each player explicitly records incoming or outgoing results, with blank outcome controls. The app never infers a selected outcome from placements.
+Each device stores its own fleet and its own record of the conversation. Setup-only code/QR/link sharing reconstructs public terrain and rules. There are no further app-to-app messages. Players coordinate readiness and turns verbally; the creator fires first. The attacker explicitly records verbal outgoing outcomes using initially blank controls. The defender confirms incoming coordinates; the app computes and announces the corresponding outcomes from the known local fleet.
 
-Incoming hits can identify the local material ship and segment and can be checked against that device’s placements. Outgoing Hit reports describe a hit act without inventing a named opponent ship or segment witness. OWL existential restrictions allow such partial descriptions; missing placement triples do not mean the site is empty. An outgoing Sunk report individuates a participating `mw:Warship` in a `mw:SunkStasis`, without specifying its subclass, length, footprint, or correspondence with earlier hits. Hit and Sunk do not require vessel identity disclosure.
+Confirmed incoming coordinates resolve against the local fleet and prior damage; incoming hits identify the local material ship and segment. Outgoing Hit reports describe a hit act without inventing a named opponent ship or segment witness. OWL existential restrictions allow such partial descriptions; missing placement triples do not mean the site is empty. An outgoing Sunk report individuates a participating `mw:Warship` in a `mw:SunkStasis`, without specifying its subclass, length, footprint, or correspondence with earlier hits. Hit and Sunk do not require vessel identity disclosure.
 
-The following diagrams show material-world patterns when the relevant participants are known. A local journal may contain only the known portion of such a pattern. Automatic resolution from fleet positions and pass-and-play are deferred future options, not current modes.
+The following diagrams show material-world patterns when the relevant participants are known. A local journal may contain only the known portion of such a pattern. Automatic outgoing resolution from opposing fleet positions and pass-and-play are deferred future options, not current modes. Incoming resolution from the local fleet is part of the baseline.
 
 ## Hit: weapon use at a site with a ship and munition
 
@@ -82,9 +82,9 @@ graph LR
   cell -->|"hasMaterialBoundary"| water["Open water portion"]
 ```
 
-In a minimal target-local miss there is no ship participant. A general weapon-use act can still include a **firing** ship, so prohibiting every Watercraft participant would be too strong. `hasStruckShip` specializes BFO `has participant` to identify exactly the participant that distinguishes hit from miss. A missing participant triple alone does not prove a miss under OWL's open-world semantics: the local player must explicitly record the defender’s verbal outcome. Only incoming reports can be validated against a fully known local footprint. The miss restriction states there are zero struck ships. Never classify from a player's redacted projection.
+In a minimal target-local miss there is no ship participant. A general weapon-use act can still include a **firing** ship, so prohibiting every Watercraft participant would be too strong. `hasStruckShip` specializes BFO `has participant` to identify exactly the participant that distinguishes hit from miss. A missing participant triple alone does not prove a miss under OWL's open-world semantics: the local player must explicitly record the defender’s verbal outcome. Only incoming coordinates can be resolved against a fully known local footprint. The app announces their outcomes after coordinate confirmation; outgoing verbal outcomes must be entered explicitly. The miss restriction states there are zero struck ships. Never classify from a player's redacted projection.
 
-Blocked and glancing misses add a terrain participant using BFO `has participant`, but no struck defender. A sinking shot is a hit, with a `SunkResult` rather than an ordinary `HitResult`. Feedback records are information about events, not the events themselves.
+Terrain misses add a terrain participant using BFO `has participant`, but no struck defender. Legacy blocked and glancing-miss records use the same participant pattern. A sinking shot is a hit, with a `SunkResult` rather than an ordinary `HitResult`. Feedback records are information about events, not the events themselves.
 
 ## Site materially bounded by geosphere
 
@@ -184,3 +184,5 @@ OWL subclass restrictions express meaning rather than closed-world completeness,
 The CCO identifiers and definitions were checked against this repository's bundled [Artifact](ArtifactOntology.ttl), [Event](EventOntology.ttl), [Geospatial](GeospatialOntology.ttl), [Agent](AgentOntology.ttl), [Information Entity](InformationEntityOntology.ttl) and [BFO core](bfo-core.ttl) files. This deliberately targets the app's installed vocabulary. Live dereferencing of the supplied CCO term URLs was unavailable during preparation. No remote ontology download is needed to understand these mappings; a loader should map imported ontology IRIs to the bundled files, following their transitive imports locally.
 
 Requirements: [Maritime Warship](../../../specs/MARITIME_WARSHIP.md), [technical boilerplate](../../../specs/BOILERPLATE_TECHNICAL_SPEC.md), [capability boilerplate](../../../specs/BOILERPLATE_CAPABILITY_SPEC.md). Parameter values use typed information nodes and `rdf:value`; renderer geometry, UI state and technical transport remain outside domain RDF.
+
+The playable result choices are Miss, Hit, and Hit and sunk (stored as `Sunk`). Terrain shots are misses. Legacy Blocked/GlancingMiss classes are retained for reading older records, not offered as current choices. Ending a game records an ended phase without inventing a winner. A local game name reuses `rdfs:label` on the session.

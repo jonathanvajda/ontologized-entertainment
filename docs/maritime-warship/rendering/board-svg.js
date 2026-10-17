@@ -16,7 +16,7 @@ export function renderBoard(holder, player, config, { title, showShips = false, 
   for (let row = 0; row < config.rows; row++) svg.append(node('text', { x: 10, y: padding + (row + .62) * unit, 'text-anchor': 'middle', class: 'chart-label' }, String.fromCharCode(65 + row)));
   for (const cell of player.cells.values()) {
     const result = results.get(cell.coordinate), ship = ships.get(cell.coordinate);
-    const type = result?.type, symbol = type === 'Hit' || type === 'Sunk' ? '×' : type === 'Miss' ? '•' : type ? '◆' : cell.obstacle ? (config.climate === 'ARCTIC' ? '❄' : '▲') : ship ? '━' : '';
+    const type = result?.type, symbol = type === 'Sunk' ? '⚓' : type === 'Hit' ? '×' : type === 'Miss' ? '•' : type ? '◆' : cell.obstacle ? (config.climate === 'ARCTIC' ? '❄' : '▲') : ship ? '━' : '';
     const isSunk = ship?.sunk || (result && ['Hit', 'Sunk'].includes(type) && player.incoming.some(other => other.type === 'Sunk' && other.cellIri === cell.iri));
     const classes = ['chart-cell', cell.obstacle ? 'obstacle' : cell.shallow ? 'shallow' : '', ship ? 'ship' : '',
       result ? (isSunk || type === 'Sunk' ? 'sunk' : type === 'Hit' ? 'hit' : type === 'Miss' ? 'miss' : 'blocked') : '', selectedSet.has(cell.coordinate) ? 'selected' : '', endpoints.includes(cell.coordinate) ? 'placement-end' : '', previewSet.has(cell.coordinate) ? invalidPreview ? 'invalid' : 'preview' : ''].filter(Boolean).join(' ');

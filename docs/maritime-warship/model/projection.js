@@ -71,7 +71,7 @@ export function projectMaritime(store) {
       obstacles: [...cells.values()].filter(c => c.obstacle).map(c => c.coordinate), incoming,
       outgoing: results.filter(result => result.attackerIri === id), intact: ships.reduce((sum, ship) => sum + ship.length - ship.hits, 0) };
   });
-  return { config, phase, currentPlayerIri, winnerIri, localPlayerIri: one(SESSION, V.localPlayer), complete: phase === 'complete', players, results,
+  return { config, phase, name: one(SESSION, V.label, players.map(p => p.name).join(' vs ')), currentPlayerIri, winnerIri, localPlayerIri: one(SESSION, V.localPlayer), complete: ['complete', 'ended'].includes(phase), ended: phase === 'ended', players, results,
     turnNumber: ofType(MW + 'AttackOrder').length + 1,
     entropy: Number(one(instance('entropy-1'), V.value)),
     revision: values(SESSION, V.current).length ? ofType(MW + 'AttackOrder').length : results.length,

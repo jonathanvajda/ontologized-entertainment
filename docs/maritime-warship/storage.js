@@ -48,18 +48,40 @@ export function safeRows(rows) {
 }
 export async function saveActive(record) {
   const connection = await db();
-  await putRecord(connection, 'saveStates', { id: record.audience, value: record });
-  await putRecord(connection, 'preferences', { id: 'active', audience: record.audience });
+  const state = (await parseLocalSave(record)).game.state();
+  const previous = await getRecord(connection, 'games', record.sessionId);
+  const active = !state.complete;
+  // Resolve only on transaction completion, after the RDF snapshot, history and
+  // active pointer are durably committed together. Each session has its own key.
+  await new Promise((resolve, reject) => {
+    const tx = connection.transaction(['saveStates', 'games', 'preferences'], 'readwrite');
+    tx.objectStore('saveStates').put({ id: record.sessionId, value: record });
+    tx.objectStore('games').put({ id: record.sessionId, name: state.name, createdAt: previous?.createdAt || record.savedAt, savedAt: record.savedAt,
+      names: state.players.map(p => p.name), status: state.ended ? 'ended' : state.complete ? 'complete' : 'active',
+      turns: state.turnNumber - 1, shots: state.results.length, climate: state.config.climate,
+      winner: state.players.find(p => p.iri === state.winnerIri)?.name || '' });
+    const preferences = tx.objectStore('preferences');
+    if (active) preferences.put({ id: 'active', sessionId: record.sessionId });
+    else {
+      const request = preferences.get('active');
+      request.onsuccess = () => { if (request.result?.sessionId === record.sessionId || request.result?.audience === record.audience) preferences.delete('active'); };
+    }
+    tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); tx.onabort = () => reject(tx.error || new Error('Save aborted.'));
+  });
   return record;
 }
 export async function loadActive() {
   const connection = await db(), active = await getRecord(connection, 'preferences', 'active');
-  return active ? (await getRecord(connection, 'saveStates', active.audience))?.value : null;
+  return active ? (await getRecord(connection, 'saveStates', active.sessionId || active.audience))?.value : null;
 }
-export async function archiveMatch(record, summary) {
-  await putRecord(await db(), 'games', { id: record.sessionId || record.savedAt, savedAt: record.savedAt, ...summary });
+export async function loadMatch(id) { return (await getRecord(await db(), 'saveStates', id))?.value; }
+export async function listMatches() {
+  const connection = await db();
+  // Preserve the single-slot journal written by the previous app version.
+  const legacy = (await getRecord(connection, 'saveStates', 'local-player'))?.value;
+  if (legacy && !await getRecord(connection, 'saveStates', legacy.sessionId)) await saveActive(legacy);
+  return (await listRecords(connection, 'games')).sort((a, b) => b.savedAt.localeCompare(a.savedAt));
 }
-export async function listHistory() { return (await listRecords(await db(), 'games')).sort((a, b) => b.savedAt.localeCompare(a.savedAt)).slice(0, 10); }
 export async function saveSettings(settings) { await putRecord(await db(), 'preferences', { id: 'settings', ...settings }); }
 export async function loadSettings() { return await getRecord(await db(), 'preferences', 'settings'); }
 export function parseFile(text) {

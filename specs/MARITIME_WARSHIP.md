@@ -16,11 +16,11 @@ Before placing vessels, the environmental condition (Climate) is selected. Clima
 * **Warm Water (Tropical Maritime):**
   * *Obstacles:* Represented as landmasses, islands, or coral reefs.
   * *Draft Rule:* Heavy vessels require deep water. The largest vessels in a fleet cannot be anchored adjacent to or overlapping island/reef sectors.
-  * *Attack Interaction:* Shots landing on island terrain are absorbed and recorded as Blocked.
+  * *Attack Interaction:* Shots landing on island terrain are absorbed and recorded as Miss. Blocked is not a separate playable outcome.
 * **Arctic (Frozen Maritime):**
   * *Obstacles:* Represented as ice fields, icebergs, or frozen hazard zones.
   * *Navigation Rule:* Vessels of any size cannot be positioned over frozen sectors.
-  * *Attack Interaction:* Shots landing on frozen sectors bounce or fail to penetrate, returning a Glancing Miss or Blocked status.
+  * *Attack Interaction:* Shots landing on frozen sectors bounce or fail to penetrate and are recorded as Miss. Glancing Miss and Blocked are not separate playable outcomes.
 
 ### 4. Fleet Configurations
 A fleet consists of $N$ distinct vessels (ranging from 4 to 7 vessels). Every vessel has a specific length measured in continuous grid cells:
@@ -39,16 +39,16 @@ A fleet consists of $N$ distinct vessels (ranging from 4 to 7 vessels). Every ve
 5. Once play begins, vessel locations remain fixed for the duration of the match.
 
 ### 6. Gameplay & Targeting Systems
-* **Default Resolution: Manual, Verbal Defender Reporting.** The attacker calls coordinate(s) aloud. The defender reviews their own primary grid and verbally reports Miss, Blocked, Glancing Miss, Hit, or Sunk for every coordinate. Each player explicitly records the corresponding incoming or outgoing observations on their own device. The app SHALL NOT choose or prefill outcomes from fleet positions.
+* **Default Resolution: Verbal Play with Local Defender Resolution.** The attacker calls coordinate(s) aloud. The defender confirms those incoming coordinates on their own device; the app derives and announces Miss, Hit, or Hit and sunk from the local fleet, prior damage, and terrain. The defender relays the result verbally. The attacker explicitly records that verbal result. Opponent placements are unavailable, so outgoing outcomes SHALL NOT be automatically resolved or prefilled.
 * **Standard Rule:** A player selects one coordinate per turn. The defender reports the status.
 * **Salvo Rule Variant:** When activated, a player selects 1–5 distinct coordinates simultaneously before firing. The defender reports all submitted coordinates as one complete batch.
-* **Local Recording:** Every selected coordinate requires an explicit result before the local batch is committed. Incoming reports may be checked against the device’s own fleet and prior damage; validation rejects inconsistent entries without choosing replacement outcomes. Outgoing reports record what the defender says; opposing placements are unknown. There is no synchronization or exchange of game-state messages after setup. Players coordinate turns and readiness verbally; the creator fires first.
+* **Local Recording:** Outgoing coordinates require explicit verbal outcomes. Incoming coordinates require confirmation only; the app computes their outcomes. Standard or salvo batches commit atomically to the canonical RDF store and are automatically persisted as RDF snapshots and transaction history in IndexedDB after every accepted action. No Save button is needed. No state is sent to the other device. Players coordinate turns and readiness verbally; the creator fires first.
 * **Optional Identity Disclosure:** Players decide whether to name hit or sunk vessels. Hit and Sunk MUST be recordable without disclosing vessel class, name, full footprint, or an association with earlier hits. A sunk vessel is a participating warship in a non-mission-capable stasis for the game mission; its more specific class may remain unknown.
 4.2 Targeting Feedback Loop
 An uncommitted selection may be canceled. After a verbal report, a coordinate is manually recorded with one of these results:
-- Miss / Blocked: The coordinate contains no active vessel segment or is occupied by an impassable obstacle.
+- Miss: The coordinate contains no vessel segment, including terrain obstacles. Cancel abandons an uncommitted selection and is not a shot result.
 - Hit: The coordinate strikes an active, unsunk vessel segment.
-- Sunk: When all coordinate segments of a specific vessel have been hit, the entire vessel is destroyed and declared Sunk.
+- Hit and sunk (stored as Sunk): The shot hits the last undamaged cell of a specific vessel. It is one exclusive outcome, rather than two separate choices.
 
 ### 7. Victory Condition
 The game ends immediately when a player marks the final remaining vessel segment of the opponent’s fleet as Sunk, declaring that player the Winner.
@@ -103,7 +103,7 @@ The game ends immediately when a player marks the final remaining vessel segment
 |Ship Count|`Integer` / `Preset`|`5`|Range: $4$ to $7$ ships|
 |Ship Customizer|Key-Value Pair|Default Preset|Custom count per length class (Length 2–5) with max fleet ceiling|
 |Salvo Rule|`Boolean`|`false`|`true` (5 shots per volley), `false` (1 shot per turn)|
-|Resolution|Fixed baseline|`MANUAL_DEFENDER_REPORTING`|Verbal feedback, explicitly recorded locally; automatic resolution is a future idea.|
+|Resolution|Fixed baseline|`MANUAL_DEFENDER_REPORTING`|Incoming coordinates resolve against the local fleet after confirmation; outgoing verbal feedback is recorded manually. Automatic outgoing resolution is a future idea.|
 |Animations|`Boolean`|`true`|Toggle visual feedback FX|
 
 
@@ -155,7 +155,7 @@ def generate_fair_board_pair(width, height, obstacle_count, fleet, climate):
 
 "Host" means the player who creates the initial setup, not an authoritative service or a device that receives later game updates.
 
-* **Self-Contained Code:** Following Query Whom!, the full code carries the public setup itself. A short session label cannot retrieve state without a rendezvous service, so the manual-entry code must be long enough to encode dimensions, climate, hazards, fleet configuration, salvo rule, terrain seed and protocol version. Display grouped Base32 with a checksum for typing-error detection. The current format is 48-53 symbols, excluding grouping dashes.
+* **Self-Contained Code:** Following Query Whom!, the full code carries the public setup itself. A short session label cannot retrieve state without a rendezvous service, so the manual-entry code must be long enough to encode dimensions, climate, hazards, fleet configuration, salvo rule, terrain seed and protocol version. Display grouped Base32 with a checksum for typing-error detection. Protocol v2 packs small fields into bits and uses a 32-bit public terrain seed and 16-bit SHA-256 checksum, requiring 20-21 Base32 symbols excluding dashes (down from 48-53). The seed reconstructs terrain locally; obstacle coordinates and verbose RDF are not transmitted. This seed is public, not a secret, and is independent of private fleet randomness. Player/game names remain local. Continue decoding protocol v1 invitations and saves. A short room identifier cannot retrieve state without a server; arbitrary text compression adds overhead to this compact binary data.
 * **QR and Invitation:** A QR encodes the setup invitation; a fragment such as `#invite=<code>` carries the same code in a link. Camera scanning is optional; manual entry and pasted links always remain available. Strip the invitation fragment after joining.
 * **Public Data Only:** The code contains rules and deterministic terrain information. It contains no fleet positions, observations, private placement random state, save contents, invitation secrets, or keys. Private auto-placement randomness must be independent of the shared terrain seed.
 * **After Joining:** Both devices operate independently and may go offline. No attacks, reports, saves, damage changes, turn changes, or final results are sent to the other device. Players call coordinates and report outcomes verbally (or through their own external communication channel).
@@ -166,7 +166,7 @@ def generate_fair_board_pair(width, height, obstacle_count, fleet, climate):
 1. Creator configures the match and displays its code, QR, or invitation.
 2. Joiner scans, pastes, or types that setup into their own device.
 3. Each player privately places and locks their own fleet. They confirm readiness verbally.
-4. Creator fires first. Each side manually records incoming attacks and verbally reported outgoing results on its own boards.
+4. Creator fires first. Each side confirms incoming coordinates for local resolution and manually records verbally reported outgoing results on its own boards.
 5. Sharing the original setup again recreates the initial public setup, never the creator’s current progress.
 
 ### 5. User Interface & Action Workflow
@@ -185,18 +185,18 @@ The UI is to display both boards. They should be clearly labeled. The active pla
 
 Keep turn instructions to a compact status line. Render grids approximately 25-30% smaller by default, with adjustable scale and no internal grid scrollbars. Wrap the board panels vertically when needed and fit each complete chart to the available width. During deployment, select a ship silhouette showing its cell length, click one endpoint, then a highlighted legal endpoint; support either direction without requiring a separate rotation control. Preview the complete footprint on hover or keyboard focus before commitment.
 
-During an outgoing turn, selecting an unresolved targeting-grid coordinate highlights a crosshair and its label. The player calls the coordinate aloud and manually chooses the result reported by the defender: Mark Miss, Mark Hit, Mark Sunk, or the climate’s terrain result. Every result starts unselected. Show the result controls in a floating menu near the selected screen cell, clamped to the viewport, rather than reserving permanent space above the boards. Keep all selected salvo coordinates in that menu. Mark Sunk does not require a vessel-class selector.
+During an outgoing turn, selecting an unresolved targeting-grid coordinate highlights a crosshair and its label. The player calls the coordinate aloud and manually chooses the result reported by the defender: Miss, Hit, or Hit and sunk. Every result starts unselected. Show the result controls in a floating menu near the selected screen cell, clamped to the viewport, rather than reserving permanent space above the boards. Keep all selected salvo coordinates in that menu. Hit and sunk does not require a vessel-class selector.
 
-During an incoming turn, the player selects the coordinate(s) called by their opponent on the primary grid, checks their own fleet, explicitly records each result, and reports it verbally. Local consistency validation may reject an entry; it must not replace it with an automatically selected result.
+During an incoming turn, the player selects the coordinate(s) called by their opponent on the lower primary grid and confirms the coordinates. The app calculates and announces the result to relay verbally: Miss, Hit, or Hit and sunk. The final newly damaged cell of a vessel is Hit and sunk, including within an atomic salvo. The defender never chooses an outcome. The opposing fleet remains unknown.
 
-Cancel clears uncommitted selections. In salvo play, 1-5 distinct coordinates may be selected with a Selected X/5 counter. Record Reported Results commits only a complete explicit batch, including damage and any locally supported final result. No opponent update is generated.
+Cancel clears uncommitted selections. In salvo play, 1-5 distinct coordinates may be selected with a Selected X/5 counter. Confirm commits a complete batch: explicit outcomes for outgoing shots, calculated outcomes for confirmed incoming coordinates, including damage and any locally supported final result. No opponent update is generated.
 
 ```text
 Select coordinate(s) -> Call / hear coordinate(s) verbally
                               |
                 Defender reports outcomes verbally
                               |
-             Each player explicitly marks local results
+             Defender confirms coordinates; attacker marks verbal results
                               |
               Confirm complete local report batch
 ```
@@ -204,13 +204,13 @@ Select coordinate(s) -> Call / hear coordinate(s) verbally
 6.2 Screen Animations & Audio Feedback Engine
 Hit Animation Sequence
 When a Hit status resolves and animations are enabled:
-Flash Cycle: The viewport background flashes sequentially through three rapid color states: `Normal → Deep Red (#8B0000) → Black (#000000) → Deep Red (#8B0000) → Normal` over $450\text{ms}$.
+Flash Cycle: The viewport background flashes sequentially through three rapid color states: `Normal → Deep Red (#8B0000) → Black (#000000) → Deep Red (#8B0000) → Normal` over $1350\text{ms}$.
 Haptic & Audio: Triggers device vibration (`navigator.vibrate([100, 50, 100])`) and low-frequency explosion audio synthesized via Web Audio API.
 
 Miss Animation Sequence
 When a Miss status resolves and animations are enabled:
 
-Splash Ripple: A concentric water splash/wave ripple expands outward from the target cell coordinate using a CSS keyframe or Canvas 2D radial wave.
+Splash feedback lasts 1800 ms (three times the previous 600 ms). Reduced-motion preferences continue to suppress animations.
 
 Audio: High-frequency water splash audio synthesized via Web Audio API.
 
@@ -231,8 +231,19 @@ Display the local primary and targeting grids with the locally recorded result. 
 
 ### Automatic Resolution from Fleet Positions
 
-A future optional mode could calculate Hit, Miss, Blocked, Glancing Miss, and Sunk from stored fleet positions and terrain when an attack is fired. It would require access to the relevant opposing placements or a separate resolution protocol; the current setup-only code does not provide those placements. This would bypass the manual defender-reporting interaction. It is not part of the current baseline, is not currently selectable, and SHALL NOT replace manual defender reporting as the default. Any future implementation must preserve private information, atomic salvo resolution, and consistent damage and victory semantics.
+A future optional mode could calculate outgoing Hit, Miss, and Hit and sunk from opposing fleet positions and terrain when an attack is fired. Incoming shots already resolve from the local fleet in the baseline. It would require access to the relevant opposing placements or a separate resolution protocol; the current setup-only code does not provide those placements. This would bypass manual entry of the opponent’s verbal result on the attacker’s device. It is not part of the current baseline, is not currently selectable, and SHALL NOT replace manual outgoing reporting as the default. Any future implementation must preserve private information, atomic salvo resolution, and consistent damage and victory semantics.
 
 ### Pass-and-Play
 
 One-device pass-and-play is a future option, not a current setup choice or required baseline. A future implementation would need separate viewer projections, confirmed handoffs, private DOM removal and a clear disclosure that both fleets reside on the same device. Current conceal/reveal controls protect the one local player’s chart; they are not pass-and-play.
+
+
+## Feedback-driven interaction requirements
+
+- **Board order:** The targeting grid is above the player's own primary grid. During deployment, hide the targeting grid entirely; reveal it when the fleet is locked. Keep complete grids visible without internal scrollbars.
+- **Results:** Use mutually exclusive radio choices with icons and text: Miss, Hit, Hit and sunk. Nothing is preselected for outgoing shots. Cancel is a separate action. Vessel identity disclosure remains optional. Legacy Blocked/GlancingMiss RDF may be read from older saves but no new game offers those states.
+- **History:** Show two labelled sections, Your shots (local player name) and Their shots (opponent name), with coordinates and results. Avoid unexplained IN/OUT prefixes.
+- **Privacy:** Concealment removes the private board DOM and directly opens the private command-deck modal. One Reveal action restores the deck; no intermediate Return button. Delay the prompt while another modal is open, and show it when that modal closes. Retain explicit conceal, blur/visibility conceal, and the idle timeout.
+- **Setup sharing:** Show Continue to fleet placement and Go back to setup. Do not depend on an X close button to advance. Going back abandons the configuration without declaring a winner.
+- **Menu and termination:** Label it Menu. Offer End game with a short confirmation, preserving the ended journal for review without declaring a winner or updating the other device. Setup & saved games pauses the current journal and opens the game list.
+- **Multiple journals:** Persist snapshots per session identifier, rather than one shared local-player slot. List all games with a local editable name, player names, updated date/time, turn and shot counts, and active/completed/ended status. Resume active games or review finished journals. Preserve and migrate the previous single saved journal. The game name is an RDF label; list metadata is a disposable summary of the saved RDF and technical timestamps.
