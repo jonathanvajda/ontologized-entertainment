@@ -1,3 +1,5 @@
+@prefix cco: <https://www.commoncoreontologies.org/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
 @prefix game: <https://w3id.org/ontologized-entertainment/game/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -12,11 +14,9 @@
   rdfs:comment "Optional structural validation shapes; executable gameplay remains in trusted JavaScript rules."@en .
 
 game:GameObjectLocationShape a sh:NodeShape ; sh:targetClass game:GameObject ;
-  sh:property [ sh:path game:locatedIn ; sh:maxCount 1 ; sh:class game:BoardLocation ; sh:message "A game object may have at most one current board location."@en ] .
-game:AggregateMembershipShape a sh:NodeShape ; sh:targetClass game:GameObject ;
-  sh:property [ sh:path game:memberOf ; sh:maxCount 1 ; sh:class game:GameObjectAggregate ; sh:message "An individuated game object may belong to at most one current game aggregate."@en ] .
+  sh:property [ sh:path game:locatedIn ; sh:maxCount 1 ; sh:class cco:ont00000472 ; sh:message "A game object may have at most one current board location."@en ] .
 game:MovementActShape a sh:NodeShape ; sh:targetClass game:MovementAct ;
-  sh:property [ sh:path game:hasOrigin ; sh:minCount 1 ; sh:maxCount 1 ; sh:class game:BoardLocation ] ;
-  sh:property [ sh:path game:hasDestination ; sh:minCount 1 ; sh:maxCount 1 ; sh:class game:BoardLocation ] .
+  sh:property [ sh:path game:hasOrigin ; sh:minCount 1 ; sh:maxCount 1 ; sh:class cco:ont00000472 ] ;
+  sh:property [ sh:path game:hasDestination ; sh:minCount 1 ; sh:maxCount 1 ; sh:class cco:ont00000472 ] .
 game:ScoreSpecificationShape a sh:NodeShape ; sh:targetClass game:ScoreSpecification ;
   sh:property [ sh:path rdf:value ; sh:maxCount 1 ; sh:or ( [ sh:datatype xsd:integer ] [ sh:datatype xsd:decimal ] ) ] .

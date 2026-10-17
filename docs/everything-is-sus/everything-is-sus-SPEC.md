@@ -79,14 +79,14 @@ Each card is both a `game:Card` and a category-specific subclass. Card art is re
 
 | Concept | Semantic model | Identity |
 | --- | --- | --- |
-| Board room | Subclass of `game:BoardLocation` / BFO Site | Stable IRI |
-| Foyer | Non-card `game:BoardLocation`; shared token start zone | Stable IRI |
+| Board room | Subclass of `cco:ont00000472` / BFO Site | Stable IRI |
+| Foyer | Non-card `cco:ont00000472`; shared token start zone | Stable IRI |
 | Passage space | `everything-is-sus:PassageSpace`, game board location | Stable IRI from geometry manifest |
 | Doorway connection | Asserted adjacency between passage and room | Endpoint pair |
 | Secret passage | Individuated route entity | Stable IRI |
 | Suspect token | Individuated `game:GamePiece` | One per suspect |
 | Weapon token | Individuated `game:GamePiece` | One per weapon |
-| Player hand | `game:GameObjectAggregate` | One per player |
+| Player hand | `obo:BFO_0000027` | One per player |
 | Sealed solution | Three-member protected aggregate | One per session |
 
 Board topology is semantic RDF; pixel geometry and artwork are external JSON/SVG/image assets.

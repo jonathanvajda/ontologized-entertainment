@@ -1,7 +1,7 @@
 import { decodeGame } from './protocol.js';
 
 export class QrScanner {
-  constructor({ video, onCode, onMessage }) { Object.assign(this, { video, onCode, onMessage }); this.generation = 0; }
+  constructor({ video, onCode, onMessage, decodeCode = decodeGame }) { Object.assign(this, { video, onCode, onMessage, decodeCode }); this.generation = 0; }
   async start() {
     this.stop(); const generation = this.generation;
     if (!isSecureContext || !navigator.mediaDevices?.getUserMedia) throw new Error('Camera scanning needs HTTPS or localhost. Enter the code instead.');
@@ -22,7 +22,7 @@ export class QrScanner {
           const result = globalThis.jsQR(pixels.data, pixels.width, pixels.height, { inversionAttempts: 'attemptBoth' });
           if (result) {
             try {
-              const { code } = await decodeGame(result.data);
+              const { code } = await this.decodeCode(result.data);
               if (generation !== this.generation) return;
               this.stop(); this.onCode(code); return;
             } catch { this.onMessage('This isn’t a supported game QR. Point at the QR on your friend’s Share screen.'); }

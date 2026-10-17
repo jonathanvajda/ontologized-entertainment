@@ -86,17 +86,10 @@ game:GamePiece a owl:Class ;
 game:Card a owl:Class ;
   rdfs:subClassOf game:GameObject ; rdfs:label "Card"@en ;
   skos:definition "A Game Object designed to bear game-relevant information and to be individuated during play."@en .
-game:GameObjectAggregate a owl:Class ;
-  rdfs:subClassOf obo:BFO_0000027 ; rdfs:label "Game Object Aggregate"@en ;
-  skos:definition "An Object Aggregate whose members are game objects grouped for a game-relevant purpose."@en .
-game:DrawPile a owl:Class ; rdfs:subClassOf game:GameObjectAggregate ; rdfs:label "Draw Pile"@en ; skos:definition "A Game Object Aggregate from which members may be randomly or sequentially drawn."@en .
-game:DiscardPile a owl:Class ; rdfs:subClassOf game:GameObjectAggregate ; rdfs:label "Discard Pile"@en ; skos:definition "A Game Object Aggregate containing objects discarded during play."@en .
-game:Hand a owl:Class ; rdfs:subClassOf game:GameObjectAggregate ; rdfs:label "Hand"@en ; skos:definition "A Game Object Aggregate associated with a participant and containing objects available to that participant."@en .
+game:DrawPile a owl:Class ; rdfs:subClassOf obo:BFO_0000027 ; rdfs:label "Draw Pile"@en ; skos:definition "An Object Aggregate from which members may be randomly or sequentially drawn."@en .
+game:DiscardPile a owl:Class ; rdfs:subClassOf obo:BFO_0000027 ; rdfs:label "Discard Pile"@en ; skos:definition "An Object Aggregate containing objects discarded during play."@en .
+game:Hand a owl:Class ; rdfs:subClassOf obo:BFO_0000027 ; rdfs:label "Hand"@en ; skos:definition "An Object Aggregate associated with a participant and containing objects available to that participant."@en .
 
-game:BoardLocation a owl:Class ;
-  rdfs:subClassOf obo:BFO_0000029 ; rdfs:label "Board Location"@en ;
-  skos:definition "A Site that functions as a semantically significant location in a game."@en ;
-  skos:scopeNote "The visual geometry used to render a Board Location is not part of this class."@en .
 game:GameQuality a owl:Class ;
   rdfs:subClassOf obo:BFO_0000019 ; rdfs:label "Game Quality"@en ;
   skos:definition "A Quality of an entity that is relevant to a game rule."@en .
@@ -113,16 +106,13 @@ game:ScoreSpecification a owl:Class ;
   skos:scopeNote "Use rdf:value for a literal score when a score is asserted rather than derived."@en .
 
 game:adjacentTo a owl:ObjectProperty , owl:SymmetricProperty ;
-  rdfs:domain game:BoardLocation ; rdfs:range game:BoardLocation ; rdfs:label "adjacent to"@en ;
-  skos:definition "Relates two Board Locations when the topology prescribed for a game permits them to be treated as adjacent."@en .
+  rdfs:domain cco:ont00000472 ; rdfs:range cco:ont00000472 ; rdfs:label "adjacent to"@en ;
+  skos:definition "Relates two Geospatial Regions when the topology prescribed for a game permits them to be treated as adjacent."@en .
 game:locatedIn a owl:ObjectProperty , owl:FunctionalProperty ;
-  rdfs:domain game:GameObject ; rdfs:range game:BoardLocation ; rdfs:label "located in"@en ;
-  skos:definition "Relates a Game Object to the Board Location in which it is currently located for gameplay purposes."@en .
-game:memberOf a owl:ObjectProperty , owl:FunctionalProperty ;
-  rdfs:domain game:GameObject ; rdfs:range game:GameObjectAggregate ; rdfs:label "member of"@en ;
-  skos:definition "Relates a Game Object to the Game Object Aggregate of which it is currently a member."@en .
-game:hasOrigin a owl:ObjectProperty ; rdfs:domain game:MovementAct ; rdfs:range game:BoardLocation ; rdfs:label "has origin"@en ; skos:definition "Relates a Movement Act to its game-relevant origin."@en .
-game:hasDestination a owl:ObjectProperty ; rdfs:domain game:MovementAct ; rdfs:range game:BoardLocation ; rdfs:label "has destination"@en ; skos:definition "Relates a Movement Act to its game-relevant destination."@en .
+  rdfs:domain game:GameObject ; rdfs:range cco:ont00000472 ; rdfs:label "located in"@en ;
+  skos:definition "Relates a Game Object to the Geospatial Region in which it is currently located for gameplay purposes."@en .
+game:hasOrigin a owl:ObjectProperty ; rdfs:domain game:MovementAct ; rdfs:range cco:ont00000472 ; rdfs:label "has origin"@en ; skos:definition "Relates a Movement Act to its game-relevant origin."@en .
+game:hasDestination a owl:ObjectProperty ; rdfs:domain game:MovementAct ; rdfs:range cco:ont00000472 ; rdfs:label "has destination"@en ; skos:definition "Relates a Movement Act to its game-relevant destination."@en .
 game:prescribesAction a owl:ObjectProperty ; rdfs:domain game:Rule ; rdfs:range game:ActionSpecification ; rdfs:label "prescribes action"@en ; skos:definition "Relates a Game Rule to an Action Specification it prescribes."@en .
 game:hasCurrentPhase a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain game:GameSession ; rdfs:range game:Phase ; rdfs:label "has current phase"@en ; skos:definition "Relates a Game Session to the phase that currently obtains in that session."@en .
 game:participatesInSession a owl:ObjectProperty ; rdfs:domain cco:ont00001017 ; rdfs:range game:GameSession ; rdfs:label "participates in game session"@en ; skos:definition "Relates an Agent to a Game Session in which that Agent participates."@en .

@@ -18,7 +18,7 @@
 
 pd:PokerDicePlayer a owl:Class ; rdfs:subClassOf cco:ont00001262 ; rdfs:label "Poker Dice Player"@en ; skos:definition "A Person who bears a Player Role in a Poker Dice game session."@en .
 pd:PokerDie a owl:Class ; rdfs:subClassOf game:GamePiece ; rdfs:label "Poker Die"@en ; skos:definition "A six-sided Game Piece whose upward face supplies a random integer result in Poker Dice."@en .
-pd:DicePool a owl:Class ; rdfs:subClassOf game:GameObjectAggregate ; rdfs:label "Poker Dice Pool"@en ; skos:definition "A Game Object Aggregate containing the five individuated dice used in a standard Poker Dice session."@en .
+pd:DicePool a owl:Class ; rdfs:subClassOf obo:BFO_0000027 ; rdfs:label "Poker Dice Pool"@en ; skos:definition "An Object Aggregate containing the five individuated dice used in a standard Poker Dice session."@en .
 pd:DieFaceValue a owl:Class ; rdfs:subClassOf cco:ont00000958 ; rdfs:label "Die Face Value"@en ; skos:definition "An Information Content Entity that records the integer face result of a Poker Die in a Dice Rolling Act."@en ; skos:scopeNote "Its integer is expressed with rdf:value."@en .
 pd:Scorecard a owl:Class ; rdfs:subClassOf cco:ont00000958 ; rdfs:label "Poker Dice Scorecard"@en ; skos:definition "An Information Content Entity that contains the committed scoring entries associated with one player in one Poker Dice session."@en .
 pd:ScoringCategory a owl:Class ; rdfs:subClassOf cco:ont00000965 ; rdfs:label "Poker Dice Scoring Category"@en ; skos:definition "A Prescriptive Information Content Entity that prescribes how one roll is assigned a score."@en .

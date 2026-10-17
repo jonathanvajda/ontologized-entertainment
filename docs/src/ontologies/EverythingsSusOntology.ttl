@@ -1,3 +1,4 @@
+@prefix obo: <http://purl.obolibrary.org/obo/> .
 @prefix everything-is-sus: <https://w3id.org/ontoeagle/games/everything-is-sus/> .
 @prefix game: <https://w3id.org/ontologized-entertainment/game/> .
 @prefix hidden: <https://w3id.org/ontologized-entertainment/game/hidden-information/> .
@@ -27,9 +28,9 @@ everything-is-sus:SuspectCard a owl:Class ; rdfs:subClassOf everything-is-sus:Ev
 everything-is-sus:WeaponCard a owl:Class ; rdfs:subClassOf everything-is-sus:EvidenceCard ; rdfs:label "Weapon card"@en ; skos:definition "An Evidence Card that identifies a possible weapon."@en .
 everything-is-sus:RoomCard a owl:Class ; rdfs:subClassOf everything-is-sus:EvidenceCard ; rdfs:label "Room card"@en ; skos:definition "An Evidence Card that identifies a possible room."@en .
 everything-is-sus:PlayerHand a owl:Class ; rdfs:subClassOf game:Hand ; rdfs:label "Player hand"@en ; skos:definition "A Hand containing the Evidence Cards visible to exactly one detective during play."@en .
-everything-is-sus:SealedSolution a owl:Class ; rdfs:subClassOf game:GameObjectAggregate ; rdfs:label "Sealed solution"@en ; skos:definition "A Game Object Aggregate containing exactly one suspect, weapon, and room card and governed by a hidden-information visibility policy until the session ends."@en .
-everything-is-sus:Room a owl:Class ; rdfs:subClassOf game:BoardLocation ; rdfs:label "Room"@en ; skos:definition "A board location that may contain suspect tokens and ground a suggestion."@en .
-everything-is-sus:Foyer a owl:Class ; rdfs:subClassOf game:BoardLocation ; rdfs:label "Foyer"@en ; skos:definition "The shared, non-card starting area of the estate; it may contain suspect tokens but cannot ground a suggestion."@en .
+everything-is-sus:SealedSolution a owl:Class ; rdfs:subClassOf obo:BFO_0000027 ; rdfs:label "Sealed solution"@en ; skos:definition "An Object Aggregate containing exactly one suspect, weapon, and room card and governed by a hidden-information visibility policy until the session ends."@en .
+everything-is-sus:Room a owl:Class ; rdfs:subClassOf cco:ont00000472 ; rdfs:label "Room"@en ; skos:definition "A board location that may contain suspect tokens and ground a suggestion."@en .
+everything-is-sus:Foyer a owl:Class ; rdfs:subClassOf cco:ont00000472 ; rdfs:label "Foyer"@en ; skos:definition "The shared, non-card starting area of the estate; it may contain suspect tokens but cannot ground a suggestion."@en .
 everything-is-sus:SuspectToken a owl:Class ; rdfs:subClassOf game:GamePiece ; rdfs:label "Suspect token"@en ; skos:definition "A game piece whose location represents a suspect on the estate board."@en .
 everything-is-sus:SuggestionAct a owl:Class ; rdfs:subClassOf game:GameAct ; rdfs:label "Suggestion act"@en ; skos:definition "A Game Act that names a suspect and weapon in the acting detective's current room."@en .
 everything-is-sus:RefutationAct a owl:Class ; rdfs:subClassOf game:GameAct ; rdfs:label "Refutation act"@en ; skos:definition "A private disclosure act in which the first eligible detective shows one matching card."@en .
@@ -40,7 +41,7 @@ everything-is-sus:hasCurrentPlayer a owl:ObjectProperty , owl:FunctionalProperty
 everything-is-sus:memberOf a owl:ObjectProperty ; rdfs:domain everything-is-sus:EvidenceCard ; rdfs:label "member of"@en ; skos:definition "Relates an Evidence Card to its Player Hand or Sealed Solution."@en .
 everything-is-sus:ownedBy a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:PlayerHand ; rdfs:range everything-is-sus:Detective ; rdfs:label "owned by"@en ; skos:definition "Relates a Player Hand to its only authorized detective."@en .
 everything-is-sus:usesToken a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:Detective ; rdfs:range everything-is-sus:SuspectToken ; rdfs:label "uses token"@en ; skos:definition "Relates a detective to the suspect token they control."@en .
-everything-is-sus:locatedIn a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:SuspectToken ; rdfs:range game:BoardLocation ; rdfs:label "located in"@en ; skos:definition "Relates a suspect token to its current board location."@en .
+everything-is-sus:locatedIn a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:SuspectToken ; rdfs:range cco:ont00000472 ; rdfs:label "located in"@en ; skos:definition "Relates a suspect token to its current board location."@en .
 everything-is-sus:refutedBy a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:SuggestionAct ; rdfs:range everything-is-sus:Detective ; rdfs:label "refuted by"@en ; skos:definition "Relates a suggestion to the first clockwise detective able to refute it."@en .
 everything-is-sus:winner a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:MysteryGameSession ; rdfs:range everything-is-sus:Detective ; rdfs:label "winner"@en ; skos:definition "Relates a completed session to the detective whose correct accusation completed it."@en .
 everything-is-sus:phase a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:MysteryGameSession ; rdfs:range xsd:string ; rdfs:label "phase"@en ; skos:definition "Records the implementation identifier of the current turn phase."@en .

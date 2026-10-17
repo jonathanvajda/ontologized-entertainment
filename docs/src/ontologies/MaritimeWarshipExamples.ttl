@@ -1,0 +1,93 @@
+@prefix ex: <https://w3id.org/ontologized-entertainment/maritime-warship/example/> .
+@prefix mw: <https://w3id.org/ontologized-entertainment/maritime-warship/> .
+@prefix game: <https://w3id.org/ontologized-entertainment/game/> .
+@prefix hi: <https://w3id.org/ontologized-entertainment/game/hidden-information/> .
+@prefix cco: <https://www.commoncoreontologies.org/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Illustrative pattern fragments, not a complete playable match or save fixture.
+ex:patterns a owl:Ontology ;
+  owl:imports <https://w3id.org/ontologized-entertainment/maritime-warship> ;
+  rdfs:comment "Partial examples showing spatial, shot, mission, and disclosure patterns; no complete grid or full fleet is asserted."@en .
+
+ex:session a mw:MaritimeSession ; mw:hasPlayer ex:alice, ex:bob ;
+  mw:hasBattleArea ex:aliceArea, ex:bobArea ; mw:hasCurrentPlayer ex:alice ;
+  game:hasCurrentPhase ex:combat ; mw:hasConfiguration ex:configuration .
+ex:alice a cco:ont00001017 ; game:participatesInSession ex:session ;
+  obo:BFO_0000196 ex:aliceRole ; mw:hasGrid ex:alicePrimary, ex:aliceTargeting .
+ex:bob a cco:ont00001017 ; game:participatesInSession ex:session ;
+  obo:BFO_0000196 ex:bobRole .
+ex:aliceRole a game:PlayerRole .
+ex:bobRole a game:PlayerRole .
+ex:combat a game:Phase .
+ex:aliceArea a cco:ont00000472 ; rdfs:label "Alice defended area"@en ; mw:controlledBy ex:alice .
+ex:bobArea a cco:ont00000472 ; rdfs:label "Bob defended area"@en ; mw:controlledBy ex:bob .
+ex:alicePrimary a mw:PrimaryGrid ; cco:ont00001808 ex:aliceArea .
+ex:aliceTargeting a mw:TargetingGrid ; cco:ont00001808 ex:bobArea ;
+  mw:hasObservation ex:hitFeedback, ex:missFeedback .
+ex:bobFleet a mw:Fleet ; mw:controlledBy ex:bob .
+ex:destroyer a mw:Destroyer ; obo:BFO_0000129 ex:bobFleet ;
+  mw:hasCurrentMissionStasis ex:partialStasis .
+ex:segment1 a mw:ShipSegment ; obo:BFO_0000176 ex:destroyer ;
+  game:locatedIn ex:bobG4 ; mw:hasCurrentDamageStasis ex:damage1 .
+ex:segment2 a mw:ShipSegment ; obo:BFO_0000176 ex:destroyer ; game:locatedIn ex:bobG5 .
+ex:bobG4 a cco:ont00000472 ; rdfs:label "Bob G4"@en ; obo:BFO_0000176 ex:bobArea ;
+  mw:hasMaterialBoundary ex:waterG4 ; mw:hasCoordinate ex:coordinateG4 ; game:adjacentTo ex:bobG5 .
+ex:bobG5 a cco:ont00000472 ; rdfs:label "Bob G5"@en ; obo:BFO_0000176 ex:bobArea ; mw:hasMaterialBoundary ex:waterG5 .
+ex:bobJ9 a cco:ont00000472 ; rdfs:label "Bob J9"@en ; obo:BFO_0000176 ex:bobArea ;
+  mw:hasMaterialBoundary ex:waterJ9 ; mw:hasCoordinate ex:coordinateJ9 .
+ex:waterG4 a mw:OpenWater .
+ex:waterG5 a mw:OpenWater .
+ex:waterJ9 a mw:OpenWater .
+ex:coordinateG4 a mw:CoordinateDesignator ; rdf:value "G4" ; cco:ont00001916 ex:bobG4 .
+ex:coordinateJ9 a mw:CoordinateDesignator ; rdf:value "J9" ; cco:ont00001916 ex:bobJ9 .
+
+ex:order1 a mw:AttackOrder ; cco:ont00001833 ex:alice ;
+  mw:targetsCell ex:bobG4 ; mw:resolvesAs ex:hit .
+ex:hit a mw:HitShot ; obo:BFO_0000066 ex:bobG4 ;
+  cco:ont00001833 ex:representedOperator ; obo:BFO_0000057 ex:launcher ;
+  mw:hasMunition ex:torpedo1 ; mw:hasStruckShip ex:destroyer ; mw:hasStruckSegment ex:segment1 .
+ex:order2 a mw:AttackOrder ; cco:ont00001833 ex:alice ;
+  mw:targetsCell ex:bobJ9 ; mw:resolvesAs ex:miss .
+ex:miss a mw:MissShot ; obo:BFO_0000066 ex:bobJ9 ;
+  cco:ont00001833 ex:representedOperator ; obo:BFO_0000057 ex:launcher ; mw:hasMunition ex:torpedo2 .
+ex:representedOperator a cco:ont00001017 .
+ex:launcher a cco:ont00000445 .
+ex:torpedo1 a cco:ont00000280 .
+ex:torpedo2 a cco:ont00000280 .
+ex:hitFeedback a mw:HitResult ; cco:ont00001808 ex:hit .
+ex:missFeedback a mw:MissResult ; cco:ont00001808 ex:miss .
+ex:damage1 a cco:ont00001289 ; obo:BFO_0000057 ex:segment1 ; mw:causedByShot ex:hit .
+ex:initialStasis a mw:FullyCapableStasis ; obo:BFO_0000057 ex:destroyer ; mw:forMission mw:DefendFleetMission .
+ex:partialStasis a mw:PartiallyCapableStasis ; obo:BFO_0000057 ex:destroyer ;
+  mw:forMission mw:DefendFleetMission ; mw:causedByShot ex:hit .
+
+# Ice and land sites are separate from their material terrain boundaries.
+ex:iceCell a cco:ont00000472 ; rdfs:label "Ice obstacle region"@en ; mw:hasMaterialBoundary ex:iceberg .
+ex:iceberg a mw:Iceberg ; obo:BFO_0000196 ex:iceObstacleRole .
+ex:iceObstacleRole a mw:ObstacleRole .
+ex:landCell a cco:ont00000472 ; rdfs:label "Island obstacle region"@en ; mw:hasMaterialBoundary ex:island .
+ex:island a mw:Island ; obo:BFO_0000196 ex:landObstacleRole .
+ex:landObstacleRole a mw:ObstacleRole .
+ex:blocked a mw:BlockedShot ; obo:BFO_0000066 ex:landCell ;
+  cco:ont00001833 ex:representedOperator ;
+  obo:BFO_0000057 ex:island, ex:launcher ; mw:hasMunition ex:torpedo3 .
+ex:torpedo3 a cco:ont00000280 .
+ex:blockedFeedback a mw:BlockedResult ; cco:ont00001808 ex:blocked .
+
+ex:configuration a mw:MatchConfiguration ; mw:hasParameter ex:rows, ex:columns, ex:climate, ex:salvoLimit .
+ex:rows a mw:RowCountSpecification ; rdf:value 10 .
+ex:columns a mw:ColumnCountSpecification ; rdf:value 10 .
+ex:climate a mw:ClimateThemeSpecification ; rdf:value "WARM_WATER" .
+ex:salvoLimit a mw:SalvoLimitSpecification ; rdf:value 1 .
+
+# These are policy examples, not a complete safe projection policy.
+ex:placementPolicy a hi:VisibilityPolicy ; hi:governs ex:segment1, ex:segment2 ;
+  hi:visibleTo ex:bob ; hi:visibleDuringPhase ex:combat .
+ex:feedbackPolicy a hi:VisibilityPolicy ; hi:governs ex:hitFeedback, ex:missFeedback ;
+  hi:visibilityMode hi:Public ; hi:visibleDuringPhase ex:combat .
+ex:hitDisclosure a hi:DisclosureEvent ; cco:ont00001833 ex:bob ;
+  hi:discloses ex:hitFeedback ; hi:hasRecipient ex:alice .

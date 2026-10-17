@@ -10,7 +10,7 @@ export const V = Object.freeze({
   Scorecard: NS + 'Scorecard', ScoreEntry: NS + 'ScoreEntry', DieFaceValue: NS + 'DieFaceValue', DiceRollingAct: NS + 'DiceRollingAct',
   hasPlayer: NS + 'hasPlayer', playerOrder: NS + 'playerOrder', currentPlayer: NS + 'hasCurrentPlayer',
   phase: NS + 'hasPhaseIdentifier', round: NS + 'hasRoundNumber', turn: NS + 'hasTurnNumber', rollCount: NS + 'hasRollCount',
-  memberOf: GAME + 'memberOf', hasCurrentFace: NS + 'hasCurrentFace', heldBy: NS + 'isHeldBy',
+  memberOf: 'http://purl.obolibrary.org/obo/BFO_0000129', hasCurrentFace: NS + 'hasCurrentFace', heldBy: NS + 'isHeldBy',
   hasScorecard: NS + 'hasScorecard', hasScoreEntry: NS + 'hasScoreEntry', forCategory: NS + 'forScoringCategory',
   hasResult: NS + 'hasResult', performedBy: NS + 'performedBy', mode: NS + 'hasGameMode', complete: NS + 'isComplete'
 });

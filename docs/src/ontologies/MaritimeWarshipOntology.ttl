@@ -1,0 +1,129 @@
+@prefix mw: <https://w3id.org/ontologized-entertainment/maritime-warship/> .
+@prefix game: <https://w3id.org/ontologized-entertainment/game/> .
+@prefix hi: <https://w3id.org/ontologized-entertainment/game/hidden-information/> .
+@prefix cco: <https://www.commoncoreontologies.org/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://w3id.org/ontologized-entertainment/maritime-warship> a owl:Ontology ;
+  owl:versionIRI <https://w3id.org/ontologized-entertainment/maritime-warship/2026-10-16> ;
+  owl:versionInfo "0.1.0" ;
+  owl:imports <https://w3id.org/ontologized-entertainment/game>,
+    <https://w3id.org/ontologized-entertainment/game/hidden-information>,
+    <https://www.commoncoreontologies.org/ArtifactOntology>,
+    <https://www.commoncoreontologies.org/GeospatialOntology>,
+    <https://www.commoncoreontologies.org/EventOntology>,
+    <https://www.commoncoreontologies.org/AgentOntology>,
+    <https://www.commoncoreontologies.org/InformationEntityOntology> ;
+  dcterms:title "Maritime Warship Ontology"@en ;
+  dcterms:created "2026-10-16"^^xsd:date ;
+  dcterms:license <https://opensource.org/license/bsd-3-clause> ;
+  rdfs:label "Maritime Warship Ontology"@en ;
+  rdfs:comment "Ships, terrain and attacks describe the represented maritime world. RDF records describe that world without identifying digital records with material entities. See MaritimeWarshipDesignPatterns.md for validation and transition semantics."@en .
+
+mw:MaritimeSession a owl:Class ; rdfs:subClassOf game:GameSession ; rdfs:label "Maritime session"@en ; skos:definition "A session governed by Maritime Warship rules."@en .
+mw:Fleet a owl:Class ; rdfs:subClassOf obo:BFO_0000027 ; rdfs:label "Fleet"@en ; skos:definition "An aggregate of the distinct warships controlled by one player in a session."@en .
+mw:Warship a owl:Class ; rdfs:subClassOf cco:ont00000440, game:GameObject ; rdfs:label "Warship"@en ; skos:definition "A watercraft designed for naval combat in the represented maritime world."@en .
+mw:Carrier a owl:Class ; rdfs:subClassOf mw:Warship ; rdfs:label "Carrier"@en ; skos:definition "A warship designed to carry and operate aircraft; five cells in the default profile."@en .
+mw:Battleship a owl:Class ; rdfs:subClassOf mw:Warship ; rdfs:label "Battleship"@en ; skos:definition "A heavily armored gun warship; four cells in the default profile."@en .
+mw:Cruiser a owl:Class ; rdfs:subClassOf mw:Warship ; rdfs:label "Cruiser"@en ; skos:definition "A cruising combat warship; three cells in the default profile."@en .
+mw:Submarine a owl:Class ; rdfs:subClassOf mw:Warship ; rdfs:label "Submarine"@en ; skos:definition "A warship designed for submerged operation; three cells in the default profile."@en .
+mw:Destroyer a owl:Class ; rdfs:subClassOf mw:Warship ; rdfs:label "Destroyer"@en ; skos:definition "An escort combat warship; two cells in the default profile."@en .
+mw:ShipSegment a owl:Class ; rdfs:subClassOf obo:BFO_0000024, game:GameObject ; rdfs:label "Ship segment"@en ; skos:definition "A fiat material part of a warship corresponding to one independently targetable cell of its footprint."@en .
+
+# The bundled CCO sphere classes are siblings of Portion of Geosphere.
+# Local intersections preserve both requested geosphere ancestry and CCO reuse.
+mw:WaterPortion a owl:Class ; rdfs:subClassOf cco:ont00001341, cco:ont00000297 ; rdfs:label "Water portion"@en ; skos:definition "A liquid maritime portion of hydrosphere constituting terrain in the game."@en .
+mw:LandPortion a owl:Class ; rdfs:subClassOf cco:ont00001341, cco:ont00001016 ; rdfs:label "Land portion"@en ; skos:definition "A lithospheric portion constituting terrain in the game."@en .
+mw:IcePortion a owl:Class ; rdfs:subClassOf cco:ont00001341, cco:ont00000779 ; rdfs:label "Ice portion"@en ; skos:definition "A cryospheric portion constituting frozen terrain in the game."@en .
+mw:OpenWater a owl:Class ; rdfs:subClassOf mw:WaterPortion ; rdfs:label "Open water"@en ; skos:definition "A water portion outside the shallow coastal exclusion zone of the rules profile."@en .
+mw:ShallowCoastalWater a owl:Class ; rdfs:subClassOf mw:WaterPortion ; rdfs:label "Shallow coastal water"@en ; skos:definition "A water portion in a coastal exclusion zone for heavy vessels."@en .
+mw:Island a owl:Class ; rdfs:subClassOf mw:LandPortion ; rdfs:label "Island"@en ; skos:definition "A land portion surrounded by water."@en .
+mw:Peninsula a owl:Class ; rdfs:subClassOf mw:LandPortion ; rdfs:label "Peninsula"@en ; skos:definition "A land portion projecting into water while connected to a larger landmass."@en .
+mw:ReefSubstrate a owl:Class ; rdfs:subClassOf mw:LandPortion ; rdfs:label "Reef substrate"@en ; skos:definition "The lithospheric rocky or mineral substrate of a reef obstacle, excluding living coral organisms."@en .
+mw:Iceberg a owl:Class ; rdfs:subClassOf mw:IcePortion ; rdfs:label "Iceberg"@en ; skos:definition "A detached portion of floating glacial ice."@en .
+mw:IceShelf a owl:Class ; rdfs:subClassOf mw:IcePortion ; rdfs:label "Ice shelf"@en ; skos:definition "A floating portion of glacial ice attached to land ice."@en .
+mw:IceField a owl:Class ; rdfs:subClassOf mw:IcePortion ; rdfs:label "Ice field"@en ; skos:definition "A portion of maritime ice covering a game hazard area."@en .
+mw:ObstacleRole a owl:Class ; rdfs:subClassOf obo:BFO_0000023 ; rdfs:label "Obstacle role"@en ; skos:definition "A role borne by terrain that prohibits ship placement or obstructs an attack under the active rules."@en .
+
+mw:GridRecord a owl:Class ; rdfs:subClassOf cco:ont00000958 ; rdfs:label "Grid record"@en ; skos:definition "Information organizing coordinate and observation records about one battle area."@en .
+mw:PrimaryGrid a owl:Class ; rdfs:subClassOf mw:GridRecord ; rdfs:label "Primary grid"@en ; skos:definition "The defending player's record of its own placements and incoming attacks."@en .
+mw:TargetingGrid a owl:Class ; rdfs:subClassOf mw:GridRecord ; rdfs:label "Targeting grid"@en ; skos:definition "The attacking player's record of disclosed results about the opponent's battle area, without duplicating its sites."@en .
+mw:CoordinateDesignator a owl:Class ; rdfs:subClassOf cco:ont00000958 ; rdfs:label "Coordinate designator"@en ; skos:definition "Information designating a cell using a row letter and column number within a particular battle area."@en .
+
+mw:HitShot a owl:Class ; rdfs:subClassOf cco:ont00000612, [ a owl:Restriction ; owl:onProperty mw:hasStruckShip ; owl:someValuesFrom mw:Warship ] ; rdfs:label "Hit shot"@en ; skos:definition "A shot striking a previously intact segment of a defending warship."@en .
+mw:MissShot a owl:Class ; rdfs:subClassOf cco:ont00000612, [ a owl:Restriction ; owl:onProperty mw:hasStruckShip ; owl:maxCardinality 0 ] ; rdfs:label "Miss shot"@en ; skos:definition "A shot that strikes no defending warship."@en ; owl:disjointWith mw:HitShot .
+mw:BlockedShot a owl:Class ; rdfs:subClassOf mw:MissShot ; rdfs:label "Blocked shot"@en ; skos:definition "A miss shot absorbed or stopped by obstacle terrain."@en .
+mw:GlancingMissShot a owl:Class ; rdfs:subClassOf mw:MissShot ; rdfs:label "Glancing miss shot"@en ; skos:definition "A miss shot deflected by frozen terrain under Arctic rules."@en .
+mw:SinkingShot a owl:Class ; rdfs:subClassOf mw:HitShot ; rdfs:label "Sinking shot"@en ; skos:definition "A hit shot damaging the last intact segment of its struck warship."@en .
+mw:AttackOrder a owl:Class ; rdfs:subClassOf game:GameAct ; rdfs:label "Attack order"@en ; skos:definition "A player's committed command to resolve one or more target coordinates."@en .
+mw:Salvo a owl:Class ; rdfs:subClassOf obo:BFO_0000015 ; rdfs:label "Salvo"@en ; skos:definition "A process aggregating the shots resolved atomically from one salvo attack order."@en .
+mw:PlacementAct a owl:Class ; rdfs:subClassOf game:GameAct ; rdfs:label "Placement act"@en ; skos:definition "A player act assigning a ship's segments to legal cells during setup."@en .
+mw:FullyCapableStasis a owl:Class ; rdfs:subClassOf cco:ont00000622 ; rdfs:label "Undamaged ship mission stasis"@en ; skos:definition "A fully mission capable stasis of a ship with no damaged segments under the game mission."@en .
+mw:PartiallyCapableStasis a owl:Class ; rdfs:subClassOf cco:ont00000100 ; rdfs:label "Damaged ship mission stasis"@en ; skos:definition "A partially mission capable stasis of a ship with some but not all segments damaged under the game mission."@en .
+mw:SunkStasis a owl:Class ; rdfs:subClassOf cco:ont00000557 ; rdfs:label "Sunk ship mission stasis"@en ; skos:definition "A non-mission capable stasis of a ship with all its segments damaged under the game mission."@en .
+mw:AttackResult a owl:Class ; rdfs:subClassOf cco:ont00000958 ; rdfs:label "Attack result"@en ; skos:definition "A disclosed information record about a resolved shot; its class identifies the feedback."@en .
+mw:HitResult a owl:Class ; rdfs:subClassOf mw:AttackResult ; rdfs:label "Hit result"@en ; skos:definition "Feedback recording a hit that does not sink a ship."@en .
+mw:MissResult a owl:Class ; rdfs:subClassOf mw:AttackResult ; rdfs:label "Miss result"@en ; skos:definition "Feedback recording an unobstructed miss."@en .
+mw:BlockedResult a owl:Class ; rdfs:subClassOf mw:AttackResult ; rdfs:label "Blocked result"@en ; skos:definition "Feedback recording a shot stopped by terrain."@en .
+mw:GlancingMissResult a owl:Class ; rdfs:subClassOf mw:AttackResult ; rdfs:label "Glancing miss result"@en ; skos:definition "Feedback recording a frozen-terrain deflection."@en .
+mw:SunkResult a owl:Class ; rdfs:subClassOf mw:AttackResult ; rdfs:label "Sunk result"@en ; skos:definition "Feedback recording a sinking shot."@en .
+mw:MatchConfiguration a owl:Class ; rdfs:subClassOf cco:ont00000965 ; rdfs:label "Match configuration"@en ; skos:definition "A prescriptive information entity specifying the selected rules and setup profile."@en .
+mw:ParameterSpecification a owl:Class ; rdfs:subClassOf cco:ont00000965 ; rdfs:label "Parameter specification"@en ; skos:definition "A typed parameter node bearing one selected configuration literal through rdf:value."@en .
+mw:PlacementEntropyAssessment a owl:Class ; rdfs:subClassOf cco:ont00000958 ; rdfs:label "Placement entropy assessment"@en ; skos:definition "Information recording a computed count of legal fleet placements for a battle area and configuration."@en .
+
+mw:hasMaterialBoundary a owl:ObjectProperty ; rdfs:domain cco:ont00000472 ; rdfs:range cco:ont00001341 ; rdfs:label "has material boundary"@en ; skos:definition "Relates a cell site to terrain whose surface materially bounds that site in part."@en ; skos:scopeNote "Local relation: the terrain is material, not a BFO continuant fiat boundary. Grid edges remain fiat; this relation is neither has material basis nor parthood."@en .
+mw:hasMunition a owl:ObjectProperty ; rdfs:subPropertyOf obo:BFO_0000057 ; rdfs:domain cco:ont00000612 ; rdfs:range cco:ont00001150 ; rdfs:label "has munition"@en ; skos:definition "Relates a shot to its participating ammunition, for example a CCO Torpedo."@en .
+mw:hasStruckShip a owl:ObjectProperty ; rdfs:subPropertyOf obo:BFO_0000057 ; rdfs:domain cco:ont00000612 ; rdfs:range mw:Warship ; rdfs:label "has struck ship"@en ; skos:definition "Relates a hit shot to the defending ship it strikes, excluding a launching ship."@en .
+mw:hasStruckSegment a owl:ObjectProperty ; rdfs:subPropertyOf obo:BFO_0000057 ; rdfs:domain mw:HitShot ; rdfs:range mw:ShipSegment ; rdfs:label "has struck segment"@en ; skos:definition "Relates a hit shot to its damaged segment."@en .
+mw:hasPlayer a owl:ObjectProperty ; rdfs:domain mw:MaritimeSession ; rdfs:range cco:ont00001017 ; rdfs:label "has player"@en ; skos:definition "Relates a session to a participating agent bearing game:PlayerRole."@en .
+mw:hasBattleArea a owl:ObjectProperty ; rdfs:domain mw:MaritimeSession ; rdfs:range cco:ont00000472 ; rdfs:label "has battle area"@en ; skos:definition "Relates a session to one defended battle area."@en .
+mw:controlledBy a owl:ObjectProperty ; rdfs:range cco:ont00001017 ; rdfs:label "controlled by"@en ; skos:definition "Relates a fleet or battle area to its current controlling player under the rules."@en .
+mw:hasGrid a owl:ObjectProperty ; rdfs:domain cco:ont00001017 ; rdfs:range mw:GridRecord ; rdfs:label "has grid"@en ; skos:definition "Relates a player to a primary or targeting grid record."@en .
+mw:hasCoordinate a owl:ObjectProperty ; rdfs:domain cco:ont00000472 ; rdfs:range mw:CoordinateDesignator ; rdfs:label "has coordinate"@en ; skos:definition "Relates a cell to its scoped coordinate designator."@en .
+mw:hasObservation a owl:ObjectProperty ; rdfs:domain mw:GridRecord ; rdfs:range mw:AttackResult ; rdfs:label "has observation"@en ; skos:definition "Relates a grid record to a disclosed shot result."@en .
+mw:hasCurrentMissionStasis a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:domain mw:Warship ; rdfs:range cco:ont00001132 ; rdfs:label "has current mission stasis"@en ; skos:definition "Relates a ship to its currently active mission capability stasis; superseded stases remain historical individuals."@en .
+mw:hasCurrentDamageStasis a owl:ObjectProperty ; rdfs:domain mw:ShipSegment ; rdfs:range cco:ont00001289 ; rdfs:label "has current damage stasis"@en ; skos:definition "Relates a damaged segment to its currently active damage stasis."@en .
+mw:forMission a owl:ObjectProperty ; rdfs:domain cco:ont00001132 ; rdfs:range game:ActionSpecification ; rdfs:label "for mission"@en ; skos:definition "Specifies the game mission relative to which capability is assessed."@en .
+mw:targetsCell a owl:ObjectProperty ; rdfs:domain mw:AttackOrder ; rdfs:range cco:ont00000472 ; rdfs:label "targets cell"@en ; skos:definition "Relates a committed order to a selected target cell."@en .
+mw:resolvesAs a owl:ObjectProperty ; rdfs:domain mw:AttackOrder ; rdfs:range cco:ont00000612 ; rdfs:label "resolves as"@en ; skos:definition "Relates a player's attack order to a represented shot resolved from it."@en .
+mw:causedByShot a owl:ObjectProperty ; rdfs:range cco:ont00000612 ; rdfs:label "caused by shot"@en ; skos:definition "Relates a damage or mission stasis to the shot initiating it."@en .
+mw:hasConfiguration a owl:ObjectProperty ; rdfs:domain mw:MaritimeSession ; rdfs:range mw:MatchConfiguration ; rdfs:label "has configuration"@en ; skos:definition "Relates a session to its selected match configuration."@en .
+mw:hasParameter a owl:ObjectProperty ; rdfs:domain mw:MatchConfiguration ; rdfs:range mw:ParameterSpecification ; rdfs:label "has parameter"@en ; skos:definition "Relates a configuration to a typed literal-bearing parameter specification."@en .
+mw:hasCurrentPlayer a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:domain mw:MaritimeSession ; rdfs:range cco:ont00001017 ; rdfs:label "has current player"@en ; skos:definition "Relates an active session to the agent entitled to issue the next order."@en .
+mw:winner a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:domain mw:MaritimeSession ; rdfs:range cco:ont00001017 ; rdfs:label "winner"@en ; skos:definition "Relates a completed session to the player whose opponent has no intact ship segments."@en .
+
+mw:DefendFleetMission a game:ActionSpecification ; rdfs:label "Maintain fleet combat capability"@en ; skos:definition "The game mission of keeping a ship available until its last intact segment is hit; partial capability is a game abstraction."@en .
+
+mw:RowCountSpecification a owl:Class ; rdfs:subClassOf mw:ParameterSpecification ; rdfs:label "RowCount specification"@en ; skos:definition "The number of rows, from 8 through 26."@en .
+
+mw:ColumnCountSpecification a owl:Class ; rdfs:subClassOf mw:ParameterSpecification ; rdfs:label "ColumnCount specification"@en ; skos:definition "The number of columns, from 8 through 26."@en .
+
+mw:ClimateThemeSpecification a owl:Class ; rdfs:subClassOf mw:ParameterSpecification ; rdfs:label "ClimateTheme specification"@en ; skos:definition "The WARM_WATER or ARCTIC terrain rules profile."@en .
+
+mw:ObstacleClusterCountSpecification a owl:Class ; rdfs:subClassOf mw:ParameterSpecification ; rdfs:label "ObstacleClusterCount specification"@en ; skos:definition "The configured number of obstacle clusters, from 0 through 4."@en .
+
+mw:FleetCompositionSpecification a owl:Class ; rdfs:subClassOf mw:ParameterSpecification ; rdfs:label "FleetComposition specification"@en ; skos:definition "The prescribed list of ship classes and multiplicities; use repeated typed specification nodes for custom fleets."@en .
+
+mw:ShipLengthSpecification a owl:Class ; rdfs:subClassOf mw:ParameterSpecification ; rdfs:label "ShipLength specification"@en ; skos:definition "The prescribed footprint length, from 2 through 5, for a ship class or custom ship specification."@en .
+
+mw:SalvoLimitSpecification a owl:Class ; rdfs:subClassOf mw:ParameterSpecification ; rdfs:label "SalvoLimit specification"@en ; skos:definition "The maximum shots per order: one in standard play or five in salvo play."@en .
+
+mw:PlayModeSpecification a owl:Class ; rdfs:subClassOf mw:ParameterSpecification ; rdfs:label "PlayMode specification"@en ; skos:definition "The TWO_DEVICE setup-sharing baseline; pass-and-play is deferred to a future rules profile."@en .
+
+mw:PresetModeSpecification a owl:Class ; rdfs:subClassOf mw:ParameterSpecification ; rdfs:label "PresetMode specification"@en ; skos:definition "The QUICK_PLAY or CUSTOM_PLAY configuration profile."@en .
+
+mw:BoardSeedSpecification a owl:Class ; rdfs:subClassOf mw:ParameterSpecification ; rdfs:label "BoardSeed specification"@en ; skos:definition "A deterministic board-generation seed; private when it reveals concealed placements."@en .
+
+mw:DraftBudgetSpecification a owl:Class ; rdfs:subClassOf mw:ParameterSpecification ; rdfs:label "DraftBudget specification"@en ; skos:definition "The point budget for a custom fleet draft."@en .
+
+mw:FleetCeilingSpecification a owl:Class ; rdfs:subClassOf mw:ParameterSpecification ; rdfs:label "FleetCeiling specification"@en ; skos:definition "The maximum number of vessels permitted by a custom draft."@en .
+
+mw:FairnessToleranceSpecification a owl:Class ; rdfs:subClassOf mw:ParameterSpecification ; rdfs:label "FairnessTolerance specification"@en ; skos:definition "The allowed relative placement entropy difference; normally 0.03."@en .
+
+mw:hasLocalPlayer a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:domain mw:MaritimeSession ; rdfs:range cco:ont00001017 ; rdfs:label "has local player"@en ; skos:definition "Relates a local session journal to the player whose private fleet and manually recorded observations it contains."@en .

@@ -95,7 +95,7 @@ Consequently, shared board-location, adjacency, movement, placement, and pathfin
 | --- | --- | ---: | ---: | ---: |
 | Die | `pd:PokerDie`, subclass of `game:GamePiece` | Yes, five | Yes | No |
 | Die face result | `pd:DieFaceValue`, descriptive ICE | Yes per recorded result | No | `rdf:value` integer 1–6 |
-| Dice pool | `pd:DicePool`, subclass of `game:GameObjectAggregate` | One/session | Membership | No |
+| Dice pool | `pd:DicePool`, subclass of `obo:BFO_0000027` | One/session | Membership | No |
 | Scorecard | `pd:Scorecard`, ICE | One/player | No | No |
 | Category | Named individual of `pd:ScoringCategory` | Thirteen/profile | No | No |
 | Score entry | `pd:ScoreEntry`, ICE | One per claimed category/player | Countable | `rdf:value` non-negative integer |
