@@ -43,3 +43,9 @@
 .target-popover .error{margin:10px 0 0;font-size:.75rem}
 @media(max-width:760px){.engagement-header{padding:12px 0}.command-strip{padding:8px 11px}.command-strip h2{font-size:.9rem}.placement-dock{padding:11px;gap:8px}.placement-dock .dock-buttons{justify-content:flex-start}.boards{gap:12px}}
 @media(max-height:600px) and (orientation:landscape){.engagement-header{padding:9px 0}.engagement-header h1{font-size:1.4rem}.command-strip{padding:7px 10px;margin-bottom:9px}.chart-scroll{max-height:58vh}.placement-dock{margin-top:0}}
+
+/* Keep whole charts visible; wrap panels before reducing a chart to the viewport. */
+.boards{display:flex;flex-wrap:wrap}
+.board-panel{flex:1 1 calc(var(--columns) * var(--cell) + 45px);max-width:100%}
+.chart-scroll{overflow:visible;max-height:none}
+.chart-scroll svg{min-width:0;max-width:100%;height:auto}

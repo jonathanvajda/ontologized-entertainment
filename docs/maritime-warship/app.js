@@ -92,7 +92,7 @@ function render(focusCoordinate = null) {
     onHover: placement && placementStart ? (coordinate, svg) => previewPlacement(svg, candidates.find(candidate => endpoint(candidate) === coordinate)?.cells || []) : null,
     onCell: placement ? safe(placeShip) : selectTarget });
   renderBoard(enemy.chart, other, state.config, { title: 'Targeting grid', showShips: false, interactive: !state.complete && !placement && outgoing, selected: outgoing ? targets : [], onCell: selectTarget });
-  const boards = make('div', 'boards'); boards.append(own.panel, enemy.panel);
+  const boards = make('div', 'boards'); boards.style.setProperty('--columns', state.config.columns); boards.append(own.panel, enemy.panel);
   let popup = null;
   const dock = make('section', 'action-dock placement-dock'), dockCopy = make('div'), controls = make('div', 'dock-buttons');
   if (placement) {

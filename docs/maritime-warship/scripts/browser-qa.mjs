@@ -147,9 +147,16 @@ try {
   await large.locator('.advanced summary').click();await large.locator('[name=rows]').fill('26');await large.locator('[name=columns]').fill('26');
   await large.locator('#setup-form [type=submit]').click();await large.locator('#transfer-dialog').waitFor();await large.locator('#transfer-dialog [data-close]').click();await large.locator('#handoff-dialog').waitFor();await reveal(large);
   const largeWidth=await large.locator('.chart-scroll svg').first().evaluate(svg=>svg.getBoundingClientRect().width);
-  assert.ok(largeWidth<750 && largeWidth>700,'26-column grid uses a 25 percent smaller minimum cell size');
+  assert.ok(largeWidth>=725,'Large boards retain their requested cell scale when there is room');
   assert.ok(await large.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
-  await large.locator('.chart-scroll').first().evaluate(el=>{el.scrollLeft=el.scrollWidth;el.scrollTop=el.scrollHeight;});
+  const panels=await large.locator('.board-panel').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {top:r.top,bottom:r.bottom};}));
+  assert.ok(panels[1].top>=panels[0].bottom,'Large boards stack vertically');
+  for(const viewport of [{width:1440,height:1000},{width:390,height:844},{width:844,height:390}]){
+    await large.setViewportSize(viewport);
+    assert.ok(await large.locator('.chart-scroll').evaluateAll(els=>els.every(el=>el.scrollWidth<=el.clientWidth+1 && el.scrollHeight<=el.clientHeight+1)),'Complete grids fit without internal scrolling');
+    assert.ok(await large.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Page fits viewport width');
+  }
+  await large.setViewportSize({width:1440,height:1000});
   await a11y(large,'26 by 26 chart');await large.screenshot({path:resolve(results,'large-grid.png'),fullPage:true});
   const salvoContext=await browser.newContext({viewport:{width:844,height:390}}),salvo=await pageIn(salvoContext);
   await salvo.selectOption('[name=salvo]','salvo');await start(salvo);await deploy(salvo);

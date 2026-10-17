@@ -183,7 +183,7 @@ The UI is to display both boards. They should be clearly labeled. The active pla
 
 6.1 Cell Selection & Manual Reporting Workflow
 
-Keep turn instructions to a compact status line. Render grids approximately 25-30% smaller by default, with adjustable scale and scrolling for larger boards. During deployment, select a ship silhouette showing its cell length, click one endpoint, then a highlighted legal endpoint; support either direction without requiring a separate rotation control. Preview the complete footprint on hover or keyboard focus before commitment.
+Keep turn instructions to a compact status line. Render grids approximately 25-30% smaller by default, with adjustable scale and no internal grid scrollbars. Wrap the board panels vertically when needed and fit each complete chart to the available width. During deployment, select a ship silhouette showing its cell length, click one endpoint, then a highlighted legal endpoint; support either direction without requiring a separate rotation control. Preview the complete footprint on hover or keyboard focus before commitment.
 
 During an outgoing turn, selecting an unresolved targeting-grid coordinate highlights a crosshair and its label. The player calls the coordinate aloud and manually chooses the result reported by the defender: Mark Miss, Mark Hit, Mark Sunk, or the climate’s terrain result. Every result starts unselected. Show the result controls in a floating menu near the selected screen cell, clamped to the viewport, rather than reserving permanent space above the boards. Keep all selected salvo coordinates in that menu. Mark Sunk does not require a vessel-class selector.
 

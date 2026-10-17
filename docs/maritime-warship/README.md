@@ -38,7 +38,7 @@ A trusted action pipeline validates legality, computes RDF additions/removals, v
 
 IndexedDB preserves your active journal, settings and completed-match summaries. Exports identify the local-player audience and contain private local state; do not share them as invitations. Save/schema version 2 / 0.2.0 rejects the earlier host-authoritative prototype format instead of treating a full two-fleet dataset as a private local journal. Old prototype IndexedDB records are left untouched in their old database.
 
-Conceal/reveal protects your screen on demand, blur, visibility loss and after five minutes. It does not isolate state from someone inspecting your browser. This is one player’s chart privacy, **not pass-and-play**. Charts default to approximately 25-30% smaller, with scrollable large boards and keyboard-focusable chart regions. Result controls appear in a floating menu beside the selected cell, including a complete batch for salvo play; interactive cells support arrow keys and Enter/Space. Chart scale is adjustable, reduced-motion preferences override effects, and audio is opt-in.
+Conceal/reveal protects your screen on demand, blur, visibility loss and after five minutes. It does not isolate state from someone inspecting your browser. This is one player’s chart privacy, **not pass-and-play**. Charts default to approximately 25-30% smaller, with fully visible boards that stack when space is limited and scale to fit narrow screens and keyboard-focusable chart regions. Result controls appear in a floating menu beside the selected cell, including a complete batch for salvo play; interactive cells support arrow keys and Enter/Space. Chart scale is adjustable, reduced-motion preferences override effects, and audio is opt-in.
 
 ## Reuse and decisions
 
