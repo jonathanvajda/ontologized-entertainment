@@ -1,7 +1,7 @@
 import { createMaritimeGame } from './model/game.js';
 import { SHIPS, presetFleet } from './game-config.js';
 import { createSetup, decodeSetup, boardSeed, inviteUrl, formatCode } from './network.js';
-import { localSave, parseLocalSave, saveActive, loadActive, parseFile, downloadJson, loadMatch, listMatches, loadSettings, saveSettings, MAX_SAVE_BYTES } from './storage.js';
+import { localSave, parseLocalSave, saveActive, loadActive, parseFile, downloadJson, loadMatch, removeMatch, listMatches, loadSettings, saveSettings, MAX_SAVE_BYTES } from './storage.js';
 import { legalPlacements } from './rules/board.js';
 import { renderBoard, previewPlacement } from './rendering/board-svg.js';
 import { createPrivacyScreen } from '../packages/game-mechanics/src/hidden-information/privacy-screen.js';
@@ -9,7 +9,7 @@ import { QrScanner } from '../query-whom/js/scanner.js';
 const $ = selector => document.querySelector(selector);
 const make = (tag, className = '', text = '') => { const el = document.createElement(tag); el.className = className; el.textContent = text; return el; };
 const form = $('#setup-form'), screen = $('#private-content');
-let game = null, setup = null, selectedShip = null, placementStart = null, targets = [], drafts = {}, busy = false, initialSharing = false;
+let game = null, setup = null, selectedShip = null, placementStart = null, targets = [], drafts = {}, busy = false, initialSharing = false, removalId = null;
 let settings = { animations: true, sound: false, zoom: 27, zoomVersion: 2 };
 const privacy = createPrivacyScreen({ maxRevealMs: 300_000 });
 function error(message) {
@@ -148,7 +148,7 @@ function render(focusCoordinate = null) {
       }
       popup.addEventListener('keydown', event => { if (event.key === 'Escape') { event.preventDefault(); const coordinate = popup.dataset.anchor; resetSelection(); render(coordinate); } });
     }
-  } else { dockCopy.append(make('h3', '', state.ended ? 'This engagement has ended without a winner.' : state.winnerIri === me.iri ? 'Victory. All enemy vessels reported sunk.' : 'Defeat. Your fleet was destroyed.'), make('p', '', 'No opponent placements are stored here. Compare boards in person if you wish.')); controls.append(actionButton('Export journal', exportSave), actionButton('New engagement', returnToSetup, false, true)); }
+  } else { dockCopy.append(make('h3', '', state.ended ? 'This engagement has ended without a winner.' : state.winnerIri === me.iri ? 'Victory. All enemy vessels reported sunk.' : 'Defeat. Your fleet was destroyed.'), make('p', '', 'No opponent placements are stored here. Compare boards in person if you wish.')); controls.append(actionButton('Export journal', exportSave), actionButton('Finish game', askFinish, false, true)); }
   dock.append(dockCopy, controls);
   const log = make('section', 'battle-log'); log.append(make('h3', '', 'Shot history'));
   const columns = make('div', 'shot-history');
@@ -213,16 +213,17 @@ async function submitReport() {
     resetSelection(); render();
     $('#notice').textContent = (outgoing ? 'Recorded: ' : 'Tell your opponent: ') + accepted.map(r => `${r.coordinate}: ${resultLabel(r.type)}`).join('; ') + '. Saved automatically.';
     effects(accepted.some(r => ['Hit', 'Sunk'].includes(r.type)));
+    if (game.state().complete) askFinish();
   }
 }
-async function persist() {
+async function persist(options = {}) {
   if (!game) return false;
-  try { await saveActive(localSave(game, setup)); return true; }
+  try { await saveActive(localSave(game, setup), options); return true; }
   catch { error('Local saving is unavailable. Export your journal before leaving.'); return false; }
 }
-async function resume(record) { const restored = await parseLocalSave(record); game = restored.game; setup = restored.setup; selectedShip = null; resetSelection(); for (const dialog of document.querySelectorAll('dialog[open]')) dialog.close(); enterGame(); await persist(); }
+async function resume(record, options = {}) { const restored = await parseLocalSave(record); game = restored.game; setup = restored.setup; selectedShip = null; resetSelection(); for (const dialog of document.querySelectorAll('dialog[open]')) dialog.close(); enterGame(); await persist(options); }
 function exportSave() { if (game) downloadJson(localSave(game, setup), 'maritime-warship-private-local-save.json'); }
-async function returnToSetup() { await persist(); game = null; setup = null; privacy.conceal(); for (const dialog of document.querySelectorAll('dialog[open]')) dialog.close(); $('#game-screen').hidden = true; $('#setup-screen').hidden = false; screen.replaceChildren(); document.body.classList.remove('arctic'); await refreshSaves(); }
+async function returnToSetup({ save = true } = {}) { if (save) await persist(); game = null; setup = null; privacy.conceal(); for (const dialog of document.querySelectorAll('dialog[open]')) dialog.close(); $('#game-screen').hidden = true; $('#setup-screen').hidden = false; screen.replaceChildren(); document.body.classList.remove('arctic'); await refreshSaves(); }
 function openSharing(join = false, initial = false) {
   initialSharing = initial;
   $('#transfer-continue').hidden = join; $('#transfer-back').hidden = !initial; $('#transfer-close').hidden = !join;
@@ -249,23 +250,43 @@ const scanner = new QrScanner({ video: $('#scan-video'), decodeCode: decodeSetup
 $('#scan-button').addEventListener('click', safe(async () => { $('#scan-dialog').showModal(); try { await scanner.start(); } catch (err) { $('#scan-status').textContent = err.message; } }));
 $('#scan-dialog').addEventListener('close', () => scanner.stop()); $('#scan-cancel').addEventListener('click', () => $('#scan-dialog').close());
 $('#help-button').addEventListener('click', () => $('#help-dialog').showModal());
-$('#menu-button').addEventListener('click', () => { $('#game-name').value = game.state().name; $('#end-button').hidden = game.state().complete; $('#rename-button').hidden = game.state().complete; $('#menu-dialog').showModal(); });
+$('#menu-button').addEventListener('click', () => { $('#game-name').value = game.state().name; $('#end-button').hidden = false; $('#end-button').textContent = game.state().complete ? 'Finish game' : 'End game'; $('#rename-button').hidden = game.state().complete; $('#menu-dialog').showModal(); });
 for (const button of document.querySelectorAll('[data-close]')) button.addEventListener('click', () => button.closest('dialog').close());
 for (const dialog of document.querySelectorAll('dialog:not(#handoff-dialog)')) dialog.addEventListener('close', () => { if (privacy.getState().status !== 'revealed') showRevealPrompt(); });
 $('#transfer-dialog').addEventListener('cancel', event => { if (!$('#transfer-continue').hidden) event.preventDefault(); });
 $('#transfer-continue').addEventListener('click', () => { $('#transfer-dialog').close(); if (privacy.getState().status !== 'revealed') showRevealPrompt(); });
-$('#transfer-back').addEventListener('click', safe(async () => { if (initialSharing) { await execute('endGame'); await returnToSetup(); } }));
+$('#transfer-back').addEventListener('click', safe(async () => { if (initialSharing) { await removeMatch(game.sessionId); await returnToSetup({ save: false }); } }));
 $('#join-button').addEventListener('click', () => openSharing(true));
 $('#network-button').addEventListener('click', () => { $('#menu-dialog').close(); openSharing(false); });
 $('#receive-button').addEventListener('click', safe(() => joinCode($('#transfer-text').value)));
 for (const [id, isLink] of [['copy-button', false], ['copy-link-button', true]]) $('#' + id).addEventListener('click', safe(async () => { const field = $(isLink ? '#invite-text' : '#transfer-text'), text = field.value; try { await navigator.clipboard.writeText(text); $('#transfer-status').textContent = 'Copied. Share only this setup; play continues verbally.'; } catch { field.focus(); field.select(); $('#transfer-status').textContent = 'Select and copy the text using your browser’s copy command.'; } }));
 $('#resume-button').addEventListener('click', safe(async () => { const record = await loadActive(); if (!record) throw new Error('No local journal found.'); await resume(record); }));
-$('#end-button').addEventListener('click', () => { $('#menu-dialog').close(); $('#end-dialog').showModal(); });
-$('#confirm-end').addEventListener('click', safe(async () => { if (await execute('endGame')) await returnToSetup(); }));
+function askFinish() {
+  $('#menu-dialog').close();
+  $('#end-title').textContent = game.state().complete ? 'Finish this game?' : 'End this game?';
+  $('#end-dialog input[value=remove]').checked = true;
+  $('#cancel-end').textContent = game.state().complete ? 'Return to board' : 'Keep playing';
+  $('#confirm-end').textContent = game.state().complete ? 'Finish game' : 'End game';
+  $('#end-dialog').showModal();
+}
+$('#end-button').addEventListener('click', askFinish);
+$('#confirm-end').addEventListener('click', safe(async () => {
+  if (busy) return;
+  const keep = $('#end-dialog input[name=end-save]:checked').value === 'history';
+  if (!game.state().complete && !await execute('endGame')) return;
+  if (keep) { if (!await persist()) return; }
+  else await removeMatch(game.sessionId);
+  await returnToSetup({ save: false });
+  $('#notice').textContent = keep ? 'Game ended. Its record is in Your games.' : 'Game ended and its local save was removed.';
+}));
+$('#confirm-remove').addEventListener('click', safe(async () => {
+  await removeMatch(removalId); removalId = null; $('#remove-dialog').close(); await refreshSaves();
+  $('#notice').textContent = 'Saved game removed from this device.';
+}));
 $('#rename-button').addEventListener('click', safe(async () => { if (await execute('renameGame', { name: $('#game-name').value })) { $('#menu-dialog').close(); $('#notice').textContent = 'Game name saved.'; } }));
-$('#conceal-button').addEventListener('click', requestReveal); $('#new-button').addEventListener('click', safe(returnToSetup)); $('#export-button').addEventListener('click', exportSave);
+$('#conceal-button').addEventListener('click', requestReveal); $('#new-button').addEventListener('click', safe(async () => { if (game.state().complete) askFinish(); else await returnToSetup(); })); $('#export-button').addEventListener('click', exportSave);
 $('#import-button').addEventListener('click', () => $('#file-input').click());
-$('#file-input').addEventListener('change', safe(async event => { const file = event.target.files[0]; event.target.value = ''; if (!file) return; if (file.size > MAX_SAVE_BYTES) throw new Error('File exceeds the 96 MB limit.'); await resume(parseFile(await file.text())); await persist(); }));
+$('#file-input').addEventListener('change', safe(async event => { const file = event.target.files[0]; event.target.value = ''; if (!file) return; if (file.size > MAX_SAVE_BYTES) throw new Error('File exceeds the 96 MB limit.'); await resume(parseFile(await file.text()), { allowReopen: true }); }));
 for (const key of ['animations', 'sound', 'zoom']) $('#' + key).addEventListener('input', safe(async event => { settings[key] = key === 'zoom' ? Number(event.target.value) : event.target.checked; document.documentElement.style.setProperty('--cell', settings.zoom + 'px'); await saveSettings(settings); }));
 function effects(hit) {
   if (settings.animations && !matchMedia('(prefers-reduced-motion: reduce)').matches) { document.body.classList.remove('hit-flash', 'splash-effect'); void document.body.offsetWidth; document.body.classList.add(hit ? 'hit-flash' : 'splash-effect'); if (hit) navigator.vibrate?.([100, 50, 100]); }
@@ -280,6 +301,9 @@ async function refreshSaves() {
       copy.append(make('h3', '', entry.name || entry.names?.join(' vs ') || 'Engagement'), make('p', '', `${entry.names?.join(' vs ') || ''} \u00b7 ${entry.status || 'complete'} \u00b7 ${entry.turns ?? 0} turns \u00b7 ${entry.shots} shots \u00b7 Updated ${new Date(entry.savedAt).toLocaleString()}`));
       row.append(copy);
       if (entry.status) row.append(actionButton(entry.status === 'active' ? 'Resume' : 'Review', async () => { const record = await loadMatch(entry.id); if (!record) throw new Error('Saved journal unavailable.'); await resume(record); }));
+      row.append(actionButton('Remove', () => {
+        removalId = entry.id; $('#remove-name').textContent = entry.name || entry.names?.join(' vs ') || 'this game'; $('#remove-dialog').showModal();
+      }));
       return row;
     }));
   } catch { $('#resume-button').disabled = true; }

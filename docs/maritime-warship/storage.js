@@ -46,7 +46,7 @@ export function safeRows(rows) {
   }
   return rowsToQuads(rows);
 }
-export async function saveActive(record) {
+export async function saveActive(record, { allowReopen = false } = {}) {
   const connection = await db();
   const state = (await parseLocalSave(record)).game.state();
   const previous = await getRecord(connection, 'games', record.sessionId);
@@ -55,18 +55,23 @@ export async function saveActive(record) {
   // active pointer are durably committed together. Each session has its own key.
   await new Promise((resolve, reject) => {
     const tx = connection.transaction(['saveStates', 'games', 'preferences'], 'readwrite');
-    tx.objectStore('saveStates').put({ id: record.sessionId, value: record });
-    tx.objectStore('games').put({ id: record.sessionId, name: state.name, createdAt: previous?.createdAt || record.savedAt, savedAt: record.savedAt,
-      names: state.players.map(p => p.name), status: state.ended ? 'ended' : state.complete ? 'complete' : 'active',
-      turns: state.turnNumber - 1, shots: state.results.length, climate: state.config.climate,
-      winner: state.players.find(p => p.iri === state.winnerIri)?.name || '' });
-    const preferences = tx.objectStore('preferences');
-    if (active) preferences.put({ id: 'active', sessionId: record.sessionId });
-    else {
-      const request = preferences.get('active');
-      request.onsuccess = () => { if (request.result?.sessionId === record.sessionId || request.result?.audience === record.audience) preferences.delete('active'); };
-    }
-    tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); tx.onabort = () => reject(tx.error || new Error('Save aborted.'));
+    const removed = tx.objectStore('preferences').get('removed:' + record.sessionId);
+    removed.onsuccess = () => {
+      if (removed.result && !allowReopen) { tx.abort(); return; }
+      if (removed.result) tx.objectStore('preferences').delete('removed:' + record.sessionId);
+      tx.objectStore('saveStates').put({ id: record.sessionId, value: record });
+      tx.objectStore('games').put({ id: record.sessionId, name: state.name, createdAt: previous?.createdAt || record.savedAt, savedAt: record.savedAt,
+        names: state.players.map(p => p.name), status: state.ended ? 'ended' : state.complete ? 'complete' : 'active',
+        turns: state.turnNumber - 1, shots: state.results.length, climate: state.config.climate,
+        winner: state.players.find(p => p.iri === state.winnerIri)?.name || '' });
+      const preferences = tx.objectStore('preferences');
+      if (active) preferences.put({ id: 'active', sessionId: record.sessionId });
+      else {
+        const request = preferences.get('active');
+        request.onsuccess = () => { if (request.result?.sessionId === record.sessionId || request.result?.audience === record.audience) preferences.delete('active'); };
+      }
+    };
+    tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); tx.onabort = () => reject(tx.error || new Error('This game was removed. Its old save cannot be restored automatically.'));
   });
   return record;
 }
@@ -75,6 +80,22 @@ export async function loadActive() {
   return active ? (await getRecord(connection, 'saveStates', active.sessionId || active.audience))?.value : null;
 }
 export async function loadMatch(id) { return (await getRecord(await db(), 'saveStates', id))?.value; }
+export async function removeMatch(id) {
+  const connection = await db();
+  await new Promise((resolve, reject) => {
+    const tx = connection.transaction(['saveStates', 'games', 'preferences', 'transactionLogs'], 'readwrite');
+    const saves = tx.objectStore('saveStates'), preferences = tx.objectStore('preferences');
+    saves.delete(id); tx.objectStore('games').delete(id); tx.objectStore('transactionLogs').delete(id);
+    // No fleet, history or summary remains. The ID alone prevents a stale tab
+    // from silently recreating a journal the player deliberately removed.
+    preferences.put({ id: 'removed:' + id });
+    const legacy = saves.get('local-player');
+    legacy.onsuccess = () => { if (legacy.result?.value?.sessionId === id) saves.delete('local-player'); };
+    const active = preferences.get('active');
+    active.onsuccess = () => { if (active.result?.sessionId === id || active.result?.audience && legacy.result?.value?.sessionId === id) preferences.delete('active'); };
+    tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); tx.onabort = () => reject(tx.error || new Error('Removal aborted.'));
+  });
+}
 export async function listMatches() {
   const connection = await db();
   // Preserve the single-slot journal written by the previous app version.

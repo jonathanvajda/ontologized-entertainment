@@ -124,16 +124,24 @@ test('Sunk needs no vessel class and denotes a participating non-mission capable
   assert.ok(ix.values(ix.one(ship, V.missionStasis), V.type).includes(MW + 'SunkStasis'));
   assert.equal(ix.values(ship, V.location).length, 0);
 });
-test('terrain shots are misses in both climates; blocked is not a playable result', async () => {
-  for (const climate of ['WARM_WATER','ARCTIC']) {
+test('public obstacles cannot be targeted; shallow water remains a valid target in both directions', async () => {
+  for (const climate of ['WARM_WATER', 'ARCTIC']) {
     const { game } = await fixture({ climate, obstacles: 2 }); await deploy(game);
-    const target = other(game).obstacles[0];
-    assert.equal((await record(game, 'outgoing', [{ coordinate: target, type: 'Hit' }])).ok, false);
-    assert.equal((await record(game, 'outgoing', [{ coordinate: target, type: 'Blocked' }])).ok, false);
-    assert.equal((await record(game, 'outgoing', [{ coordinate: target, type: 'Miss' }])).ok, true);
-    assert.equal(game.state().index.values(game.state().results[0].shotIri, V.struckShip).length, 0);
+    const before = JSON.stringify(game.snapshot()), target = other(game).obstacles[0];
+    for (const type of ['Miss', 'Hit', 'Sunk']) {
+      assert.equal((await record(game, 'outgoing', [{ coordinate: target, type }])).ok, false);
+      assert.equal(JSON.stringify(game.snapshot()), before);
+    }
+    const water = [...other(game).cells.values()].find(cell => !cell.obstacle && (climate === 'ARCTIC' || cell.shallow)).coordinate;
+    assert.equal((await record(game, 'outgoing', [{ coordinate: water, type: 'Miss' }])).ok, true);
+    const incomingBefore = JSON.stringify(game.snapshot());
+    assert.equal((await game.act('receiveAttack', { coordinates: [me(game).obstacles[0]] })).ok, false);
+    assert.equal(JSON.stringify(game.snapshot()), incomingBefore);
+    const ownWater = [...me(game).cells.values()].find(cell => !cell.obstacle && (climate === 'ARCTIC' || cell.shallow)).coordinate;
+    assert.equal((await game.act('receiveAttack', { coordinates: [ownWater] })).ok, true);
   }
 });
+
 test('two independent journals reach victory/defeat only by manually recording verbal reports', async () => {
   const { game: first, setup } = await fixture({ salvo: true });
   const second = createMaritimeGame(setup.config, { boardSeed: boardSeed(setup), localIndex: 1, placementSeed: 'second' });

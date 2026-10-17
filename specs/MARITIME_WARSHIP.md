@@ -16,11 +16,11 @@ Before placing vessels, the environmental condition (Climate) is selected. Clima
 * **Warm Water (Tropical Maritime):**
   * *Obstacles:* Represented as landmasses, islands, or coral reefs.
   * *Draft Rule:* Heavy vessels require deep water. The largest vessels in a fleet cannot be anchored adjacent to or overlapping island/reef sectors.
-  * *Attack Interaction:* Shots landing on island terrain are absorbed and recorded as Miss. Blocked is not a separate playable outcome.
+  * *Attack Interaction:* Visible island terrain cannot be targeted. Blocked is not a separate playable outcome.
 * **Arctic (Frozen Maritime):**
   * *Obstacles:* Represented as ice fields, icebergs, or frozen hazard zones.
   * *Navigation Rule:* Vessels of any size cannot be positioned over frozen sectors.
-  * *Attack Interaction:* Shots landing on frozen sectors bounce or fail to penetrate and are recorded as Miss. Glancing Miss and Blocked are not separate playable outcomes.
+  * *Attack Interaction:* Visible frozen obstacles cannot be targeted. Glancing Miss and Blocked are not separate playable outcomes.
 
 ### 4. Fleet Configurations
 A fleet consists of $N$ distinct vessels (ranging from 4 to 7 vessels). Every vessel has a specific length measured in continuous grid cells:
@@ -46,7 +46,7 @@ A fleet consists of $N$ distinct vessels (ranging from 4 to 7 vessels). Every ve
 * **Optional Identity Disclosure:** Players decide whether to name hit or sunk vessels. Hit and Sunk MUST be recordable without disclosing vessel class, name, full footprint, or an association with earlier hits. A sunk vessel is a participating warship in a non-mission-capable stasis for the game mission; its more specific class may remain unknown.
 4.2 Targeting Feedback Loop
 An uncommitted selection may be canceled. After a verbal report, a coordinate is manually recorded with one of these results:
-- Miss: The coordinate contains no vessel segment, including terrain obstacles. Cancel abandons an uncommitted selection and is not a shot result.
+- Miss: The coordinate contains no vessel segment, excluding visible terrain obstacles, which cannot be targeted. Cancel abandons an uncommitted selection and is not a shot result.
 - Hit: The coordinate strikes an active, unsunk vessel segment.
 - Hit and sunk (stored as Sunk): The shot hits the last undamaged cell of a specific vessel. It is one exclusive outcome, rather than two separate choices.
 
@@ -244,8 +244,8 @@ One-device pass-and-play is a future option, not a current setup choice or requi
 - **Results:** Use mutually exclusive radio choices with icons and text: Miss, Hit, Hit and sunk. Nothing is preselected for outgoing shots. Cancel is a separate action. Vessel identity disclosure remains optional. Legacy Blocked/GlancingMiss RDF may be read from older saves but no new game offers those states.
 - **History:** Show two labelled sections, Your shots (local player name) and Their shots (opponent name), with coordinates and results. Avoid unexplained IN/OUT prefixes.
 - **Privacy:** Concealment removes the private board DOM and directly opens the private command-deck modal. One Reveal action restores the deck; no intermediate Return button. Delay the prompt while another modal is open, and show it when that modal closes. Retain explicit conceal, blur/visibility conceal, and the idle timeout.
-- **Setup sharing:** Show Continue to fleet placement and Go back to setup. Do not depend on an X close button to advance. Going back abandons the configuration without declaring a winner.
-- **Menu and termination:** Label it Menu. Offer End game with a short confirmation, preserving the ended journal for review without declaring a winner or updating the other device. Setup & saved games pauses the current journal and opens the game list.
+- **Setup sharing:** Show Continue to fleet placement and Go back to setup. Do not depend on an X close button to advance. Going back discards the configuration and its temporary save without declaring a winner.
+- **Menu and termination:** Label it Menu. Offer End game with a short confirmation, defaulting to Remove the save, with Keep in finished-game history as an explicit alternative; ending early does not declare a winner or update the other device. Setup & saved games pauses the current journal and opens the game list.
 - **Multiple journals:** Persist snapshots per session identifier, rather than one shared local-player slot. List all games with a local editable name, player names, updated date/time, turn and shot counts, and active/completed/ended status. Resume active games or review finished journals. Preserve and migrate the previous single saved journal. The game name is an RDF label; list metadata is a disposable summary of the saved RDF and technical timestamps.
 
 ### Sharing and chart presentation refinement
@@ -253,3 +253,9 @@ One-device pass-and-play is a future option, not a current setup choice or requi
 Keep the sharing modal compact: a single-line setup code with an adjacent Copy code button, a read-only invite-link preview with its own adjacent Copy link button, and a compact scannable QR. Center Continue horizontally, with Go back underneath for initial setup. Join mode uses the code field for either a code or pasted invitation, without redundant sharing controls. Copy fallback selects the corresponding field without replacing the other value.
 
 Use static, non-realistic light/dark water bands and recognizable island/ice silhouettes. Terrain remains fixed and public; decorative variations carry no gameplay information. Preserve the contrast of ship, damage, selection and shallow-water indicators. Hit and miss feedback uses a fixed viewport overlay with a broad edge wash reaching approximately 30% into the screen, including on long/scrolled boards; retain the 1350/1800 ms durations, pointer pass-through, and reduced-motion suppression.
+
+Visible obstacle cells cannot be selected or targeted, for either climate. Shallow-water cells remain valid targets because eligible ships may occupy them. Keyboard arrows skip obstacles and previously resolved cells. Existing saved terrain-shot observations remain readable.
+
+### Save retention and removal
+
+Follow Query Whom!: ending or finishing presents Remove the save (selected by default) and Keep in finished-game history (opt-in). The last shot is autosaved for recovery and immediately opens this choice; choosing removal deletes the snapshot and summary. Ended records are not kept automatically. Existing saved-game entries have a Remove action with cancellation/confirmation. Removal deletes private RDF/history, summary, any matching legacy slot and active pointer atomically, leaving unrelated games untouched. An identifier-only deletion marker prevents stale tab saves from resurrecting a removed record; deliberate backup import may restore it. Cancelling removal preserves the game. Abandoning initial setup removes its temporary save.

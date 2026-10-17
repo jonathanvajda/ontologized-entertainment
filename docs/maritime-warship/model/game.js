@@ -146,7 +146,7 @@ function canAct({ action, store }) {
   let knownHits = me.outgoing.filter(r => ['Hit', 'Sunk'].includes(r.type)).length;
   for (const report of [...reports].sort(sortReports)) {
     const cell = defender.cells.get(report.coordinate);
-    if (cell.obstacle && report.type !== 'Miss') return fail('TERRAIN_REPORT', 'A shot at terrain is a miss.');
+    if (cell.obstacle) return fail('OBSTRUCTED_TARGET', 'Choose a water coordinate. Visible obstacles cannot be targeted.');
     if (incoming) {
       const ship = me.ships.find(s => s.cells.includes(report.coordinate)), segment = ship?.segments.find(s => s.cellIri === cell.iri);
       if (!cell.obstacle && segment) {

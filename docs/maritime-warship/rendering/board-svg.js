@@ -20,7 +20,7 @@ export function renderBoard(holder, player, config, { title, showShips = false, 
     const isSunk = ship?.sunk || (result && ['Hit', 'Sunk'].includes(type) && player.incoming.some(other => other.type === 'Sunk' && other.cellIri === cell.iri));
     const classes = ['chart-cell', cell.obstacle ? 'obstacle' : cell.shallow ? 'shallow' : '', ship ? 'ship' : '',
       result ? (isSunk || type === 'Sunk' ? 'sunk' : type === 'Hit' ? 'hit' : type === 'Miss' ? 'miss' : 'blocked') : '', selectedSet.has(cell.coordinate) ? 'selected' : '', endpoints.includes(cell.coordinate) ? 'placement-end' : '', previewSet.has(cell.coordinate) ? invalidPreview ? 'invalid' : 'preview' : ''].filter(Boolean).join(' ');
-    const enabled = interactive && !result;
+    const enabled = interactive && !result && !cell.obstacle;
     const group = node('g', { transform: `translate(${padding + cell.column * unit},${padding + cell.row * unit})`, class: classes,
       'data-coordinate': cell.coordinate, role: enabled ? 'button' : 'img', 'aria-label': `${cell.coordinate}: ${type || (cell.obstacle ? config.climate === 'ARCTIC' ? 'ice obstacle' : 'island obstacle' : ship ? ship.name : cell.shallow ? 'shallow water' : 'water')}${selectedSet.has(cell.coordinate) ? ', selected' : ''}${endpoints.includes(cell.coordinate) ? ', available ship endpoint' : ''}`,
       ...(enabled ? { tabindex: '0', 'aria-pressed': selectedSet.has(cell.coordinate) } : {}) });
@@ -47,9 +47,14 @@ export function renderBoard(holder, player, config, { title, showShips = false, 
         if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onCell?.(cell.coordinate, event); }
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
           event.preventDefault();
-          const r = cell.row + (event.key === 'ArrowDown' ? 1 : event.key === 'ArrowUp' ? -1 : 0);
-          const c = cell.column + (event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0);
-          svg.querySelector(`[data-coordinate="${String.fromCharCode(65 + r)}${c + 1}"][tabindex]`)?.focus();
+          const dr = event.key === 'ArrowDown' ? 1 : event.key === 'ArrowUp' ? -1 : 0;
+          const dc = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+          let r = cell.row + dr, c = cell.column + dc;
+          while (r >= 0 && r < config.rows && c >= 0 && c < config.columns) {
+            const next = svg.querySelector(`[data-coordinate="${String.fromCharCode(65 + r)}${c + 1}"][tabindex]`);
+            if (next) { next.focus(); break; }
+            r += dr; c += dc;
+          }
         }
       });
       if (onHover) {

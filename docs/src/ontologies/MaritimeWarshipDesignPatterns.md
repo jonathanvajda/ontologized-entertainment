@@ -185,4 +185,4 @@ The CCO identifiers and definitions were checked against this repository's bundl
 
 Requirements: [Maritime Warship](../../../specs/MARITIME_WARSHIP.md), [technical boilerplate](../../../specs/BOILERPLATE_TECHNICAL_SPEC.md), [capability boilerplate](../../../specs/BOILERPLATE_CAPABILITY_SPEC.md). Parameter values use typed information nodes and `rdf:value`; renderer geometry, UI state and technical transport remain outside domain RDF.
 
-The playable result choices are Miss, Hit, and Hit and sunk (stored as `Sunk`). Terrain shots are misses. Legacy Blocked/GlancingMiss classes are retained for reading older records, not offered as current choices. Ending a game records an ended phase without inventing a winner. A local game name reuses `rdfs:label` on the session.
+The playable result choices are Miss, Hit, and Hit and sunk (stored as `Sunk`). Visible obstacles cannot be targeted; existing terrain-shot records remain readable. Legacy Blocked/GlancingMiss classes are retained for reading older records, not offered as current choices. Ending a game records an ended phase without inventing a winner. A local game name reuses `rdfs:label` on the session.

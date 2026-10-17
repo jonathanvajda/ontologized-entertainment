@@ -103,3 +103,6 @@
 .chart-cell.ship .water-texture,.chart-cell.hit .water-texture,.chart-cell.sunk .water-texture,.chart-cell.preview .water-texture,.chart-cell.selected .water-texture{display:none}
 .terrain-texture{fill:#566940;stroke:#e0d29c;stroke-width:1;pointer-events:none}
 .arctic .terrain-texture{fill:#c5e4ec;stroke:#edfaff}
+
+.end-options{margin:18px 0}.end-options label{margin:12px 0;color:var(--ink)}
+.history-entry{flex-wrap:wrap}.history-entry>div{flex:1 1 240px}
