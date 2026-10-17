@@ -130,8 +130,24 @@ try {
   assert.equal(await page.locator('#match-name').textContent(),'Saturday with Sam');
   console.log('PASS: placement, explicit outgoing/calculated incoming reports, cancellation, privacy, save/resume and desktop/mobile accessibility');
   await page.locator('#menu-button').click(); await page.locator('#network-button').click();
+  await page.setViewportSize({width:1440,height:1000});
   assert.equal(await page.locator('#transfer-text').inputValue(),code,'Re-sharing exports only original setup');
-  await a11y(page,'sharing');
+  assert.equal(await page.locator('#invite-text').inputValue(),await page.evaluate(()=>document.querySelector('#qr-output svg') ? new URL('./',location.href).href+'#invite='+document.querySelector('#transfer-text').value.replaceAll('-','') : ''));
+  assert.equal(await page.locator('#transfer-text').evaluate(el=>el.tagName),'INPUT');
+  const sharingBounds=await page.locator('#transfer-dialog').boundingBox();assert.ok(sharingBounds.width<=500 && sharingBounds.height<580,'Sharing modal stays compact');
+  const continueBounds=await page.locator('#transfer-continue').boundingBox();assert.ok(Math.abs(continueBounds.x+continueBounds.width/2-sharingBounds.x-sharingBounds.width/2)<2,'Continue is centered');
+  await a11y(page,'sharing');await page.screenshot({path:resolve(results,'sharing-compact.png'),fullPage:true});
+  await page.setViewportSize({width:390,height:844});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  await a11y(page,'mobile sharing');await page.screenshot({path:resolve(results,'sharing-mobile.png'),fullPage:true});
+  await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('Clipboard unavailable');}}}));
+  const displayedLink=await page.locator('#invite-text').inputValue();
+  await page.locator('#copy-link-button').click();
+  assert.equal(await page.locator('#transfer-text').inputValue(),code,'Link copy fallback preserves the setup code');
+  assert.equal(await page.locator('#invite-text').evaluate(el=>el.value.slice(el.selectionStart,el.selectionEnd)),displayedLink,'Fallback selects the link field');
+  await page.locator('#copy-button').click();
+  assert.equal(await page.locator('#transfer-text').evaluate(el=>el.value.slice(el.selectionStart,el.selectionEnd)),code);
+  await page.setViewportSize({width:1440,height:1000});
   const invitation=await page.evaluate(async()=>{
     const svg=document.querySelector('#qr-output svg'); const xml=new XMLSerializer().serializeToString(svg);
     const image=new Image();image.src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(xml)));await image.decode();
@@ -198,8 +214,8 @@ try {
   await salvo.waitForFunction(()=>document.querySelectorAll('.log-entry').length===4);
   assert.match(await salvo.locator('#notice').textContent(),/Tell your opponent:.*Hit and sunk/);
   assert.equal((await persisted(salvo)).transactions.filter(tx=>tx.action.actionType==='recordReport').length,2);
-  assert.equal(await salvo.evaluate(()=>getComputedStyle(document.body).animationDuration),'1.35s');
-  assert.equal(await salvo.evaluate(()=>{document.body.classList.remove('hit-flash');document.body.classList.add('splash-effect');return getComputedStyle(document.body).animationDuration;}),'1.8s');
+  assert.equal(await salvo.evaluate(()=>getComputedStyle(document.body,'::after').animationDuration),'1.35s');
+  assert.equal(await salvo.evaluate(()=>{document.body.classList.remove('hit-flash');document.body.classList.add('splash-effect');return getComputedStyle(document.body,'::after').animationDuration;}),'1.8s');
 
   const gamesContext=await browser.newContext(),games=await pageIn(gamesContext);
   await games.locator('[name=matchName]').fill('First game');await start(games);await deploy(games);await mark(games,1,'A1','Hit');

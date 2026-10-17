@@ -228,13 +228,16 @@ function openSharing(join = false, initial = false) {
   $('#transfer-continue').hidden = join; $('#transfer-back').hidden = !initial; $('#transfer-close').hidden = !join;
   $('#transfer-continue').textContent = initial ? 'Continue to fleet placement' : 'Continue';
   clearMessages(); $('#transfer-title').textContent = join ? 'Join a game' : 'Share the setup once';
-  $('#transfer-description').textContent = join ? 'Scan the creator’s QR, paste an invitation, or type the complete setup code. No server lookup is needed.' : 'The code contains public rules and terrain only. Your opponent joins on their device. After setup, communicate all attacks and results verbally.';
+  $('#transfer-description').textContent = join ? 'Scan the creator’s QR, paste an invitation, or type the complete setup code. No server lookup is needed.' : 'Share a code, link, or QR. Your opponent joins once; then call shots and results aloud.';
+  $('#join-actions').hidden = !join; $('#invite-field').hidden = join;
+  $('#transfer-code-label').textContent = join ? 'Setup code or invitation' : 'Setup code';
+  $('#invite-text').value = !join && setup ? inviteUrl(setup.code, new URL('./', location.href).href) : '';
   for (const id of ['receive-button', 'scan-button']) $('#' + id).hidden = !join;
   for (const id of ['copy-button', 'copy-link-button']) $('#' + id).hidden = join;
   $('#transfer-text').readOnly = !join; $('#transfer-text').value = !join && setup ? formatCode(setup.code) : '';
   $('#qr-output').replaceChildren();
   if (!join && setup) { const qr = window.qrcode(0, 'M'); qr.addData(inviteUrl(setup.code, new URL('./', location.href).href)); qr.make(); $('#qr-output').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 4, scalable: true }); $('#qr-output svg')?.setAttribute('aria-label', 'Public setup invitation QR'); }
-  $('#transfer-status').textContent = join ? 'The creator fires first. Your fleet will be placed privately on this device.' : 'No fleets, hits, misses, private random state, or saved progress are included.';
+  $('#transfer-status').textContent = join ? 'The creator fires first. Your fleet will be placed privately on this device.' : 'Public setup only. Your fleet and progress stay private.';
   if (!$('#transfer-dialog').open) $('#transfer-dialog').showModal();
 }
 async function joinCode(code) {
@@ -255,7 +258,7 @@ $('#transfer-back').addEventListener('click', safe(async () => { if (initialShar
 $('#join-button').addEventListener('click', () => openSharing(true));
 $('#network-button').addEventListener('click', () => { $('#menu-dialog').close(); openSharing(false); });
 $('#receive-button').addEventListener('click', safe(() => joinCode($('#transfer-text').value)));
-for (const [id, isLink] of [['copy-button', false], ['copy-link-button', true]]) $('#' + id).addEventListener('click', safe(async () => { const text = isLink ? inviteUrl(setup.code, new URL('./', location.href).href) : formatCode(setup.code); try { await navigator.clipboard.writeText(text); $('#transfer-status').textContent = 'Copied. Share only this setup; play continues verbally.'; } catch { $('#transfer-text').value = text; $('#transfer-text').select(); $('#transfer-status').textContent = 'Select and copy the text using your browser’s copy command.'; } }));
+for (const [id, isLink] of [['copy-button', false], ['copy-link-button', true]]) $('#' + id).addEventListener('click', safe(async () => { const field = $(isLink ? '#invite-text' : '#transfer-text'), text = field.value; try { await navigator.clipboard.writeText(text); $('#transfer-status').textContent = 'Copied. Share only this setup; play continues verbally.'; } catch { field.focus(); field.select(); $('#transfer-status').textContent = 'Select and copy the text using your browser’s copy command.'; } }));
 $('#resume-button').addEventListener('click', safe(async () => { const record = await loadActive(); if (!record) throw new Error('No local journal found.'); await resume(record); }));
 $('#end-button').addEventListener('click', () => { $('#menu-dialog').close(); $('#end-dialog').showModal(); });
 $('#confirm-end').addEventListener('click', safe(async () => { if (await execute('endGame')) await returnToSetup(); }));

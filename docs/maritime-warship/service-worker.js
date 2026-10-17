@@ -1,4 +1,4 @@
-const CACHE = 'maritime-warship-v6';
+const CACHE = 'maritime-warship-v7';
 const base = new URL('./', self.location.href);
 const paths = [
   './', './index.html', './app.js', './theme.css', './game-config.js', './storage.js', './network.js', './manifest.webmanifest', './assets/icon.svg',
