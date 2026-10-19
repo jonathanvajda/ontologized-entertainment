@@ -127,3 +127,5 @@ mw:FleetCeilingSpecification a owl:Class ; rdfs:subClassOf mw:ParameterSpecifica
 mw:FairnessToleranceSpecification a owl:Class ; rdfs:subClassOf mw:ParameterSpecification ; rdfs:label "FairnessTolerance specification"@en ; skos:definition "The allowed relative placement entropy difference; normally 0.03."@en .
 
 mw:hasLocalPlayer a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:domain mw:MaritimeSession ; rdfs:range cco:ont00001017 ; rdfs:label "has local player"@en ; skos:definition "Relates a local session journal to the player whose private fleet and manually recorded observations it contains."@en .
+
+mw:hasOpenAttackOrder a owl:ObjectProperty, owl:FunctionalProperty ; rdfs:domain mw:MaritimeSession ; rdfs:range mw:AttackOrder ; rdfs:label "has open attack order"@en ; skos:definition "Identifies the current salvo order while its shots are recorded incrementally; cleared on turn handover or game termination."@en .

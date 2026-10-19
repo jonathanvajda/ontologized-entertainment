@@ -38,3 +38,53 @@ test('compact codes reject checksum changes, padding changes and invalid rule fi
   const dimensions = original.slice(); dimensions[1] |= 0xf8;
   await assert.rejects(decodeSetup(await resign(dimensions)), /dimensions/);
 });
+
+test('player names round-trip through typed codes and invitations without changing terrain', async () => {
+  const { formatCode, inviteUrl } = await import('../network.js');
+  const defaultSetup = await createSetup({}, 'same-ocean');
+  for (const names of [['Ada', 'Bert'], ['Zo\u00eb', '\u674e\u96f7'], ['A'.repeat(24), 'B'.repeat(24)], ['\u6c34'.repeat(24), '\u51b0'.repeat(24)], ['\ud83d\udea2 Admiral', 'Captain O\u2019Brien']]) {
+    const setup = await createSetup({ names }, 'same-ocean');
+    assert.equal(boardSeed(setup), boardSeed(defaultSetup), 'Names do not alter terrain generation');
+    for (const input of [formatCode(setup.code).toLowerCase(), inviteUrl(setup.code, 'https://example.test/warship/')]) {
+      assert.deepEqual(await decodeSetup(input), setup);
+    }
+  }
+  const legacy = await decodeSetup('2AAA5F2NWKJ7DVZ2MMUJ');
+  assert.deepEqual(legacy.config.names, ['Admiral One', 'Admiral Two']);
+  assert.deepEqual(legacy.seed, [140, 10, 189, 252]);
+});
+
+test('re-sharing legacy games adds their saved names while retaining both seed formats and private RDF', async () => {
+  const { withPlayerNames } = await import('../network.js');
+  const { createMaritimeGame } = await import('../model/game.js');
+  const { localSave, parseLocalSave } = await import('../storage.js');
+  const { canonicalizeQuads } = await import('../../packages/game-mechanics/src/hidden-information/rdf-capsule.js');
+  for (const code of ['2672N2226E4242J52J2242J52J4JE3SA3672Q52F3S9JTZBG', '2AAA5F2NWKJ7DVZ2MMUJ']) {
+    const original = await decodeSetup(code), names = ['Ada', 'Bert'];
+    const game = createMaritimeGame({ ...original.config, names }, { boardSeed: boardSeed(original) });
+    await game.act('autoPlace');
+    await parseLocalSave(localSave(game, original)); // Old saves did not encode names.
+    const upgraded = await withPlayerNames(original, names);
+    assert.equal(boardSeed(upgraded), boardSeed(original));
+    assert.deepEqual(await decodeSetup(upgraded.code), upgraded);
+    assert.deepEqual(upgraded.config.names, names);
+    const restored = await parseLocalSave(localSave(game, upgraded));
+    assert.equal(canonicalizeQuads(restored.game.snapshot().quads), canonicalizeQuads(game.snapshot().quads));
+    const changed = localSave(game, upgraded);
+    changed.quads.find(q => q.predicate.value.endsWith('label') && q.object.value === 'Ada').object.value = 'Wrong name';
+    await assert.rejects(parseLocalSave(changed), /player names/);
+  }
+});
+
+test('named setup codes reject truncated names and invalid UTF-8 even with a valid checksum', async () => {
+  const setup = await createSetup({ names: ['Ada', 'Bert'] }, 'invalid-names');
+  const bytes = base32Decode(setup.code);
+  const resign = async candidate => {
+    candidate.set(new Uint8Array(await crypto.subtle.digest('SHA-256', candidate.slice(0, -2))).slice(0, 2), candidate.length - 2);
+    return base32Encode(candidate);
+  };
+  const length = bytes.slice(); length[10] = 96;
+  await assert.rejects(decodeSetup(await resign(length)), /player names/);
+  const invalid = bytes.slice(); invalid[11] = 255;
+  await assert.rejects(decodeSetup(await resign(invalid)), /encoded data|encoding|UTF/i);
+});

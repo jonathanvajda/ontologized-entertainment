@@ -81,7 +81,7 @@ export function hydrateMaritimeGame(snapshot) {
   const store = new RdfStore(snapshot.quads), findings = validateMaritime(store);
   if (findings.length) throw new Error(findings[0].message);
   const rules = new RuleRegistry();
-  for (const actionType of ['placeShip', 'autoPlace', 'clearPlacement', 'lockFleet', 'recordReport', 'endGame', 'renameGame']) rules.registerAction(actionType, { preconditions: [canAct], effects });
+  for (const actionType of ['placeShip', 'autoPlace', 'clearPlacement', 'lockFleet', 'recordReport', 'correctReport', 'finishVolley', 'endGame', 'renameGame']) rules.registerAction(actionType, { preconditions: [canAct], effects });
   const engine = createGameEngine({ store, rules, validator: new Validator([validateMaritime]), projection: projectMaritime });
   engine.random.setState(snapshot.rngState); engine.transactions.restore(snapshot.transactions || []);
   const sessionId = snapshot.sessionId || crypto.randomUUID(); let busy = false;
@@ -92,7 +92,7 @@ export function hydrateMaritimeGame(snapshot) {
       busy = true;
       try {
         if (actionType === 'receiveAttack') {
-          parameters = { direction: 'incoming', reports: incomingReports(projectMaritime(store), parameters.coordinates) };
+          parameters = { direction: 'incoming', reports: incomingReports(projectMaritime(store), parameters.coordinates), continueVolley: parameters.continueVolley };
           actionType = 'recordReport';
         }
         return await engine.actions.propose({ actionType, parameters, actorIri, actionIri: instance(`act-${engine.transactions.cursor + 1}`) });
@@ -122,7 +122,12 @@ export function incomingReports(state, coordinates) {
 }
 function canAct({ action, store }) {
   const state = projectMaritime(store), me = state.players.find(p => p.iri === state.localPlayerIri), params = action.parameters || {};
-  if (action.actorIri !== me.iri || state.complete) return fail('ACTION_NOT_ALLOWED', 'Only the local player can update an active journal.');
+  if (action.actorIri !== me.iri || state.ended || state.complete && action.actionType !== 'correctReport') return fail('ACTION_NOT_ALLOWED', 'Only the local player can update an active journal.');
+  if (action.actionType === 'correctReport') {
+    const updates = params.updates;
+    return Array.isArray(updates) && updates.length > 0 && updates.length <= me.outgoing.length && new Set(updates.map(r => r.resultIri)).size === updates.length && updates.every(update => me.outgoing.some(r => r.iri === update.resultIri) && ['Miss', 'Hit', 'Sunk'].includes(update.type)) || fail('INVALID_CORRECTION', 'Choose an existing outgoing report and Miss, Hit, or Hit and sunk.');
+  }
+  if (action.actionType === 'finishVolley') return state.phase === 'combat' && state.config.salvo && Boolean(state.openOrder) || fail('NO_OPEN_VOLLEY', 'Record at least one shot before finishing the volley.');
   if (action.actionType === 'endGame') return true;
   if (action.actionType === 'renameGame') return typeof params.name === 'string' && params.name.trim().length > 0 && params.name.trim().length <= 60 || fail('INVALID_NAME', 'Enter a game name of up to 60 characters.');
   if (action.actionType !== 'recordReport') {
@@ -140,10 +145,18 @@ function canAct({ action, store }) {
   if (params.direction !== (incoming ? 'incoming' : 'outgoing')) return fail('WRONG_TURN', incoming ? 'Record the incoming attack first.' : 'It is your firing turn.');
   const reports = params.reports, defender = state.players.find(p => p.iri === (incoming ? me.iri : state.players.find(p => p.iri !== me.iri).iri));
   if (!Array.isArray(reports) || reports.length < 1 || reports.length > (state.config.salvo ? 5 : 1) || new Set(reports.map(r => r?.coordinate)).size !== reports.length || reports.some(r => !r || !parseCoordinate(r.coordinate, state.config) || !['Miss', 'Hit', 'Sunk'].includes(r.type))) return fail('INVALID_REPORT', 'Select Miss, Hit, or Hit and sunk for each distinct coordinate.');
+  if (state.volleyCount + reports.length > (state.config.salvo ? 5 : 1)) return fail('VOLLEY_FULL', 'This volley can contain at most five shots. Finish it before changing turns.');
   if (reports.some(r => defender.incoming.some(old => old.coordinate === r.coordinate))) return fail('REPEAT_TARGET', 'A coordinate cannot be recorded twice.');
   const hit = new Set(me.ships.flatMap(ship => ship.segments.filter(seg => seg.damaged).map(seg => seg.iri)));
-  let knownSunk = me.outgoing.filter(r => r.type === 'Sunk').length;
-  let knownHits = me.outgoing.filter(r => ['Hit', 'Sunk'].includes(r.type)).length;
+  // An atomic batch is validated as a whole. Coordinate sorting must not make
+  // a sinking invalid just because its supporting hit sorts after it.
+  if (!incoming) {
+    const all = [...me.outgoing, ...reports];
+    const knownHits = all.filter(r => ['Hit', 'Sunk'].includes(r.type)).length, knownSunk = all.filter(r => r.type === 'Sunk').length;
+    const minimumSegments = state.config.fleet.map(type => SHIPS[type].length).sort((a,b) => a-b).slice(0, knownSunk).reduce((sum,n) => sum+n, 0);
+    if (knownHits > state.config.fleet.reduce((sum, type) => sum + SHIPS[type].length, 0)) return fail('INCONSISTENT_REPORT', 'Recorded hits exceed the opposing fleet’s segment inventory. Correct any mismarked earlier shot.');
+    if (knownSunk > state.config.fleet.length || knownHits < minimumSegments) return fail('INCONSISTENT_REPORT', 'The recorded hits are insufficient for the number of vessels reported sunk. Correct any mistaken Hit and sunk reports.');
+  }
   for (const report of [...reports].sort(sortReports)) {
     const cell = defender.cells.get(report.coordinate);
     if (cell.obstacle) return fail('OBSTRUCTED_TARGET', 'Choose a water coordinate. Visible obstacles cannot be targeted.');
@@ -153,15 +166,6 @@ function canAct({ action, store }) {
         hit.add(segment.iri); const final = ship.segments.every(seg => hit.has(seg.iri));
         if (report.type !== (final ? 'Sunk' : 'Hit')) return fail('INCONSISTENT_REPORT', 'Check your ship and its previous damage before reporting Hit or Sunk.');
       } else if (!cell.obstacle && report.type !== 'Miss') return fail('INCONSISTENT_REPORT', 'There is no vessel at this primary-grid coordinate.');
-    } else {
-      // The opposing placements are unknown. Record verbal claims, never resolve them.
-      if (['Hit', 'Sunk'].includes(report.type)) knownHits++;
-      if (knownHits > state.config.fleet.reduce((sum, type) => sum + SHIPS[type].length, 0)) return fail('INCONSISTENT_REPORT', 'Recorded hits exceed the opposing fleet’s segment inventory.');
-      if (report.type === 'Sunk') {
-        knownSunk++;
-        const minimumSegments = state.config.fleet.map(type => SHIPS[type].length).sort((a,b) => a-b).slice(0, knownSunk).reduce((sum, n) => sum+n, 0);
-        if (knownSunk > state.config.fleet.length || knownHits < minimumSegments) return fail('INCONSISTENT_REPORT', 'The recorded hits are insufficient for the number of vessels reported sunk.');
-      }
     }
   }
   return true;
@@ -173,9 +177,35 @@ function effects({ action, store, random }) {
   const remove = (s, p) => next.removeQuads(next.getQuads(nn(s), nn(p), null, null));
   const set = (s, p, o) => { remove(s, p); add(s, p, o); };
   const type = (s, t) => add(s, V.type, t), act = action.actionIri;
-  type(act, ['recordReport', 'endGame', 'renameGame'].includes(action.actionType) ? GAME + 'GameAct' : MW + 'PlacementAct'); add(act, V.agent, me.iri);
+  type(act, ['recordReport', 'correctReport', 'finishVolley', 'endGame', 'renameGame'].includes(action.actionType) ? GAME + 'GameAct' : MW + 'PlacementAct'); add(act, V.agent, me.iri);
   if (action.actionType === 'renameGame') set(SESSION, V.label, text(action.parameters.name.trim()));
-  if (action.actionType === 'endGame') { set(SESSION, V.phase, phaseIri('ended')); remove(SESSION, V.current); }
+  if (action.actionType === 'endGame') { set(SESSION, V.phase, phaseIri('ended')); remove(SESSION, V.current); remove(SESSION, V.openOrder); }
+  if (action.actionType === 'finishVolley') {
+    const attacker = state.index.one(state.openOrder, V.agent);
+    set(SESSION, V.current, attacker === me.iri ? other.iri : me.iri); remove(SESSION, V.openOrder);
+  }
+  if (action.actionType === 'correctReport') {
+    for (const update of action.parameters.updates) {
+      const result = me.outgoing.find(r => r.iri === update.resultIri), shot = result.shotIri;
+      remove(result.iri, V.type); type(result.iri, MW + 'AttackResult'); type(result.iri, MW + update.type + 'Result');
+      remove(shot, V.type); type(shot, V.shot); type(shot, MW + ({ Miss: 'MissShot', Hit: 'HitShot', Sunk: 'SinkingShot' }[update.type]));
+      const oldShip = state.index.one(shot, V.struckShip);
+      if (oldShip) {
+        const oldStasis = state.index.one(oldShip, V.missionStasis);
+        next.removeQuads([...next].filter(q => q.subject.value === oldShip || q.subject.value === oldStasis || q.object.value === oldShip || q.object.value === oldStasis));
+      }
+      if (update.type === 'Sunk') reportedSinking(shot, other.iri, add, type);
+    }
+    const corrected = projectMaritime(next), won = corrected.players.find(p => p.iri === me.iri).outgoing.filter(r => r.type === 'Sunk').length === state.config.fleet.length;
+    const lost = me.intact === 0;
+    remove(SESSION, V.winner);
+    if (won || lost) { set(SESSION, V.phase, phaseIri('complete')); remove(SESSION, V.current); remove(SESSION, V.openOrder); add(SESSION, V.winner, won ? me.iri : other.iri); }
+    else if (state.phase === 'complete') {
+      set(SESSION, V.phase, phaseIri('combat'));
+      const orders = state.index.ofType(MW + 'AttackOrder'), lastAttacker = state.index.one(orders.at(-1), V.agent);
+      set(SESSION, V.current, lastAttacker === me.iri ? other.iri : me.iri);
+    }
+  }
   const place = (ship, placement) => {
     const candidate = legalPlacements(ship.length, me.obstacles, state.config).find(p => p.start === placement.start && p.orientation === placement.orientation);
     ship.segments.forEach((seg, i) => set(seg.iri, V.location, me.cells.get(candidate.cells[i]).iri)); add(act, V.participant, ship.iri);
@@ -186,12 +216,12 @@ function effects({ action, store, random }) {
   if (action.actionType === 'lockFleet') set(SESSION, V.phase, phaseIri('combat'));
   if (action.actionType === 'recordReport') {
     const incoming = action.parameters.direction === 'incoming', attacker = incoming ? other : me, defender = incoming ? me : other;
-    const order = act + '/order'; type(order, MW + 'AttackOrder'); add(order, V.agent, attacker.iri);
+    const order = state.openOrder || act + '/order'; type(order, MW + 'AttackOrder'); add(order, V.agent, attacker.iri);
     const hit = new Set(me.ships.flatMap(s => s.segments.filter(seg => seg.damaged).map(seg => seg.iri)));
     const salvo = order + '/salvo'; if (state.config.salvo) type(salvo, MW + 'Salvo');
     const operator = order + '/operator', launcher = order + '/launcher'; type(operator, CCO + 'ont00001017'); type(launcher, CCO + 'ont00000445');
     for (const [i, report] of [...action.parameters.reports].sort(sortReports).entries()) {
-      const cell = defender.cells.get(report.coordinate), shot = order + `/shot-${i}`, result = shot + '/result', munition = shot + '/torpedo';
+      const cell = defender.cells.get(report.coordinate), shot = order + `/shot-${state.volleyCount + i}`, result = shot + '/result', munition = shot + '/torpedo';
       type(shot, V.shot); type(munition, V.torpedo); add(order, V.targets, cell.iri); add(order, V.resolves, shot);
       add(shot, V.occursIn, cell.iri); add(shot, V.agent, operator); add(shot, V.munition, munition); add(shot, V.participant, munition); add(shot, V.participant, launcher);
       if (state.config.salvo) add(shot, V.occurrentPartOf, salvo);
@@ -208,10 +238,7 @@ function effects({ action, store, random }) {
       if (!incoming && report.type === 'Sunk') {
         // A verbally reported vessel is individuated without inventing its class,
         // length, full footprint, or membership links to other earlier hit reports.
-        const reportedShip = shot + '/reported-warship', stasis = shot + '/reported-non-mission-capable';
-        type(reportedShip, MW + 'Warship'); add(reportedShip, V.controller, other.iri);
-        add(shot, V.struckShip, reportedShip); add(shot, V.participant, reportedShip);
-        type(stasis, MW + 'SunkStasis'); add(stasis, V.participant, reportedShip); add(stasis, V.causedBy, shot); add(stasis, V.forMission, MW + 'DefendFleetMission'); add(reportedShip, V.missionStasis, stasis);
+        reportedSinking(shot, other.iri, add, type);
       }
       add(instance(`grid-${me.index + 1}-${incoming ? 'PrimaryGrid' : 'TargetingGrid'}`), V.observation, result);
       const disclosure = result + '/disclosure'; type(disclosure, HI + 'DisclosureEvent'); add(disclosure, V.agent, defender.iri); add(disclosure, HI + 'discloses', result); add(disclosure, HI + 'hasRecipient', attacker.iri);
@@ -219,10 +246,17 @@ function effects({ action, store, random }) {
     const projected = projectMaritime(next);
     const won = !incoming && projected.players.find(p => p.iri === me.iri).outgoing.filter(r => r.type === 'Sunk').length === state.config.fleet.length;
     const lost = incoming && me.ships.every(ship => ship.segments.every(seg => hit.has(seg.iri)));
-    if (won || lost) { set(SESSION, V.phase, phaseIri('complete')); remove(SESSION, V.current); add(SESSION, V.winner, won ? me.iri : other.iri); }
-    else set(SESSION, V.current, defender.iri);
+    if (won || lost) { set(SESSION, V.phase, phaseIri('complete')); remove(SESSION, V.current); remove(SESSION, V.openOrder); add(SESSION, V.winner, won ? me.iri : other.iri); }
+    else if (state.config.salvo && action.parameters.continueVolley && state.volleyCount + action.parameters.reports.length < 5) set(SESSION, V.openOrder, order);
+    else { remove(SESSION, V.openOrder); set(SESSION, V.current, defender.iri); }
   }
   return difference(store, next);
+}
+function reportedSinking(shot, defenderIri, add, type) {
+  const ship = shot + '/reported-warship', stasis = shot + '/reported-non-mission-capable';
+  type(ship, MW + 'Warship'); add(ship, V.controller, defenderIri);
+  add(shot, V.struckShip, ship); add(shot, V.participant, ship);
+  type(stasis, MW + 'SunkStasis'); add(stasis, V.participant, ship); add(stasis, V.causedBy, shot); add(stasis, V.forMission, MW + 'DefendFleetMission'); add(ship, V.missionStasis, stasis);
 }
 export function difference(before, after) {
   const old = new Map([...before].map(q => [quadKey(q), q])), current = new Map([...after].map(q => [quadKey(q), q]));
@@ -241,6 +275,7 @@ export function validateMaritime(store) {
     if (ix.ofType(MW + 'ShipSegment').some(id => !localSegments.has(id)) || ix.ofType(MW + 'Warship').some(id => !localShips.has(id) && (!disclosedSunkShips.has(id) || ix.values(id, V.location).length))) report('Undisclosed opposing segments or placements cannot be present in a local journal.');
     if (ix.values(SESSION, V.localPlayer).length !== 1 || ix.values(SESSION, V.phase).length !== 1) report('Exactly one local identity and phase are required.');
     if (!state.complete && (ix.values(SESSION, V.current).length !== 1 || !state.players.some(p => p.iri === state.currentPlayerIri))) report('A valid active attacker is required.');
+    if (ix.values(SESSION, V.openOrder).length > 1 || state.openOrder && (!state.config.salvo || state.phase !== 'combat' || !ix.values(state.openOrder, V.type).includes(MW + 'AttackOrder') || ix.one(state.openOrder, V.agent) !== state.currentPlayerIri || state.volleyCount < 1 || state.volleyCount >= 5)) report('Invalid open volley or current attacker.');
     if (me.ships.map(s => s.type).sort().join(',') !== [...state.config.fleet].sort().join(',')) report('Local fleet inventory does not match the configuration.');
     const occupied = new Set();
     for (const ship of me.ships) {
@@ -278,7 +313,7 @@ export function validateMaritime(store) {
     const sunk = me.outgoing.filter(r => r.type === 'Sunk');
     if (me.outgoing.filter(r => ['Hit', 'Sunk'].includes(r.type)).length > state.config.fleet.reduce((sum, type) => sum + SHIPS[type].length, 0)) report('Recorded hits exceed the opposing fleet inventory.');
     const minimumSegments = state.config.fleet.map(type => SHIPS[type].length).sort((a,b) => a-b).slice(0, sunk.length).reduce((sum, n) => sum+n, 0);
-    if (sunk.length > state.config.fleet.length || minimumSegments > me.outgoing.filter(r => ['Hit', 'Sunk'].includes(r.type)).length) report('Reported sinking requires sufficient recorded hits and remaining vessels.');
+    if (sunk.length > state.config.fleet.length || minimumSegments > me.outgoing.filter(r => ['Hit', 'Sunk'].includes(r.type)).length) report('Reported sinking requires sufficient recorded hits and remaining vessels. Correct any mistaken Hit and sunk reports first, or update the related reports together.');
     if (state.phase === 'complete' && (!state.winnerIri || ix.values(SESSION, V.current).length || (state.winnerIri === me.iri ? sunk.length !== state.config.fleet.length : me.intact !== 0))) report('The declared result is not supported by the local record.');
     if (state.ended && (state.winnerIri || ix.values(SESSION, V.current).length)) report('An ended engagement has no winner or current player.');
     if (!state.complete && state.winnerIri) report('An active journal cannot have a winner.');

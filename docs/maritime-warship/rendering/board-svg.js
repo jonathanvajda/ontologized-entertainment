@@ -5,7 +5,7 @@ const node = (name, attributes = {}, text = '') => {
   if (text) element.textContent = text;
   return element;
 };
-export function renderBoard(holder, player, config, { title, showShips = false, interactive = false, selected = [], endpoints = [], preview = [], invalidPreview = false, onCell, onHover } = {}) {
+export function renderBoard(holder, player, config, { title, showShips = false, interactive = false, editableResults = false, selected = [], endpoints = [], preview = [], invalidPreview = false, onCell, onRecordedCell, onHover } = {}) {
   const unit = 32, padding = 23;
   const svg = node('svg', { viewBox: `0 0 ${config.columns * unit + padding} ${config.rows * unit + padding}`, role: 'group', 'aria-label': title });
   holder.style.setProperty('--columns', config.columns);
@@ -20,9 +20,9 @@ export function renderBoard(holder, player, config, { title, showShips = false, 
     const isSunk = ship?.sunk || (result && ['Hit', 'Sunk'].includes(type) && player.incoming.some(other => other.type === 'Sunk' && other.cellIri === cell.iri));
     const classes = ['chart-cell', cell.obstacle ? 'obstacle' : cell.shallow ? 'shallow' : '', ship ? 'ship' : '',
       result ? (isSunk || type === 'Sunk' ? 'sunk' : type === 'Hit' ? 'hit' : type === 'Miss' ? 'miss' : 'blocked') : '', selectedSet.has(cell.coordinate) ? 'selected' : '', endpoints.includes(cell.coordinate) ? 'placement-end' : '', previewSet.has(cell.coordinate) ? invalidPreview ? 'invalid' : 'preview' : ''].filter(Boolean).join(' ');
-    const enabled = interactive && !result && !cell.obstacle;
+    const enabled = !cell.obstacle && (interactive && !result || editableResults && Boolean(result));
     const group = node('g', { transform: `translate(${padding + cell.column * unit},${padding + cell.row * unit})`, class: classes,
-      'data-coordinate': cell.coordinate, role: enabled ? 'button' : 'img', 'aria-label': `${cell.coordinate}: ${type || (cell.obstacle ? config.climate === 'ARCTIC' ? 'ice obstacle' : 'island obstacle' : ship ? ship.name : cell.shallow ? 'shallow water' : 'water')}${selectedSet.has(cell.coordinate) ? ', selected' : ''}${endpoints.includes(cell.coordinate) ? ', available ship endpoint' : ''}`,
+      'data-coordinate': cell.coordinate, role: enabled ? 'button' : 'img', 'aria-label': `${cell.coordinate}: ${type || (cell.obstacle ? config.climate === 'ARCTIC' ? 'ice obstacle' : 'island obstacle' : ship ? ship.name : cell.shallow ? 'shallow water' : 'water')}${result && editableResults ? ', edit recorded result' : ''}${selectedSet.has(cell.coordinate) ? ', selected' : ''}${endpoints.includes(cell.coordinate) ? ', available ship endpoint' : ''}`,
       ...(enabled ? { tabindex: '0', 'aria-pressed': selectedSet.has(cell.coordinate) } : {}) });
     group.append(node('rect', { x: 1, y: 1, width: unit - 2, height: unit - 2, rx: 2 }));
     if (cell.obstacle) {
@@ -42,9 +42,10 @@ export function renderBoard(holder, player, config, { title, showShips = false, 
       group.append(node('path', { d: 'M16 4v6m0 12v6M4 16h6m12 0h6', stroke: '#d5fff0', 'stroke-width': 1.5, fill: 'none', 'aria-hidden': 'true' }));
     }
     if (enabled) {
-      group.addEventListener('click', event => onCell?.(cell.coordinate, event));
+      const activate = event => result ? onRecordedCell?.(result, event) : onCell?.(cell.coordinate, event);
+      group.addEventListener('click', activate);
       group.addEventListener('keydown', event => {
-        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onCell?.(cell.coordinate, event); }
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); activate(event); }
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
           event.preventDefault();
           const dr = event.key === 'ArrowDown' ? 1 : event.key === 'ArrowUp' ? -1 : 0;

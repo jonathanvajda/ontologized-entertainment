@@ -1,6 +1,6 @@
 import { createMaritimeGame } from './model/game.js';
 import { SHIPS, presetFleet } from './game-config.js';
-import { createSetup, decodeSetup, boardSeed, inviteUrl, formatCode } from './network.js';
+import { createSetup, decodeSetup, boardSeed, inviteUrl, formatCode, withPlayerNames } from './network.js';
 import { localSave, parseLocalSave, saveActive, loadActive, parseFile, downloadJson, loadMatch, removeMatch, listMatches, loadSettings, saveSettings, MAX_SAVE_BYTES } from './storage.js';
 import { legalPlacements } from './rules/board.js';
 import { renderBoard, previewPlacement } from './rendering/board-svg.js';
@@ -9,7 +9,7 @@ import { QrScanner } from '../query-whom/js/scanner.js';
 const $ = selector => document.querySelector(selector);
 const make = (tag, className = '', text = '') => { const el = document.createElement(tag); el.className = className; el.textContent = text; return el; };
 const form = $('#setup-form'), screen = $('#private-content');
-let game = null, setup = null, selectedShip = null, placementStart = null, targets = [], drafts = {}, busy = false, initialSharing = false, removalId = null;
+let game = null, setup = null, selectedShip = null, placementStart = null, targets = [], drafts = {}, editing = null, busy = false, initialSharing = false, removalId = null;
 let settings = { animations: true, sound: false, zoom: 27, zoomVersion: 2 };
 const privacy = createPrivacyScreen({ maxRevealMs: 300_000 });
 function error(message) {
@@ -19,7 +19,7 @@ function error(message) {
 }
 const safe = fn => async (...args) => { try { await fn(...args); } catch (err) { error(err.message || 'That action could not be completed.'); } };
 function clearMessages() { $('#error').textContent = ''; $('#notice').textContent = ''; $('#setup-error').textContent = ''; document.querySelectorAll('.dialog-error').forEach(el => el.remove()); }
-function resetSelection() { targets = []; drafts = {}; placementStart = null; }
+function resetSelection() { targets = []; drafts = {}; editing = null; placementStart = null; }
 for (const [type, ship] of Object.entries(SHIPS)) {
   const label = make('label', '', ship.label + ` (${ship.length})`), input = document.createElement('input');
   input.type = 'number'; input.min = 0; input.max = 7; input.value = 1; input.name = 'count-' + type; label.append(input); $('#custom-counts').append(label);
@@ -34,7 +34,7 @@ form.addEventListener('submit', safe(async event => {
     const config = { names: [form.elements.first.value, form.elements.second.value], rows: Number(form.elements.rows.value), columns: Number(form.elements.columns.value), climate: form.elements.climate.value, obstacles: Number(form.elements.obstacles.value), salvo: form.elements.salvo.value === 'salvo', fleet, budget: form.elements.fleet.value === 'custom' ? Number(form.elements.budget.value) : 35 };
     const nextSetup = await createSetup(config, form.elements.seed.value);
     const nextGame = createMaritimeGame(config, { boardSeed: boardSeed(nextSetup), localIndex: 0, name: form.elements.matchName.value });
-    setup = nextSetup; game = nextGame; selectedShip = null; resetSelection(); enterGame(false); await persist(); openSharing(false, true);
+    setup = nextSetup; game = nextGame; selectedShip = null; resetSelection(); enterGame(false); await persist(); await openSharing(false, true);
   } catch (err) { $('#setup-error').textContent = err.message; }
   finally { busy = false; button.disabled = false; render(); }
 }));
@@ -74,6 +74,7 @@ function render(focusCoordinate = null) {
   if (!game || privacy.getState().status !== 'revealed') return;
   const state = game.state(), me = state.players.find(p => p.iri === state.localPlayerIri), other = state.players.find(p => p.iri !== me.iri);
   const placement = state.phase === 'placement', outgoing = state.currentPlayerIri === me.iri;
+  const reportingOutgoing = Boolean(editing) || outgoing, shotLimit = state.config.salvo ? 5 - state.volleyCount : 1;
   $('#match-name').textContent = state.name;
   $('#engagement-meta').textContent = `${state.config.climate === 'ARCTIC' ? 'ARCTIC' : 'TROPICAL'} / ${state.config.rows} × ${state.config.columns} / ${state.config.salvo ? 'SALVO' : 'STANDARD'} / ${me.index === 0 ? 'CREATOR' : 'JOINER'}`;
   const strip = make('section', 'command-strip'), copy = make('div');
@@ -83,19 +84,21 @@ function render(focusCoordinate = null) {
   const enemy = boardPanel('Targeting grid', `${other.name} · verbal reports only · ${me.outgoing.filter(r => r.type === 'Sunk').length}/${state.config.fleet.length} sunk`, !placement && outgoing);
   if (!selectedShip || !me.ships.some(s => s.iri === selectedShip)) selectedShip = (me.ships.find(s => !s.placed) || me.ships[0])?.iri;
   const selectTarget = (coordinate, event) => {
+    if (editing) resetSelection();
     if (targets.includes(coordinate)) { targets = targets.filter(c => c !== coordinate); delete drafts[coordinate]; }
-    else if (targets.length < (state.config.salvo ? 5 : 1)) targets.push(coordinate);
+    else if (targets.length < shotLimit) targets.push(coordinate);
     else if (!state.config.salvo) { targets = [coordinate]; drafts = {}; }
-    else { $('#notice').textContent = 'Five coordinates are already selected. Deselect one to change the volley.'; return; }
+    else { $('#notice').textContent = `${shotLimit} coordinates are already selected. Record them or deselect one.`; return; }
     render(coordinate);
     if (event?.type === 'keydown' || event?.detail === 0) screen.querySelector('.target-popover input, .target-popover button')?.focus({ preventScroll: true });
   };
+  const editResult = result => { resetSelection(); editing = result; targets = [result.coordinate]; drafts[result.coordinate] = { type: result.type }; render(result.coordinate); };
   const candidates = placement && placementStart ? placementCandidates(state, me) : [];
   const endpoint = candidate => candidate.cells[0] === placementStart ? candidate.cells.at(-1) : candidate.cells[0];
-  renderBoard(own.chart, me, state.config, { title: 'Primary grid', showShips: true, interactive: !state.complete && (placement || !outgoing), selected: placement && placementStart ? [placementStart] : !outgoing ? targets : [], endpoints: candidates.map(endpoint),
+  renderBoard(own.chart, me, state.config, { title: 'Primary grid', showShips: true, interactive: !state.complete && (placement || !outgoing), selected: placement && placementStart ? [placementStart] : !outgoing && !editing ? targets : [], endpoints: candidates.map(endpoint),
     onHover: placement && placementStart ? (coordinate, svg) => previewPlacement(svg, candidates.find(candidate => endpoint(candidate) === coordinate)?.cells || []) : null,
     onCell: placement ? safe(placeShip) : selectTarget });
-  renderBoard(enemy.chart, other, state.config, { title: 'Targeting grid', showShips: false, interactive: !state.complete && !placement && outgoing, selected: outgoing ? targets : [], onCell: selectTarget });
+  renderBoard(enemy.chart, other, state.config, { title: 'Targeting grid', showShips: false, interactive: !state.complete && !placement && outgoing, editableResults: !placement && !state.ended, selected: reportingOutgoing ? targets : [], onCell: selectTarget, onRecordedCell: editResult });
   const boards = make('div', 'boards'); boards.style.setProperty('--columns', state.config.columns); own.panel.dataset.board = 'own'; enemy.panel.dataset.board = 'targeting'; if (!placement) boards.append(enemy.panel); boards.append(own.panel);
   let popup = null;
   const dock = make('section', 'action-dock placement-dock'), dockCopy = make('div'), controls = make('div', 'dock-buttons');
@@ -111,16 +114,16 @@ function render(focusCoordinate = null) {
     }
     dockCopy.append(list, make('p', 'placement-hint', placementStart ? `${placementStart}: select the other end of your ${me.ships.find(ship => ship.iri === selectedShip).length}-cell ship. Click the start again to cancel.` : 'Choose a ship, then its first and last cells.'));
     controls.append(actionButton('Auto-deploy', () => { placementStart = null; return execute('autoPlace'); }), actionButton('Clear', () => { placementStart = null; return execute('clearPlacement'); }), actionButton('Lock my fleet', () => execute('lockFleet'), !me.ships.every(s => s.placed), true));
-  } else if (!state.complete) {
+  } else if (!state.complete || editing) {
     if (targets.length) {
       popup = make('section', 'target-popover'); popup.setAttribute('popover', 'manual'); popup.setAttribute('role', 'dialog'); popup.setAttribute('aria-label', 'Report selected coordinates');
       popup.dataset.anchor = targets.includes(focusCoordinate) ? focusCoordinate : targets.at(-1);
-      const title = make('div', 'popover-heading'); title.append(make('h3', '', outgoing ? targets.length === 1 ? `Report ${targets[0]}` : `Report volley (${targets.length}/5)` : 'Confirm incoming coordinates')); popup.append(title);
+      const title = make('div', 'popover-heading'); title.append(make('h3', '', editing ? `Correct ${targets[0]}` : reportingOutgoing ? targets.length === 1 ? `Report ${targets[0]}` : `Report volley (${targets.length}/5)` : 'Confirm incoming coordinates')); popup.append(title);
       const fields = make('div', 'report-fields');
-      const confirm = actionButton(outgoing ? targets.length === 1 ? 'Record result' : 'Record volley' : 'Confirm incoming shot' + (targets.length > 1 ? 's' : ''), submitReport, outgoing && targets.some(c => !drafts[c]?.type), true);
-      confirm.setAttribute('aria-label', outgoing ? 'Record reported results' : 'Confirm incoming coordinates');
+      const confirm = actionButton(editing ? 'Save correction' : reportingOutgoing ? targets.length === 1 ? 'Record result' : 'Record volley' : 'Confirm incoming shot' + (targets.length > 1 ? 's' : ''), submitReport, reportingOutgoing && targets.some(c => !drafts[c]?.type), true);
+      confirm.setAttribute('aria-label', editing ? 'Save shot correction' : reportingOutgoing ? 'Record reported results' : 'Confirm incoming coordinates');
       for (const coord of targets) {
-        if (!outgoing) { fields.append(make('p', 'incoming-coordinate', coord)); continue; }
+        if (!reportingOutgoing) { fields.append(make('p', 'incoming-coordinate', coord)); continue; }
         const group = make('fieldset', 'result-choices'); group.dataset.reportCoordinate = coord;
         group.append(make('legend', '', coord));
         for (const [value, symbol, title] of [['Miss', '\u2022', 'Miss'], ['Hit', '\u00d7', 'Hit'], ['Sunk', '\u2693', 'Hit and sunk']]) {
@@ -132,41 +135,52 @@ function render(focusCoordinate = null) {
         }
         fields.append(group);
       }
-      if (!outgoing) popup.append(make('p', 'fine-print', 'Is this where your opponent fired? Confirm to reveal the result to announce.'));
+      if (!reportingOutgoing) popup.append(make('p', 'fine-print', 'Is this where your opponent fired? Confirm to reveal the result to announce.'));
       const cancel = actionButton('Cancel', () => { resetSelection(); render(); }); cancel.setAttribute('aria-label', 'Cancel selection');
       const actions = make('div', 'popover-actions'); actions.append(cancel, confirm); popup.append(fields, actions);
-      if (state.config.salvo && targets.length < 5) {
+      if (!editing && state.config.salvo && targets.length < shotLimit) {
         const addTarget = actionButton('Add another target', () => {
           if (popup.hidePopover) popup.hidePopover(); else popup.hidden = true;
-          (outgoing ? enemy : own).chart.querySelector(`[data-coordinate="${popup.dataset.anchor}"]`)?.focus({ preventScroll: true });
+          (reportingOutgoing ? enemy : own).chart.querySelector(`[data-coordinate="${popup.dataset.anchor}"]`)?.focus({ preventScroll: true });
         });
         actions.prepend(addTarget);
       }
-      if (state.config.salvo) {
+      if (!editing && state.config.salvo) {
         const reopen = actionButton(`Report ${targets.length} selected`, () => { popup.hidden = false; if (popup.showPopover && !popup.matches(':popover-open')) popup.showPopover(); positionTargetMenu(); });
-        reopen.classList.add('reopen-report'); (outgoing ? enemy : own).panel.querySelector('.board-heading').append(reopen);
+        reopen.classList.add('reopen-report'); (reportingOutgoing ? enemy : own).panel.querySelector('.board-heading').append(reopen);
       }
       popup.addEventListener('keydown', event => { if (event.key === 'Escape') { event.preventDefault(); const coordinate = popup.dataset.anchor; resetSelection(); render(coordinate); } });
     }
   } else { dockCopy.append(make('h3', '', state.ended ? 'This engagement has ended without a winner.' : state.winnerIri === me.iri ? 'Victory. All enemy vessels reported sunk.' : 'Defeat. Your fleet was destroyed.'), make('p', '', 'No opponent placements are stored here. Compare boards in person if you wish.')); controls.append(actionButton('Export journal', exportSave), actionButton('Finish game', askFinish, false, true)); }
   dock.append(dockCopy, controls);
+  if (!placement && !state.complete && state.config.salvo) {
+    const volley = make('div', 'volley-controls');
+    volley.append(make('span', '', `${outgoing ? 'Your' : 'Their'} volley: ${state.volleyCount}/5 recorded`));
+    if (state.openOrder) (outgoing ? enemy : own).panel.querySelector('.board-heading').append(actionButton('Finish volley', async () => { resetSelection(); await execute('finishVolley'); }, targets.length > 0, true));
+    strip.append(volley);
+  }
   const log = make('section', 'battle-log'); log.append(make('h3', '', 'Shot history'));
   const columns = make('div', 'shot-history');
   for (const [player, results, label] of [[me, me.outgoing, 'Your shots'], [other, me.incoming, 'Their shots']]) {
     const column = make('section', 'shot-column'), entries = make('div', 'log-entries');
     column.append(make('h3', '', `${label} \u00b7 ${player.name}`));
-    for (const result of results.slice(-12).reverse()) entries.append(make('span', 'log-entry ' + result.type.toLowerCase(), `${result.coordinate} / ${resultLabel(result.type)}`));
+    for (const result of [...results].reverse()) {
+      const entry = player.iri === me.iri && !state.ended ? actionButton(`${result.coordinate} / ${resultLabel(result.type)}`, () => editResult(result)) : make('span', '', `${result.coordinate} / ${resultLabel(result.type)}`);
+      entry.classList.add('log-entry', result.type.toLowerCase());
+      if (player.iri === me.iri && !state.ended) entry.setAttribute('aria-label', `Correct ${result.coordinate}: ${resultLabel(result.type)}`);
+      entries.append(entry);
+    }
     if (!results.length) entries.append(make('p', 'fine-print', 'No shots yet.'));
     column.append(entries); columns.append(column);
   }
   log.append(columns);
   screen.replaceChildren(strip, ...((placement || state.complete) ? [dock] : []), boards, log);
   if (popup) { screen.append(popup); popup.showPopover?.(); positionTargetMenu(); }
-  if (focusCoordinate) (outgoing ? enemy : own).chart.querySelector(`[data-coordinate="${focusCoordinate}"]`)?.focus();
+  if (focusCoordinate) (reportingOutgoing ? enemy : own).chart.querySelector(`[data-coordinate="${focusCoordinate}"]`)?.focus();
 }
 async function execute(actionType, parameters = {}) {
   if (busy) return false; busy = true; clearMessages();
-  try { const result = await game.act(actionType, parameters); if (!result.ok) throw new Error(result.message); await persist(); return true; }
+  try { const result = await game.act(actionType, parameters); if (!result.ok) throw new Error(result.details?.findings?.[0]?.message || result.message); await persist(); return true; }
   finally { busy = false; render(); }
 }
 function placementCandidates(state, me) {
@@ -192,7 +206,7 @@ async function placeShip(coordinate) {
 }
 function positionTargetMenu() {
   const menu = screen.querySelector('.target-popover'); if (!menu) return;
-  const cell = screen.querySelector(`.board-panel.active [data-coordinate="${menu.dataset.anchor}"]`); if (!cell) return;
+  const cell = screen.querySelector(`${editing ? '[data-board=targeting]' : '.board-panel.active'} [data-coordinate="${menu.dataset.anchor}"]`); if (!cell) return;
   const anchor = cell.getBoundingClientRect(), box = menu.getBoundingClientRect(), gap = 10;
   let left = anchor.right + gap;
   if (left + box.width > innerWidth - gap) left = anchor.left - box.width - gap;
@@ -206,12 +220,17 @@ window.addEventListener('scroll', positionTargetMenu, true);
 const resultLabel = type => type === 'Sunk' ? 'Hit and sunk' : ['Blocked', 'GlancingMiss'].includes(type) ? 'Miss' : type;
 async function submitReport() {
   const state = game.state(), outgoing = state.currentPlayerIri === state.localPlayerIri;
+  if (editing) {
+    const result = editing;
+    if (await execute('correctReport', { updates: [{ resultIri: result.iri, type: drafts[result.coordinate].type }] })) { resetSelection(); render(); $('#notice').textContent = `${result.coordinate} corrected. Totals recalculated and saved. No turn or shot was consumed.`; if (game.state().complete) askFinish(); }
+    return;
+  }
   const coordinates = [...targets];
   const reports = targets.map(coordinate => ({ coordinate, ...drafts[coordinate] }));
-  if (await execute(outgoing ? 'recordReport' : 'receiveAttack', outgoing ? { direction: 'outgoing', reports } : { coordinates })) {
+  if (await execute(outgoing ? 'recordReport' : 'receiveAttack', outgoing ? { direction: 'outgoing', reports, continueVolley: state.config.salvo } : { coordinates, continueVolley: state.config.salvo })) {
     const accepted = game.state().results.filter(r => coordinates.includes(r.coordinate) && (r.attackerIri === state.localPlayerIri) === outgoing);
     resetSelection(); render();
-    $('#notice').textContent = (outgoing ? 'Recorded: ' : 'Tell your opponent: ') + accepted.map(r => `${r.coordinate}: ${resultLabel(r.type)}`).join('; ') + '. Saved automatically.';
+    $('#notice').textContent = (outgoing ? 'Recorded: ' : 'Tell your opponent: ') + accepted.map(r => `${r.coordinate}: ${resultLabel(r.type)}`).join('; ') + (game.state().openOrder ? '. Saved. Add the next shot or finish the volley.' : '. Saved automatically.');
     effects(accepted.some(r => ['Hit', 'Sunk'].includes(r.type)));
     if (game.state().complete) askFinish();
   }
@@ -224,7 +243,11 @@ async function persist(options = {}) {
 async function resume(record, options = {}) { const restored = await parseLocalSave(record); game = restored.game; setup = restored.setup; selectedShip = null; resetSelection(); for (const dialog of document.querySelectorAll('dialog[open]')) dialog.close(); enterGame(); await persist(options); }
 function exportSave() { if (game) downloadJson(localSave(game, setup), 'maritime-warship-private-local-save.json'); }
 async function returnToSetup({ save = true } = {}) { if (save) await persist(); game = null; setup = null; privacy.conceal(); for (const dialog of document.querySelectorAll('dialog[open]')) dialog.close(); $('#game-screen').hidden = true; $('#setup-screen').hidden = false; screen.replaceChildren(); document.body.classList.remove('arctic'); await refreshSaves(); }
-function openSharing(join = false, initial = false) {
+async function openSharing(join = false, initial = false) {
+  if (!join && game && setup.protocol < 3) {
+    setup = await withPlayerNames(setup, game.state().players.map(player => player.name));
+    await persist();
+  }
   initialSharing = initial;
   $('#transfer-continue').hidden = join; $('#transfer-back').hidden = !initial; $('#transfer-close').hidden = !join;
   $('#transfer-continue').textContent = initial ? 'Continue to fleet placement' : 'Continue';
@@ -256,8 +279,8 @@ for (const dialog of document.querySelectorAll('dialog:not(#handoff-dialog)')) d
 $('#transfer-dialog').addEventListener('cancel', event => { if (!$('#transfer-continue').hidden) event.preventDefault(); });
 $('#transfer-continue').addEventListener('click', () => { $('#transfer-dialog').close(); if (privacy.getState().status !== 'revealed') showRevealPrompt(); });
 $('#transfer-back').addEventListener('click', safe(async () => { if (initialSharing) { await removeMatch(game.sessionId); await returnToSetup({ save: false }); } }));
-$('#join-button').addEventListener('click', () => openSharing(true));
-$('#network-button').addEventListener('click', () => { $('#menu-dialog').close(); openSharing(false); });
+$('#join-button').addEventListener('click', safe(() => openSharing(true)));
+$('#network-button').addEventListener('click', safe(async () => { $('#menu-dialog').close(); await openSharing(false); }));
 $('#receive-button').addEventListener('click', safe(() => joinCode($('#transfer-text').value)));
 for (const [id, isLink] of [['copy-button', false], ['copy-link-button', true]]) $('#' + id).addEventListener('click', safe(async () => { const field = $(isLink ? '#invite-text' : '#transfer-text'), text = field.value; try { await navigator.clipboard.writeText(text); $('#transfer-status').textContent = 'Copied. Share only this setup; play continues verbally.'; } catch { field.focus(); field.select(); $('#transfer-status').textContent = 'Select and copy the text using your browser’s copy command.'; } }));
 $('#resume-button').addEventListener('click', safe(async () => { const record = await loadActive(); if (!record) throw new Error('No local journal found.'); await resume(record); }));

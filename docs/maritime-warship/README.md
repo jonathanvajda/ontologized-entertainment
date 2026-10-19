@@ -7,10 +7,10 @@ Serve the repository with `python -m http.server 8000 --directory docs` and open
 ## Playing
 
 1. Creator selects tropical or Arctic waters, an 8-26 by 8-26 board, zero to four hazard clusters, a 4-7 vessel preset or custom fleet, and standard or salvo firing. Custom draft cost is one point per segment, within an adjustable budget up to 35.
-2. Share the displayed setup code, QR or invitation link with the second player. The joiner types, pastes or scans it on their device. It reconstructs public rules and terrain, not saved progress.
+2. Share the displayed setup code, QR or invitation link with the second player. The joiner types, pastes or scans it on their device. It reconstructs both player names, public rules and terrain, not saved progress.
 3. Each player privately arranges their own fleet. Select a vessel, click its starting cell, then click a highlighted ending cell. The full footprint previews on hover or keyboard focus; either endpoint can come first. Auto-deploy remains available. Lock your own fleet and confirm readiness verbally. Creator fires first.
 4. On your firing turn, select targeting-grid coordinates and call them aloud. Manually choose the result your opponent tells you. During incoming turns, confirm the called coordinates on your lower primary grid; the app announces the calculated result for you to say aloud. Outgoing result controls start blank and use icon-labelled radio choices: Miss, Hit, Hit and sunk.
-5. Confirm the complete local report to record it. Standard turns record one coordinate; salvo turns record 1-5 distinct coordinates as one atomic batch. Cancel clears uncommitted selections. In salvo mode, Add another target tucks the floating menu away without discarding staged outcomes; Report N selected reopens it. Local turn order alternates, but the app cannot verify that the other device recorded the same conversation.
+5. Confirm the complete local report to record it. Standard turns record one coordinate; salvo turns record 1-5 distinct coordinates as one atomic batch. Cancel clears uncommitted selections. In salvo mode, Add another target tucks the floating menu away without discarding staged outcomes; Report N selected reopens it. Local turns alternate after a standard shot or a finished salvo. A partial salvo stays open until Finish volley or its fifth recorded shot. The app cannot verify that the other device recorded the same conversation.
 
 Heavy tropical vessels (four or five cells) need orthogonal coastal clearance. No vessel may overlap a hazard or another vessel. Visible obstacles cannot be targeted in either climate. Incoming results are calculated from your known fleet and damage after you confirm the coordinates; the last cell announces Hit and sunk. Outgoing Hit/Miss/Sunk reports are not checked against a hidden opposing fleet: that fleet is absent from your dataset.
 
@@ -20,13 +20,14 @@ The lower primary grid shows your private fleet; the upper targeting grid shows 
 
 ## Setup code
 
-Like Query Whom!, the code is self-contained rather than a server lookup. It has 20-21 Base32 symbols (grouped for readability) and encodes:
+Like Query Whom!, the code is self-contained rather than a server lookup. Protocol v3 uses 20-21 Base32 symbols with default names; custom player names add their length-prefixed UTF-8 bytes. The grouped code encodes:
 
 - Protocol version, dimensions, hazard count, climate and salvo flag.
 - Fleet classes and multiplicities, plus draft budget.
+- Both player names, using length-prefixed UTF-8 when customized.
 - A four-byte public terrain seed and two SHA-256 checksum bytes. Small rule fields and ship types are bit-packed. Legacy 48-53-character protocol v1 codes still decode unchanged.
 
-The checksum detects typing mistakes; it is not authentication. The code contains **no fleet positions, private placement RNG, damage, observations, saves, player keys or current progress**. Private auto-placement uses a separate local random source. Re-sharing the code does not update or synchronize either device. Creator and joiner use opposite, rotationally fair terrain areas. Player display names are local labels and are not part of the shared code.
+The checksum detects typing mistakes; it is not authentication. The code contains **no fleet positions, private placement RNG, damage, observations, saves, player keys or current progress**. Private auto-placement uses a separate local random source. Re-sharing the code does not update or synchronize either device. Creator and joiner use opposite, rotationally fair terrain areas. Both player names are included in new setup codes, QR codes and invite links. Legacy v1/v2 codes still decode with the original default names. Re-sharing an existing saved game upgrades its invitation using the names stored in its RDF while preserving its exact terrain seed, including legacy 16-byte seeds; game titles remain local.
 
 The compact sharing dialog shows a single-line code and a visible invitation link with adjacent copy buttons, a QR, and centered Continue navigation. Invitation URLs use `#invite=<code>` and remove that fragment after joining. QR generation and camera scanning reuse the repository’s Query Whom! libraries. Manual entry remains available when camera access is denied or unavailable.
 
@@ -64,6 +65,13 @@ node docs/maritime-warship/scripts/browser-qa.mjs
 
 Browser QA uses the existing Playwright and axe installation under `docs/query-whom/node_modules`, starts/stops its own server, and checks separate independent device contexts, explicit manual reporting, code/QR joining, privacy, persistence, offline reload and desktop/mobile accessibility. Generated screenshots are in ignored `test-results/`.
 
-Visible obstacle cells cannot be selected or targeted, for either climate. Shallow-water cells remain valid targets because eligible ships may occupy them. Keyboard arrows skip obstacles and previously resolved cells. Existing saved terrain-shot observations remain readable.
+Visible obstacle cells cannot be selected or targeted, for either climate. Shallow-water cells remain valid targets because eligible ships may occupy them. Keyboard arrows skip noninteractive cells; recorded outgoing guesses remain keyboard-editable. Existing saved terrain-shot observations remain readable.
 
 Ending or finishing follows Query Whom!: Remove the save is selected by default; Keep in finished-game history is opt-in. The final shot opens this choice. Saved-game entries offer Remove with confirmation, including older retained records. Deletion removes the RDF snapshot, embedded history, summary, matching legacy slot, and matching active pointer without touching other games. A minimal removed-session ID prevents stale tabs from recreating it; explicitly importing a backup may restore it. Going back from initial setup discards that configuration.
+
+
+### Correcting guesses and recording incremental salvos
+
+Click any recorded cell on the targeting grid, or its entry under Your shots, to correct Miss, Hit, or Hit and sunk. The current choice is preselected. Save correction updates the existing result, its shot classification and any reported sunk-ship witness atomically; it consumes no shot or turn. The transaction history retains the earlier assertion and correction. Recalculate hit limits, sunk counts and victory from the corrected dataset. A mistaken final sinking can be corrected before removing the save, reopening combat. Impossible combinations are rejected without mutation; correct a mistaken sinking before reducing the hits that support it, or submit related updates atomically through the headless API. Incoming outcomes remain calculated from the local fleet rather than manually overridden.
+
+In salvo play, recording or confirming fewer than five shots keeps the current player's volley open. Both attacker and defender may record shots one at a time or in batches. Show the recorded count out of five and Finish volley on the active board; Finish volley ends a shorter volley, while the fifth shot automatically hands over. Pending, unconfirmed selections must be recorded or cancelled before finishing. An open volley is one AttackOrder/Salvo in RDF, even across several local confirmations, and survives reload. Duplicate coordinates and a total exceeding five shots remain invalid. Each device finishes its own local volley; coordinate readiness verbally. The headless recordReport/receiveAttack APIs expose continueVolley for incremental recording; omitting it retains the earlier complete-batch behavior.

@@ -82,6 +82,7 @@ async function persisted(page) {
 try {
   const page=await pageIn(context); await a11y(page,'setup'); await page.screenshot({path:resolve(results,'setup-desktop.png'),fullPage:true});
   assert.equal(await page.locator('[name=mode]').count(),0,'Pass-and-play is not selectable');
+  await page.locator('[name=first]').fill('Ada');await page.locator('[name=second]').fill('Bert');
   await page.locator('[name=matchName]').fill('Saturday with Sam');
   const code=await start(page); await a11y(page,'placement');
   assert.equal(await page.locator('.board-panel').count(),1,'Setup hides the opponent board');
@@ -114,6 +115,18 @@ try {
   await page.screenshot({path:resolve(results,'floating-report.png'),fullPage:true});
   await page.getByRole('button',{name:'Cancel selection',exact:true}).click(); assert.equal(await page.locator('[data-report-coordinate]').count(),0);
   await mark(page,1,'A1','Hit');
+  await page.locator('[data-board=targeting] [data-coordinate=A1]').click();
+  assert.equal(await page.locator('[data-report-coordinate=A1] input:checked').inputValue(),'Hit');
+  await page.locator('[data-report-coordinate=A1] input[value=Miss]').check();
+  await page.getByRole('button',{name:'Save shot correction',exact:true}).click();
+  await page.waitForFunction(()=>!document.querySelector('.target-popover'));
+  assert.match(await page.locator('.command-strip h2').textContent(),/Incoming attack/,'Correction does not advance the turn');
+  assert.equal(await page.locator('.log-entry').count(),1,'Correction does not add a shot');
+  assert.match(await page.locator('.log-entry').first().textContent(),/Miss/);
+  await page.getByRole('button',{name:'Correct A1: Miss',exact:true}).click();
+  await page.locator('[data-report-coordinate=A1] input[value=Hit]').check();
+  await page.getByRole('button',{name:'Save shot correction',exact:true}).click();
+  await page.waitForFunction(()=>!document.querySelector('.target-popover'));
   assert.match(await page.locator('.command-strip h2').textContent(),/Incoming attack/);
   assert.match(await page.locator('.log-entry').first().textContent(),/A1 \/ Hit/);
   const empty=await page.locator('[data-board=own]').locator('.chart-cell:not(.ship):not(.obstacle)').first().getAttribute('data-coordinate');
@@ -157,10 +170,13 @@ try {
   assert.ok(invitation?.includes('#invite='),'Generated QR must decode to the setup invitation');
   const joinContext=await browser.newContext({viewport:{width:1440,height:1000}}), joiner=await pageIn(joinContext);
   await joiner.locator('#join-button').click();await joiner.locator('#transfer-text').fill(code.toLowerCase());await joiner.locator('#receive-button').click();await joiner.locator('#handoff-dialog').waitFor();await reveal(joiner);await deploy(joiner);
+  assert.match(await joiner.locator('#handoff-title').textContent(),/Bert/);
+  assert.match(await joiner.locator('[data-board=own] .board-heading').textContent(),/Bert/);
+  assert.match(await joiner.locator('[data-board=targeting] .board-heading').textContent(),/Ada/);
   assert.match(await joiner.locator('.command-strip h2').textContent(),/Incoming attack/);
   assert.equal(await joiner.locator('.log-entry').count(),0,'Creator reports do not propagate to joiner');
   await a11y(joiner,'joiner');await joiner.screenshot({path:resolve(results,'two-device-player.png'),fullPage:true});
-  const linkContext=await browser.newContext(),linked=await linkContext.newPage();await linked.goto(invitation);await linked.locator('#handoff-dialog').waitFor();assert.equal(new URL(linked.url()).hash,'');await reveal(linked);
+  const linkContext=await browser.newContext(),linked=await linkContext.newPage();await linked.goto(invitation);await linked.locator('#handoff-dialog').waitFor();assert.equal(new URL(linked.url()).hash,'');await reveal(linked);assert.match(await linked.locator('[data-board=own] .board-heading').textContent(),/Bert/);
   const cameraContext=await browser.newContext(),camera=await pageIn(cameraContext);await camera.locator('#join-button').click();await camera.locator('#scan-button').click();await camera.waitForFunction(()=>/denied|unavailable/.test(document.querySelector('#scan-status').textContent));await camera.locator('#scan-cancel').click();
   await page.bringToFront();await page.locator('#transfer-continue').click();await reveal(page);
   await page.evaluate(()=>navigator.serviceWorker.ready);await page.reload();await page.locator('#resume-button:not([disabled])').waitFor();await context.setOffline(true);await page.reload();await page.locator('#resume-button:not([disabled])').waitFor();await page.locator('#resume-button').click();await page.locator('#handoff-dialog').waitFor();await reveal(page);
@@ -206,6 +222,8 @@ try {
   await salvo.screenshot({path:resolve(results,'salvo-floating-landscape.png'),fullPage:true});
   await salvo.locator('[data-report-coordinate=A2] input[value=Sunk]').check();await salvo.getByRole('button',{name:'Record reported results',exact:true}).click();
   await salvo.waitForFunction(()=>document.querySelectorAll('.log-entry').length===2);
+  assert.match(await salvo.locator('.command-strip h2').textContent(),/Your attack/,'Partial salvo does not hand over');
+  await salvo.getByRole('button',{name:'Finish volley',exact:true}).click();
   const ownShip=await salvo.evaluate(async()=>{
     const {loadActive,parseLocalSave}=await import('./storage.js');
     const {game}=await parseLocalSave(await loadActive());const state=game.state();
@@ -219,8 +237,17 @@ try {
   await salvo.waitForFunction(()=>document.querySelectorAll('.log-entry').length===4);
   assert.match(await salvo.locator('#notice').textContent(),/Tell your opponent:.*Hit and sunk/);
   assert.equal((await persisted(salvo)).transactions.filter(tx=>tx.action.actionType==='recordReport').length,2);
+  assert.match(await salvo.locator('.command-strip h2').textContent(),/Incoming attack/,'Incoming salvo remains open after a partial batch');
   assert.equal(await salvo.evaluate(()=>getComputedStyle(document.body,'::after').animationDuration),'1.35s');
   assert.equal(await salvo.evaluate(()=>{document.body.classList.remove('hit-flash');document.body.classList.add('splash-effect');return getComputedStyle(document.body,'::after').animationDuration;}),'1.8s');
+  const incomingEmpty=async()=>salvo.locator('[data-board=own] .chart-cell[role=button]:not(.ship):not(.obstacle)').first().getAttribute('data-coordinate');
+  await mark(salvo,0,await incomingEmpty(),'Miss');
+  assert.match(await salvo.locator('.volley-controls').textContent(),/3\/5/,'Incoming single-shot confirmation keeps the volley open');
+  await salvo.reload();await salvo.locator('#resume-button:not([disabled])').waitFor();await salvo.locator('#resume-button').click();await reveal(salvo);
+  assert.match(await salvo.locator('.volley-controls').textContent(),/3\/5/,'An unfinished incoming salvo survives reload');
+  await mark(salvo,0,await incomingEmpty(),'Miss');await mark(salvo,0,await incomingEmpty(),'Miss');
+  assert.match(await salvo.locator('.command-strip h2').textContent(),/Your attack/,'The fifth incoming shot hands over the turn');
+  assert.equal(await salvo.locator('.log-entry').count(),7);
 
   const gamesContext=await browser.newContext(),games=await pageIn(gamesContext);
   await games.locator('[name=matchName]').fill('First game');await start(games);await deploy(games);await mark(games,1,'A1','Hit');
@@ -279,6 +306,12 @@ try {
   await finish.locator('#file-input').setInputFiles({name:'finish.json',mimeType:'application/json',buffer:Buffer.from(finishingSave)});await reveal(finish);
   await mark(finish,1,'B2','Sunk');await finish.locator('#end-dialog').waitFor();
   assert.equal(await finish.locator('#end-dialog input[value=remove]').isChecked(),true,'Victory opens the retention choice with removal as default');
+  await finish.locator('#cancel-end').click();await finish.locator('[data-board=targeting] [data-coordinate=B2]').click();
+  await finish.locator('[data-report-coordinate=B2] input[value=Hit]').check();await finish.getByRole('button',{name:'Save shot correction',exact:true}).click();
+  await finish.waitForFunction(()=>!document.querySelector('.target-popover'));
+  assert.match(await finish.locator('.command-strip h2').textContent(),/Incoming attack/,'A mistaken final sinking can be corrected and play resumed');
+  await finish.getByRole('button',{name:'Correct B2: Hit',exact:true}).click();await finish.locator('[data-report-coordinate=B2] input[value=Sunk]').check();
+  await finish.getByRole('button',{name:'Save shot correction',exact:true}).click();await finish.locator('#end-dialog').waitFor();
   await a11y(finish,'finish retention choice');await finish.locator('#confirm-end').click();await finish.locator('#setup-screen').waitFor({state:'visible'});
   assert.equal(await finish.locator('.history-entry').count(),0,'Finishing does not retain a game by default');
   console.log('PASS: calculated sinking, longer animations, autosave, named games, resume, one-step reveal, end/cancel/review and setup back navigation.');

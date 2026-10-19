@@ -17,7 +17,7 @@ export const V = Object.freeze({
   missionStasis: MW + 'hasCurrentMissionStasis', damageStasis: MW + 'hasCurrentDamageStasis', forMission: MW + 'forMission',
   struckShip: MW + 'hasStruckShip', struckSegment: MW + 'hasStruckSegment', munition: MW + 'hasMunition',
   targets: MW + 'targetsCell', resolves: MW + 'resolvesAs', causedBy: MW + 'causedByShot', observation: MW + 'hasObservation', grid: MW + 'hasGrid',
-  localPlayer: MW + 'hasLocalPlayer',
+  localPlayer: MW + 'hasLocalPlayer', openOrder: MW + 'hasOpenAttackOrder',
   governs: HI + 'governs', visibleTo: HI + 'visibleTo', visibilityMode: HI + 'visibilityMode', visiblePhase: HI + 'visibleDuringPhase'
 });
 export const SESSION = MW + 'instance/session';

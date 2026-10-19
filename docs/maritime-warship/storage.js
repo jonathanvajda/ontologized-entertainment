@@ -27,6 +27,7 @@ export async function parseLocalSave(value) {
   const game = hydrateMaritimeGame({ sessionId: value.sessionId, quads, transactions: value.transactions, rngState: value.rngState });
   const setup = await decodeSetup(value.setup?.code);
   const state = game.state();
+  if (setup.protocol >= 3 && JSON.stringify(state.players.map(player => player.name)) !== JSON.stringify(setup.config.names)) throw new Error('Saved player names do not match the setup code.');
   for (const key of ['rows', 'columns', 'obstacles', 'climate', 'salvo', 'fleet', 'budget']) if (JSON.stringify(state.config[key]) !== JSON.stringify(setup.config[key])) throw new Error('Save configuration does not match its setup code.');
   const terrain = generateBoardPair(setup.config, new RandomEngine(boardSeed(setup)));
   if (state.players.some((player, index) => [...player.obstacles].sort().join(',') !== [...terrain.obstacles[index]].sort().join(','))) throw new Error('Saved terrain does not match the public setup code.');

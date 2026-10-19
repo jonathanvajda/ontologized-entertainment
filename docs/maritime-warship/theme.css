@@ -106,3 +106,5 @@
 
 .end-options{margin:18px 0}.end-options label{margin:12px 0;color:var(--ink)}
 .history-entry{flex-wrap:wrap}.history-entry>div{flex:1 1 240px}
+
+.volley-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:.75rem;color:var(--aqua)}.volley-controls button{min-height:34px;padding:7px 10px;font-size:.75rem}.command-strip{flex-wrap:wrap}.log-entry:is(button){min-height:32px;cursor:pointer}

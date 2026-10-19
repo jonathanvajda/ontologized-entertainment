@@ -221,3 +221,104 @@ test('ending during placement or combat preserves RDF history without inventing 
     assert.equal((await game.act('autoPlace')).ok, false);
   }
 });
+
+const correct = (game, result, type) => game.act('correctReport', { updates: [{ resultIri: result.iri, type }] });
+
+test('correcting a misplaced hit frees the hit ceiling without another shot or turn', async () => {
+  const { game, setup } = await fixture({ salvo: true }); await deploy(game);
+  const targets = [...other(game).cells.keys()], replies = [...me(game).cells.keys()].filter(c => !me(game).ships.some(s => s.cells.includes(c)));
+  for (const size of [5, 5, 2]) {
+    assert.equal((await record(game, 'outgoing', targets.splice(0, size).map(coordinate => ({ coordinate, type: 'Hit' })))).ok, true);
+    await game.act('receiveAttack', { coordinates: [replies.shift()] });
+  }
+  const before = game.state(), first = me(game).outgoing[0], random = game.snapshot().rngState;
+  assert.equal((await record(game, 'outgoing', [{ coordinate: targets[0], type: 'Hit' }])).ok, false);
+  assert.equal((await correct(game, first, 'Miss')).ok, true);
+  assert.equal(game.state().results.length, before.results.length);
+  assert.equal(game.state().currentPlayerIri, before.currentPlayerIri);
+  assert.equal(game.state().turnNumber, before.turnNumber);
+  assert.equal(game.snapshot().rngState, random);
+  assert.equal(game.snapshot().transactions.at(-1).action.actionType, 'correctReport');
+  assert.equal((await record(game, 'outgoing', [{ coordinate: targets[0], type: 'Hit' }])).ok, true);
+  assert.equal(me(game).outgoing.filter(r => r.type === 'Hit').length, 12);
+  const restored = await parseLocalSave(JSON.parse(JSON.stringify(localSave(game, setup))));
+  assert.deepEqual(validateMaritime(restored.game.engine.store), []);
+  assert.equal(me(restored.game).outgoing.find(r => r.iri === first.iri).type, 'Miss');
+});
+
+test('corrections replace sinking witnesses, reject inconsistent edits atomically, and accept related edits together', async () => {
+  const { game } = await fixture({ salvo: true }); await deploy(game);
+  await record(game, 'outgoing', [{ coordinate: 'A1', type: 'Hit' }, { coordinate: 'A2', type: 'Sunk' }]);
+  const [hit, sunk] = me(game).outgoing;
+  const ship = game.state().index.one(sunk.shotIri, V.struckShip);
+  assert.equal((await correct(game, sunk, 'Hit')).ok, true);
+  assert.equal([...game.engine.store].some(q => q.subject.value === ship || q.object.value === ship), false);
+  assert.equal((await correct(game, hit, 'Miss')).ok, true);
+  const before = JSON.stringify(game.snapshot());
+  assert.equal((await correct(game, sunk, 'Sunk')).ok, false, 'One hit cannot support a sunk vessel');
+  assert.equal(JSON.stringify(game.snapshot()), before);
+  assert.equal((await game.act('correctReport', { updates: [{ resultIri: hit.iri, type: 'Hit' }, { resultIri: sunk.iri, type: 'Sunk' }] })).ok, true);
+  assert.equal(me(game).outgoing.filter(r => r.type === 'Sunk').length, 1);
+  assert.equal((await correct(game, sunk, 'Miss')).ok, true);
+  assert.equal(me(game).outgoing.filter(r => r.type === 'Sunk').length, 0);
+  assert.deepEqual(validateMaritime(game.engine.store), []);
+});
+
+test('correcting the final sinking reopens combat and recalculates victory without changing turn count', async () => {
+  const { game } = await fixture({ salvo: true }); await deploy(game);
+  const cells = [...other(game).cells.keys()], empty = [...me(game).cells.keys()].filter(c => !me(game).ships.some(s => s.cells.includes(c)));
+  for (const size of [4, 3, 3, 2]) {
+    await record(game, 'outgoing', cells.splice(0, size).map((coordinate, i) => ({ coordinate, type: i === size - 1 ? 'Sunk' : 'Hit' })));
+    if (!game.state().complete) await game.act('receiveAttack', { coordinates: [empty.shift()] });
+  }
+  assert.equal(game.state().complete, true);
+  const count = game.state().turnNumber, last = me(game).outgoing.at(-1);
+  assert.equal((await correct(game, last, 'Hit')).ok, true);
+  assert.equal(game.state().phase, 'combat'); assert.equal(game.state().winnerIri, '');
+  assert.equal(game.state().turnNumber, count); assert.equal(game.state().currentPlayerIri, other(game).iri);
+  assert.equal((await correct(game, last, 'Sunk')).ok, true);
+  assert.equal(game.state().winnerIri, me(game).iri);
+});
+
+test('both devices accept salvo shots one at a time, preserve an open volley in saves, and hand over only at five or Finish volley', async () => {
+  const { game: first, setup } = await fixture({ salvo: true });
+  const second = createMaritimeGame(setup.config, { boardSeed: boardSeed(setup), localIndex: 1, placementSeed: 'salvo-second' });
+  await deploy(first); await deploy(second);
+  const empty = game => [...me(game).cells.keys()].filter(c => !me(game).ships.some(s => s.cells.includes(c)));
+  const targets = empty(second).slice(0, 5);
+  assert.equal((await first.act('finishVolley')).ok, false);
+  for (const [i, coordinate] of targets.entries()) {
+    assert.equal((await first.act('recordReport', { direction: 'outgoing', reports: [{ coordinate, type: 'Miss' }], continueVolley: true })).ok, true);
+    assert.equal((await second.act('receiveAttack', { coordinates: [coordinate], continueVolley: true })).ok, true);
+    assert.equal(first.state().turnNumber, 2); assert.equal(second.state().turnNumber, 2);
+    assert.equal(first.state().currentPlayerIri, playerIri(i < 4 ? 0 : 1));
+    assert.equal(second.state().currentPlayerIri, playerIri(i < 4 ? 0 : 1));
+    assert.equal(first.state().volleyCount, i < 4 ? i + 1 : 0);
+    if (i === 1) {
+      const excess = [...targets.slice(2), empty(second)[5]];
+      const unchanged = JSON.stringify(first.snapshot());
+      assert.equal((await first.act('recordReport', { direction: 'outgoing', reports: excess.map(coordinate => ({ coordinate, type: 'Miss' })), continueVolley: true })).ok, false);
+      assert.equal(JSON.stringify(first.snapshot()), unchanged, 'A partial volley cannot accept enough shots to exceed five');
+      const restored = await parseLocalSave(JSON.parse(JSON.stringify(localSave(second, setup))));
+      assert.equal(restored.game.state().volleyCount, 2);
+      assert.equal(restored.game.state().currentPlayerIri, playerIri(0));
+    }
+  }
+  const replies = empty(first).slice(0, 2);
+  for (const coordinate of replies) {
+    assert.equal((await second.act('recordReport', { direction: 'outgoing', reports: [{ coordinate, type: 'Miss' }], continueVolley: true })).ok, true);
+    assert.equal((await first.act('receiveAttack', { coordinates: [coordinate], continueVolley: true })).ok, true);
+  }
+  for (const game of [first, second]) {
+    assert.equal(game.state().volleyCount, 2); assert.equal(game.state().currentPlayerIri, playerIri(1));
+    assert.equal((await game.act('finishVolley')).ok, true);
+    assert.equal(game.state().currentPlayerIri, playerIri(0)); assert.equal(game.state().results.length, 7);
+    assert.deepEqual(validateMaritime(game.engine.store), []);
+  }
+});
+
+test('a salvo containing hit and sunk validates totals independently of coordinate sort order', async () => {
+  const { game } = await fixture({ salvo: true }); await deploy(game);
+  assert.equal((await record(game, 'outgoing', [{ coordinate: 'A1', type: 'Sunk' }, { coordinate: 'A2', type: 'Hit' }])).ok, true);
+  assert.equal(me(game).outgoing.filter(r => r.type === 'Sunk').length, 1);
+});
