@@ -1,6 +1,6 @@
 @prefix obo: <http://purl.obolibrary.org/obo/> .
 @prefix pd: <https://w3id.org/ontoeagle/games/poker-dice/> .
-@prefix game: <https://w3id.org/ontoeagle/game/> .
+@prefix game: <https://w3id.org/ontologized-entertainment/game/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .

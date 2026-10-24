@@ -1,6 +1,7 @@
 {
-  "version": 2,
-  "board": { "src": "./art/estate-board-04.png", "alt": "Top-down illustrated plan of the nine-room estate and its Foyer" },
+  "version": 8,
+  "board": { "src": "./art/board-layout.png", "alt": "Exact 26 by 18 estate grid with rooms, walkable halls, doors, open entryways, foyer, and stairs" },
+  "topology": "./board-topology.json",
   "entities": {
     "eggshell": "./art/person-mrs-eggshell.png",
     "marinara": "./art/person-lt-marinara.png",
@@ -14,23 +15,36 @@
     "rope": "./art/weapon-rope.png",
     "knife": "./art/weapon-knife.png",
     "guitar": "./art/weapon-guitar-02.png",
-    "ballroom": "./art/room-ballroom-02.png",
-    "living-room": "./art/room-livingroom.png",
-    "dining-room": "./art/room-diningroom.png",
-    "kitchen": "./art/room-kitchen.png",
-    "library": "./art/room-library.png",
-    "game-room": "./art/room-gameroom-03.png",
-    "screened-porch": "./art/room-screened-in-porch.png",
-    "greenhouse": "./art/room-greenhouse.png",
-    "pool-room": "./art/room-pool-room.png"
+    "ballroom": "./art/room-ballroom-topdown-03.png",
+    "living-room": "./art/room-livingroom-topdown-02.png",
+    "dining-room": "./art/room-diningroom-topdown-02.png",
+    "kitchen": "./art/room-kitchen-topdown-02.png",
+    "study": "./art/room-study-topdown-02.png",
+    "game-room": "./art/room-gameroom-topdown-04.png",
+    "screened-porch": "./art/room-screened-in-porch-topdown-02.png",
+    "greenhouse": "./art/room-greenhouse-topdown-02.png",
+    "pool-room": "./art/room-pool-room-topdown-02.png"
+  },
+  "boardInteriors": {
+    "ballroom": "./art/room-ballroom-board-02.png",
+    "living-room": "./art/room-livingroom-board-02.png",
+    "dining-room": "./art/room-diningroom-board-01.png",
+    "kitchen": "./art/room-kitchen-board-03.png",
+    "study": "./art/room-study-board-02.png",
+    "game-room": "./art/room-gameroom-board-02.png",
+    "screened-porch": "./art/room-screened-in-porch-board-02.png",
+    "greenhouse": "./art/room-greenhouse-board-02.png",
+    "pool-room": "./art/room-pool-room-board-01.png"
   },
   "boardZones": {
-    "foyer": "./art/room-ballroom-01.png"
+    "foyer": "./art/foyer-board-02.png"
   },
   "variants": {
     "estate-board-01": "./art/estate-board-01.png",
     "estate-board-02": "./art/estate-board-02.png",
     "estate-board-03": "./art/estate-board-03.png",
+    "estate-board-04": "./art/estate-board-04.png",
+    "library-card": "./art/room-library.png",
     "mint-01": "./art/person-mrs-mint-01.png",
     "brown-01": "./art/person-mr-brown-01.png",
     "guitar-01": "./art/weapon-guitar-01.png",

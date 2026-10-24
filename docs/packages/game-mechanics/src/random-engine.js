@@ -4,16 +4,22 @@ export class RandomEngine {
   constructor(seed = cryptoSeed()) { this.#state = normalizeSeed(seed); }
   getState() { return this.#state >>> 0; }
   setState(state) { this.#state = normalizeSeed(state); return this; }
-  randomFloat() {
+  nextUint32() {
     this.#state = (this.#state + 0x6D2B79F5) >>> 0;
     let value = this.#state;
     value = Math.imul(value ^ (value >>> 15), value | 1);
     value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
-    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+    return (value ^ (value >>> 14)) >>> 0;
   }
+  randomFloat() { return this.nextUint32() / 4294967296; }
   randomInt(min, max) {
     if (!Number.isInteger(min) || !Number.isInteger(max) || max < min) throw new RangeError('randomInt requires integer min <= max.');
-    return min + Math.floor(this.randomFloat() * (max - min + 1));
+    const span = max - min + 1;
+    if (span > 4294967296) throw new RangeError('randomInt range cannot exceed 2^32 values.');
+    const limit = Math.floor(4294967296 / span) * span;
+    let value;
+    do value = this.nextUint32(); while (value >= limit);
+    return min + (value % span);
   }
   shuffle(items) {
     const output = [...items];

@@ -1,0 +1,18 @@
+@prefix dice: <https://w3id.org/ontologized-entertainment/game/dice/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://w3id.org/ontologized-entertainment/game/dice/shapes> a owl:Ontology ;
+  owl:versionInfo "0.1.0" ; dcterms:title "Dice Mechanic SHACL Shapes"@en ;
+  dcterms:created "2026-10-24"^^xsd:date ; dcterms:license <https://opensource.org/license/bsd-3-clause> ;
+  rdfs:comment "Reusable structural constraints for six-sided die results."@en .
+
+dice:SixSidedFaceValueShape a sh:NodeShape ; sh:targetClass dice:DieFaceValue ;
+  sh:property [ sh:path rdf:value ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 1 ; sh:maxInclusive 6 ] .
+dice:RollingActShape a sh:NodeShape ; sh:targetClass dice:DiceRollingAct ;
+  sh:property [ sh:path dice:hasResult ; sh:minCount 1 ; sh:class dice:DieFaceValue ] ;
+  sh:property [ sh:path dice:performedBy ; sh:minCount 1 ; sh:maxCount 1 ] .

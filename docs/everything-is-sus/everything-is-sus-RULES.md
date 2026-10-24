@@ -37,13 +37,13 @@ Win by making the first correct accusation naming all three solution cards.
 - Living Room
 - Dining Room
 - Kitchen
-- Library
+- Study
 - Game Room
 - Screened-in Porch
 - Greenhouse
-- Pool Room
+- Swimming Pool Room
 
-The deck contains 21 unique cards: six suspects, six weapons, and nine rooms. The board contains the nine card rooms, connecting passages, the shared Foyer starting area, and any secret passages shown on the board. The Foyer is a board location but is not a room card and cannot be named in a suggestion or accusation.
+The deck contains 21 unique cards: six suspects, six weapons, and nine rooms. The board contains the nine card rooms, connecting passages, the shared Foyer starting area, and any secret passages shown on the board. The Foyer is a board location but is not a room card and cannot be named in a room accusation or final accusation.
 
 ## 3. Choose how to play
 
@@ -55,7 +55,7 @@ This prevents accidental viewing during ordinary play, but everyone’s informat
 
 ### Local multi-device
 
-Use one host device for setup, the board, turns, dice, suggestions, and accusations. Each player opens the player page on a personal device and enters the table code, their chosen suspect, and private five-letter hand code shown by the host.
+Use one host device for setup, the board, turns, die rolls, room accusations, and final accusations. Each player opens the player page on a personal device and enters the table code, their chosen suspect, and private five-letter hand code shown by the host.
 
 The player page contains that player’s starting hand and private detective notebook. It does not automatically receive later board changes; players follow the host screen and update their notebooks themselves.
 
@@ -69,7 +69,7 @@ The short table code identifies the game but contains no deal or solution. A pri
 4. The remaining 18 cards are shuffled and dealt one at a time. Some players may receive one more card than others.
 5. In pass-and-play, each player privately reviews their hand in turn.
 6. In multi-device play, the host presents a separate five-letter hand code to each player. Each player enters only their own code and access details.
-7. Place every suspect token in the Foyer, including tokens not assigned to a player. Use the six nonblocking positions arranged around the Foyer so every active player has an open first move.
+7. Randomly assign the selected player-suspects without replacement among the six nonblocking Foyer start sites marked internally as α, β, γ, δ, ε, and ζ. The assignment is independent of player selection and turn order; α is not automatically the first player. Unselected suspects begin in an off-board reserve until named in a room accusation. Place each selected suspect's token on the site occupied by the person it represents.
 8. The first selected portrait takes the first turn. Play then follows the generated turn order.
 
 The host publishes a cryptographic commitment to the sealed solution during setup. When the game ends, the revealed solution can be checked against that original commitment.
@@ -78,78 +78,98 @@ The host publishes a cryptographic commitment to the sealed solution during setu
 
 ```mermaid
 flowchart TD
-  A[Turn begins] --> B{Make an accusation now?}
-  B -- Yes --> H[Submit suspect, weapon, and room]
-  B -- No --> C[Roll two dice]
-  C --> D[Move through passages]
-  D --> E{Entered a room?}
-  E -- No --> G[End turn]
-  E -- Yes --> F[Make one suggestion]
-  F --> I[Move named suspect and weapon into room]
-  I --> J[Ask players clockwise for a refutation]
-  J --> K{A player can refute?}
-  K -- Yes --> L[Privately show one matching card]
-  K -- No --> G
-  L --> G
-  H --> M{Accusation correct?}
-  M -- Yes --> N[Reveal and verify solution; accuser wins]
-  M -- No --> O[Accuser may no longer move, suggest, or accuse]
-  O --> G
-  G --> P[Next eligible player's turn]
+  A[Turn begins] --> B{Roll one die?}
+  B -- Yes --> C[Record 1–6 result in RDF]
+  B -- No --> D[Movement allowance is zero]
+  C --> E{Move?}
+  D --> F[Keep current location]
+  E -- Yes --> G[Move up to the allowance]
+  E -- No --> F
+  G --> H[Resolve final location]
+  F --> H
+  H --> I{Located in a murder room?}
+  I -- No --> N[End turn]
+  I -- Yes --> J{Make a room accusation?}
+  J -- No --> N
+  J -- Yes --> K[Name suspect and weapon; room is current room]
+  K --> L[First able player in turn order chooses and privately shows one matching card]
+  L --> N
+  N --> O[Next eligible player's turn]
 ```
+
+Rolling, movement, and a room accusation are each optional. A player may end their turn without rolling; roll and decline to move; move fewer paces than available; decline to accuse while in a room; or end immediately. A room accusation, when made, is the last voluntary action of the turn. A separate **final accusation** is the attempt to solve and win the game.
 
 ## 6. Roll and move
 
-Roll two six-sided dice on the host or shared page. Move up to the rolled total through connected passage spaces.
+The player may roll one fair six-sided die once on the host or shared page. Each result from 1 through 6 has equal probability. The result is recorded in the game state and becomes that turn's maximum movement allowance. Rolling does not require movement, and a player may stop before spending every pace.
 
+- From a hallway or Foyer space, the interface offers each legal adjacent destination: up, down, left, or right. Diagonal movement is never offered.
+- Moving to an orthogonally adjacent walkable space normally costs 1 pace.
+- Crossing an open entryway costs 2 paces total. An entryway is simply an unobstructed gap in the wall: it has no door, gate, curtain, or other physical barrier.
+- Crossing a doorway costs 3 paces total. A paired or double door is one doorway crossing, not two.
+- The special crossing cost replaces the ordinary 1-pace step cost; it is not added to it.
+- A player may cross no more than one marked ingress or egress during a turn. A doorway and an open entryway both count toward this limit.
+- A player who cannot pay the complete crossing cost may not cross that boundary.
 - Movement is orthogonal unless the board explicitly shows another connection.
 - You may not enter the same passage space twice during one move.
-- You may not pass through or finish on a passage occupied by another active token.
-- Entering a room ends movement immediately.
-- Exact count is not required to enter a room.
-- A player who begins a turn in a room may leave through a doorway, use a shown secret passage instead of rolling, or remain to make a suggestion and end the turn.
+- A hallway or Foyer space may contain at most one person. You may not enter or pass through one occupied by another person.
+- Entering a room ends movement immediately. Exact count is not required to enter it, but the player must still have enough paces to pay the complete ingress cost.
+- A player who begins a turn in a room may leave through one marked egress and continue through passage spaces, but may not enter another room during that turn because that would cross a second ingress/egress.
+- A player who begins in a room may instead use a shown secret passage without rolling, or remain to make a room accusation and end the turn.
 
-Room interiors do not use movement squares. Multiple suspect and weapon tokens may occupy one room.
+When a person is adjacent to a marked room entrance, the interface offers **Enter room** and reports its cost. If fewer than 2 paces remain for an entryway or fewer than 3 remain for a doorway, the option remains visible but disabled with the explanation **Not enough moves**. It is also disabled after the player has already crossed an ingress or egress that turn.
+
+Each room is one location rather than a collection of movement spaces. It may contain zero through six suspect people, and the board must be able to display all six corresponding tokens in one room. Weapon pieces do not count against this person capacity.
+
+The game state records where the suspect person is located. The token is only the visible representation of that person; moving the token updates the person's location rather than asserting that the person and token are identical.
+
+The displayed die uses the same accessible SVG face design as Poker Dice, but it is a single non-holdable movement die.
+
+Every walkable hallway and Foyer site is visibly outlined as a square on the finished board. These subtle grid lines are part of the player view so players can count one-pace orthogonal routes before rolling. Room interiors are not subdivided because each room is one multiply occupiable site.
+
+The four literal corner rooms have diagonal secret passages: **Swimming Pool Room ↔ Dining Room** and **Greenhouse ↔ Living Room**. A player who begins in one of those rooms may use its marked passage instead of rolling. Passage use moves the person directly to the paired room and ends movement for the turn.
 
 ### Estate layout
 
 The intended floorplan is organized in three broad bands:
 
-- Back: Pool Room, Screened-in Porch, and Greenhouse.
-- Middle: two narrow, side-by-side Library and Game Room spaces on the left, Ballroom in the center, and Kitchen above Dining Room on the right.
+- Back: Swimming Pool Room, Screened-in Porch, and Greenhouse.
+- Middle: a side-by-side Study and Game Room on the left, Ballroom in the center, and Kitchen above Dining Room on the right.
 - Front: Living Room across the lower-left, the central Foyer, and Dining Room extending through the lower-right.
 
 The minimum room/zone connections are:
 
-- Library—Living Room;
-- Game Room—Library, Game Room—Living Room, and Game Room—Ballroom;
-- Pool Room—Screened-in Porch;
+- Study—Living Room;
+- Game Room—Study, Game Room—Living Room, and Game Room—Ballroom;
+- Swimming Pool Room—Screened-in Porch;
 - Screened-in Porch—Greenhouse and Screened-in Porch—Ballroom;
 - Greenhouse—Kitchen;
 - Kitchen—Ballroom and Kitchen—Dining Room;
 - Ballroom—Dining Room; and
 - Foyer—Living Room, Foyer—Ballroom, and Foyer—Dining Room.
 
-These are architectural relationships, not necessarily one-step moves. Marked hinged doors and double doors are entry nodes. Wide parallel openings, especially around the Ballroom, are direct room-to-room access without intervening corridors. The final board overlay will insert individually addressable movement squares and doorway/opening nodes only where the floorplan requires them; it must not manufacture hallways between rooms that share a wall. Square identifiers are internal and do not need printed names. Until that overlay is finalized, the app uses room-to-room connections as a playable prototype.
+The underlying board model is an exact 26-column by 18-row topology, but its coordinate labels and specification colors are not part of the player-facing artwork. Hallways should appear as an off-white, tan, or gray mansion floor rather than black. Stairs should use a clear top-down stair illustration rather than a flat gray block. Room illustrations are clipped to their exact room boundaries; in particular, Swimming Pool Room artwork must not spill into hallway spaces J4 or J5. The source plan's solid red marks identify doors and its dashed marks identify open entryways. On the finished board a door is a visible fixture, while an entryway is rendered only as a clean, unobstructed break in the wall.
 
-## 7. Suggestions
+The finished board should retain the illustrated estate aesthetic, outer mansion walls, and surrounding lawn. Individually generated room artwork is composed beneath a separate topology and interaction layer so changing the art cannot change legal spaces or movement.
 
-After entering or beginning the turn in a room, you may make one suggestion consisting of:
+## 7. Room accusations and evidence
+
+If your suspect person ends movement in one of the nine murder rooms—or began the turn there and did not leave—you may make one optional room accusation consisting of:
 
 - any suspect;
 - any weapon; and
-- the room your token currently occupies.
+- the room the person currently occupies.
 
-Move the named suspect token and weapon token into that room. The moved suspect remains there until moved normally or named by another suggestion.
+Move the named suspect person and weapon into that room in the game state, then render their pieces there. The moved suspect person remains located in that room until moved normally or named by another room accusation.
 
-Beginning with the next player clockwise, each player checks whether their hand contains at least one suggested card.
+Beginning with the next player in the fixed turn order and wrapping around as needed, each other player checks whether their hand contains at least one card named by the accusation.
 
 - A player with no matching card declares that they cannot refute, and the request passes clockwise.
-- The first player with one or more matching cards must privately show exactly one of their choice to the suggester.
+- The first player with one or more matching cards must privately show exactly one to the accuser. If they hold multiple matching cards, that player chooses which one to show.
 - Refutation stops after one card is shown.
 - Nobody else may see which card was shown.
 
-In pass-and-play, use the private reveal screen. In multi-device play, the refuting player selects the card on their own device and physically shows that device only to the suggester. The suggester records the information in their notebook.
+In pass-and-play, use the private reveal screen. In multi-device play, the refuting player selects the card on their own device and physically shows that device only to the accuser. The accuser records the information in their notebook. After the room accusation is resolved—or after every other player reports that they cannot refute—the turn ends.
 
 ## 8. Detective notebook
 
@@ -162,17 +182,17 @@ Your notebook is private. It may track:
 
 Notebook marks are aids, not authoritative game state. The game does not make deductions or correct mistaken notes.
 
-## 9. Accusations
+## 9. Final accusations
 
-At the beginning of your turn, before rolling, you may make one accusation naming any suspect, weapon, and room. In the current playtest profile, your token does not need to be in the accused room or the Foyer.
+To distinguish this game-ending claim from the refutable action in Section 7, this section calls it a **final accusation**. A final accusation names a suspect, weapon, and room and is checked directly against the sealed solution rather than offered to other players for evidence.
 
-**Open playtest decision:** a stricter variant would require returning to the Foyer before making an accusation. That makes the Foyer strategically meaningful and gives opponents warning, but it may lengthen an endgame whose deduction is already complete. The first implementation retains anywhere-at-turn-start accusations until playtesting selects the preferred rule.
+A player may make a final accusation only while their suspect person is located on one of the walkable Foyer squares. The representing token must therefore visibly be in the Foyer. Being in a room adjacent to the Foyer, on the stairs, or in another hallway site is not sufficient. The player may accuse from the Foyer at any otherwise voluntary decision point and need not spend all remaining paces first.
 
-The host compares the accusation with the sealed solution without first displaying the solution.
+The host compares the final accusation with the sealed solution without first displaying the solution.
 
 - If all three cards match, the solution is revealed, its setup commitment is verified, and the accuser wins.
-- If any card differs, the accusation fails. The accuser is eliminated from taking turns, moving, suggesting, and accusing.
-- An eliminated player keeps their cards and must continue refuting suggestions when able.
+- If any card differs, the final accusation fails. The accuser is eliminated from taking turns, moving, making room accusations, and making final accusations.
+- An eliminated player keeps their cards and must continue refuting room accusations when able.
 
 If every player but one is eliminated, the remaining eligible player does not automatically win; they must still make a correct accusation. If every player becomes eliminated, reveal and verify the solution and record that the mystery defeated the table.
 

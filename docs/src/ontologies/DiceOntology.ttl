@@ -1,0 +1,30 @@
+@prefix dice: <https://w3id.org/ontologized-entertainment/game/dice/> .
+@prefix game: <https://w3id.org/ontologized-entertainment/game/> .
+@prefix cco: <https://www.commoncoreontologies.org/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://w3id.org/ontologized-entertainment/game/dice> a owl:Ontology ;
+  owl:versionIRI <https://w3id.org/ontologized-entertainment/game/dice/2026-10-24> ;
+  owl:versionInfo "0.1.0" ;
+  owl:imports <https://w3id.org/ontologized-entertainment/game> , <https://www.commoncoreontologies.org/InformationEntityOntology> ;
+  dcterms:title "Dice Mechanic Ontology"@en ;
+  dcterms:description "A reusable CCO-aligned model of dice, fair die rolls, and their face-value results."@en ;
+  dcterms:creator "Ontologized Entertainment contributors"@en ;
+  dcterms:created "2026-10-24"^^xsd:date ;
+  dcterms:license <https://opensource.org/license/bsd-3-clause> ;
+  rdfs:label "Dice Mechanic Ontology"@en ;
+  rdfs:comment "The ontology records canonical randomization results; animation and rendering remain interface state."@en .
+
+dice:Die a owl:Class ; rdfs:subClassOf game:GamePiece ; rdfs:label "Die"@en ; skos:definition "A game piece whose mutually exclusive faces are used to realize a random result."@en .
+dice:SixSidedDie a owl:Class ; rdfs:subClassOf dice:Die ; rdfs:label "Six-sided die"@en ; skos:definition "A die with six equiprobable face values numbered one through six."@en .
+dice:DieFaceValue a owl:Class ; rdfs:subClassOf cco:ont00000958 ; rdfs:label "Die face value"@en ; skos:definition "An information content entity that records the face value produced by rolling a die."@en .
+dice:DiceRollingAct a owl:Class ; rdfs:subClassOf game:RandomizationAct ; rdfs:label "Dice rolling act"@en ; skos:definition "A randomization act that determines the upward face value of one or more dice."@en .
+
+dice:hasResult a owl:ObjectProperty ; rdfs:domain dice:DiceRollingAct ; rdfs:range dice:DieFaceValue ; rdfs:label "has result"@en ; skos:definition "Relates a dice rolling act to a face-value result it produced."@en .
+dice:performedBy a owl:ObjectProperty ; rdfs:domain dice:DiceRollingAct ; rdfs:label "performed by"@en ; skos:definition "Relates a dice rolling act to the player who performed it."@en .
+dice:hasCurrentFace a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain dice:Die ; rdfs:range dice:DieFaceValue ; rdfs:label "has current face"@en ; skos:definition "Relates a die to its currently recorded face-value result."@en .

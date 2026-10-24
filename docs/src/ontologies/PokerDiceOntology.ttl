@@ -1,5 +1,6 @@
 @prefix pd: <https://w3id.org/ontoeagle/games/poker-dice/> .
-@prefix game: <https://w3id.org/ontoeagle/game/> .
+@prefix game: <https://w3id.org/ontologized-entertainment/game/> .
+@prefix dice: <https://w3id.org/ontologized-entertainment/game/dice/> .
 @prefix cco: <https://www.commoncoreontologies.org/> .
 @prefix obo: <http://purl.obolibrary.org/obo/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
@@ -11,19 +12,19 @@
 
 <https://w3id.org/ontoeagle/games/poker-dice> a owl:Ontology ;
   owl:versionIRI <https://w3id.org/ontoeagle/games/poker-dice/2026-09-24> ;
-  owl:versionInfo "0.1.0" ; owl:imports <https://w3id.org/ontoeagle/game> , <https://www.commoncoreontologies.org/AgentOntology> , <https://www.commoncoreontologies.org/InformationEntityOntology> ;
+  owl:versionInfo "0.2.0" ; owl:imports <https://w3id.org/ontologized-entertainment/game> , <https://w3id.org/ontologized-entertainment/game/dice> , <https://www.commoncoreontologies.org/AgentOntology> , <https://www.commoncoreontologies.org/InformationEntityOntology> ;
   dcterms:title "Poker Dice Ontology"@en ; dcterms:description "A CCO-aligned semantic model for the standard-13 Poker Dice game profile."@en ;
   dcterms:creator "OntoEagle contributors"@en ; dcterms:created "2026-09-24"^^xsd:date ; dcterms:license <https://opensource.org/license/bsd-3-clause> ;
   rdfs:label "Poker Dice Ontology"@en ; rdfs:comment "Rendering coordinates, die animation, score previews, and other interface state are intentionally excluded."@en .
 
 pd:PokerDicePlayer a owl:Class ; rdfs:subClassOf cco:ont00001262 ; rdfs:label "Poker Dice Player"@en ; skos:definition "A Person who bears a Player Role in a Poker Dice game session."@en .
-pd:PokerDie a owl:Class ; rdfs:subClassOf game:GamePiece ; rdfs:label "Poker Die"@en ; skos:definition "A six-sided Game Piece whose upward face supplies a random integer result in Poker Dice."@en .
+pd:PokerDie a owl:Class ; rdfs:subClassOf dice:SixSidedDie ; rdfs:label "Poker Die"@en ; skos:definition "A six-sided die used in Poker Dice."@en .
 pd:DicePool a owl:Class ; rdfs:subClassOf obo:BFO_0000027 ; rdfs:label "Poker Dice Pool"@en ; skos:definition "An Object Aggregate containing the five individuated dice used in a standard Poker Dice session."@en .
-pd:DieFaceValue a owl:Class ; rdfs:subClassOf cco:ont00000958 ; rdfs:label "Die Face Value"@en ; skos:definition "An Information Content Entity that records the integer face result of a Poker Die in a Dice Rolling Act."@en ; skos:scopeNote "Its integer is expressed with rdf:value."@en .
+pd:DieFaceValue a owl:Class ; rdfs:subClassOf dice:DieFaceValue ; rdfs:label "Poker Dice face value"@en ; skos:definition "A die face value recorded during Poker Dice play."@en ; skos:scopeNote "Its integer is expressed with rdf:value."@en .
 pd:Scorecard a owl:Class ; rdfs:subClassOf cco:ont00000958 ; rdfs:label "Poker Dice Scorecard"@en ; skos:definition "An Information Content Entity that contains the committed scoring entries associated with one player in one Poker Dice session."@en .
 pd:ScoringCategory a owl:Class ; rdfs:subClassOf cco:ont00000965 ; rdfs:label "Poker Dice Scoring Category"@en ; skos:definition "A Prescriptive Information Content Entity that prescribes how one roll is assigned a score."@en .
 pd:ScoreEntry a owl:Class ; rdfs:subClassOf cco:ont00000958 ; rdfs:label "Poker Dice Score Entry"@en ; skos:definition "An Information Content Entity that records the non-negative integer committed to one Scoring Category on one Scorecard."@en .
-pd:DiceRollingAct a owl:Class ; rdfs:subClassOf game:RandomizationAct ; rdfs:label "Dice Rolling Act"@en ; skos:definition "A Randomization Act in which the face values of one or more unheld Poker Dice are determined."@en .
+pd:DiceRollingAct a owl:Class ; rdfs:subClassOf dice:DiceRollingAct ; rdfs:label "Poker Dice rolling act"@en ; skos:definition "A dice rolling act in which the face values of one or more unheld Poker Dice are determined."@en .
 pd:ScoreCommitmentAct a owl:Class ; rdfs:subClassOf game:ScoringAct ; rdfs:label "Score Commitment Act"@en ; skos:definition "A Scoring Act in which a player irrevocably assigns a roll score to one unused category."@en .
 pd:DieHoldingAct a owl:Class ; rdfs:subClassOf game:GameAct ; rdfs:label "Die Holding Act"@en ; skos:definition "A Game Act in which a player marks a die to be excluded from the next roll in the same turn."@en .
 
@@ -32,10 +33,10 @@ pd:hasCurrentPlayer a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain 
 pd:hasScorecard a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain pd:PokerDicePlayer ; rdfs:range pd:Scorecard ; rdfs:label "has scorecard"@en ; skos:definition "Relates a player to the scorecard associated with that player in the session."@en .
 pd:hasScoreEntry a owl:ObjectProperty ; rdfs:domain pd:Scorecard ; rdfs:range pd:ScoreEntry ; rdfs:label "has score entry"@en ; skos:definition "Relates a scorecard to one of its committed score entries."@en .
 pd:forScoringCategory a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain pd:ScoreEntry ; rdfs:range pd:ScoringCategory ; rdfs:label "for scoring category"@en ; skos:definition "Relates a score entry to the scoring category whose rule determined it."@en .
-pd:hasCurrentFace a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain pd:PokerDie ; rdfs:range pd:DieFaceValue ; rdfs:label "has current face"@en ; skos:definition "Relates a Poker Die to the face-value result that currently holds."@en .
+pd:hasCurrentFace a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:subPropertyOf dice:hasCurrentFace ; rdfs:domain pd:PokerDie ; rdfs:range pd:DieFaceValue ; rdfs:label "has current face"@en ; skos:definition "Relates a Poker Die to the face-value result that currently holds."@en .
 pd:isHeldBy a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain pd:PokerDie ; rdfs:range pd:PokerDicePlayer ; rdfs:label "is held by"@en ; skos:definition "Relates a Poker Die to the current player when that die is excluded from the next roll."@en .
-pd:hasResult a owl:ObjectProperty ; rdfs:domain pd:DiceRollingAct ; rdfs:range pd:DieFaceValue ; rdfs:label "has result"@en ; skos:definition "Relates a Dice Rolling Act to a face-value result it produced."@en .
-pd:performedBy a owl:ObjectProperty ; rdfs:domain game:GameAct ; rdfs:range pd:PokerDicePlayer ; rdfs:label "performed by"@en ; skos:definition "Relates a Poker Dice act to the player who performed it."@en .
+pd:hasResult a owl:ObjectProperty ; rdfs:subPropertyOf dice:hasResult ; rdfs:domain pd:DiceRollingAct ; rdfs:range pd:DieFaceValue ; rdfs:label "has result"@en ; skos:definition "Relates a Poker Dice rolling act to a face-value result it produced."@en .
+pd:performedBy a owl:ObjectProperty ; rdfs:subPropertyOf dice:performedBy ; rdfs:domain pd:DiceRollingAct ; rdfs:range pd:PokerDicePlayer ; rdfs:label "performed by"@en ; skos:definition "Relates a Poker Dice rolling act to the player who performed it."@en .
 
 pd:hasPhaseIdentifier a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain game:GameSession ; rdfs:range xsd:string ; rdfs:label "has phase identifier"@en ; skos:definition "Records the implementation identifier of the current phase for restoration and action dispatch."@en .
 pd:hasRoundNumber a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain game:GameSession ; rdfs:range xsd:integer ; rdfs:label "has round number"@en ; skos:definition "Records the one-based current round number."@en .

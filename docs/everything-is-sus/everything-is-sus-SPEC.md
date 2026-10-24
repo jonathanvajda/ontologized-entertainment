@@ -3,7 +3,7 @@
 **Status:** Refined implementation draft  
 **Game version:** 0.1.0  
 **Schema version:** 1  
-**Date:** 2026-09-24
+**Date:** 2026-10-24
 
 ## 1. Overview
 
@@ -11,7 +11,7 @@ Everything's Sus is a three-to-six-player deduction game built on the Ontologize
 
 - pass-and-play on one device with audience/phase concealment;
 - local multi-device play with a host page and static player pages;
-- host-authoritative board, turn, movement, suggestion, and accusation state;
+- host-authoritative board, turn, movement, room-accusation, and final-accusation state;
 - player-scoped five-letter hand codes and local notebooks;
 - commitment and later verification of the concealed solution.
 
@@ -71,7 +71,7 @@ The 21 card IRIs are stable and individuated.
 | --- | --- |
 | Suspects | Mrs. Eggshell, Lt. Marinara, Ms. Peach, Mrs. Mint, Prof. Mulberry, Mr. Brown |
 | Weapons | Shovel, Baseball Bat, Pistol, Rope, Knife, Electric Guitar |
-| Rooms | Ballroom, Living Room, Dining Room, Kitchen, Library, Game Room, Screened-in Porch, Greenhouse, Pool Room |
+| Rooms | Ballroom, Living Room, Dining Room, Kitchen, Study, Game Room, Screened-in Porch, Greenhouse, Swimming Pool Room |
 
 Each card is both a `game:Card` and a category-specific subclass. Card art is rendering configuration outside RDF; asset identifiers map stable card IRIs to files.
 
@@ -79,15 +79,19 @@ Each card is both a `game:Card` and a category-specific subclass. Card art is re
 
 | Concept | Semantic model | Identity |
 | --- | --- | --- |
-| Board room | Subclass of `cco:ont00000472` / BFO Site | Stable IRI |
-| Foyer | Non-card `cco:ont00000472`; shared token start zone | Stable IRI |
-| Passage space | `everything-is-sus:PassageSpace`, game board location | Stable IRI from geometry manifest |
+| Suspect person | In-game person controlled by a player or moved as evidence | Stable IRI |
+| Board room | Instance of `obo:BFO_0000029` (site); capacity 0–6 suspect people | Stable IRI |
+| Foyer space | Instance of `obo:BFO_0000029` and walkable-space class; capacity 0–1 suspect person | Stable grid IRI |
+| Hallway space | Instance of `obo:BFO_0000029` and walkable-space class; capacity 0–1 suspect person | Stable grid IRI |
+| Stair site | Instance of `obo:BFO_0000029`; non-walkable | Stable grid IRI |
 | Doorway connection | Asserted adjacency between passage and room | Endpoint pair |
 | Secret passage | Individuated route entity | Stable IRI |
-| Suspect token | Individuated `game:GamePiece` | One per suspect |
+| Suspect token | Individuated `game:GamePiece` that visually represents, but is not identical with, one suspect person | One per suspect |
 | Weapon token | Individuated `game:GamePiece` | One per weapon |
 | Player hand | `obo:BFO_0000027` | One per player |
 | Sealed solution | Three-member protected aggregate | One per session |
+
+Every room, Foyer cell, hallway cell, and stair cell is a BFO site. A suspect person's current location target is either one room site or one walkable cell site. Canonical location is asserted on that suspect person with `obo:BFO_0000171` (`located in`), for example `person-mint obo:BFO_0000171 site-N15` in the Foyer or `person-mint obo:BFO_0000171 room-ballroom` after entering the Ballroom. The human player controls a suspect person but is not asserted to occupy the game-board site. A local functional relation such as `everything-is-sus:representsPerson` links each visual token to its person. Token placement is projected from the person's location; the token is never used as a substitute for the person in location assertions.
 
 Board topology is semantic RDF; pixel geometry and artwork are external JSON/SVG/image assets.
 
@@ -97,17 +101,23 @@ The board composition SHALL follow this architectural layout:
 
 | Band | Left | Center | Right |
 | --- | --- | --- | --- |
-| Back | Pool Room | Screened-in Porch | Greenhouse |
-| Middle | Narrow side-by-side Library and Game Room | Ballroom | Kitchen above Dining Room |
+| Back | Swimming Pool Room | Screened-in Porch | Greenhouse |
+| Middle | Side-by-side Study and Game Room | Ballroom | Kitchen above Dining Room |
 | Front | Living Room across lower-left | Foyer | Dining Room extending through lower-right |
 
-Required adjacency is Library–Game Room, Library–Living Room, Game Room–Living Room, Game Room–Ballroom, Pool Room–Screened-in Porch, Screened-in Porch–Greenhouse, Screened-in Porch–Ballroom, Greenhouse–Kitchen, Kitchen–Ballroom, Kitchen–Dining Room, Ballroom–Dining Room, and Foyer–Living Room/Ballroom/Dining Room.
+Required adjacency is Study–Game Room, Study–Living Room, Game Room–Living Room, Game Room–Ballroom, Swimming Pool Room–Screened-in Porch, Screened-in Porch–Greenhouse, Screened-in Porch–Ballroom, Greenhouse–Kitchen, Kitchen–Ballroom, Kitchen–Dining Room, Ballroom–Dining Room, and Foyer–Living Room/Ballroom/Dining Room.
 
-Adjacency describes architectural reachability, not necessarily a single movement point. Slanted plan marks designate hinged doors; paired slanted marks designate one double door. Parallel straight marks designate broad direct access, especially at the Ballroom, with no hallway inserted between the rooms. Exterior windows MUST occur only on exterior walls, stairs MUST terminate at a modeled landing, and door regions MUST remain unobstructed in the art. A future `board-topology.json` SHALL represent walkable squares, doors, broad openings, the six Foyer starts, room entry nodes, occupancy, and optional passage edges independently of the art. Stable square IDs use grid coordinates such as `sq-r12-c08`; visible labels are not required.
+Adjacency describes architectural reachability, not necessarily a single movement point. Slanted plan marks designate hinged doors; paired slanted marks designate one double door. Parallel straight marks designate broad direct access, especially at the Ballroom, with no hallway inserted between the rooms. Exterior windows MUST occur only on exterior walls, stairs MUST terminate at a modeled landing, and door regions MUST remain unobstructed in the art. `assets/board-topology.json` represents the grid frame, room ranges, walkable terrain, stairs, doors, broad openings, capacity, crossing cost, and walkability independently of the art. Runtime square IDs use familiar grid coordinates such as `N15`; visible labels are not required.
 
-A logical grid around 36×36 or 40×40 is the starting design target. The exact extent should be derived from the room footprints and useful corridor length rather than fixed at 50×50. Room geometry may occupy most of the image, but the movement graph needs enough walkable corridor nodes for two-die values and blocking to matter; the prototype SHALL be playtested before limiting walkable area to 10–20 percent.
+The approved topology is the explicit 26-column (`A`–`Z`) by 18-row (`1`–`18`) plan in `specs/everything-is-sus/board-layout.png`. Runtime room masks are exact cell sets: Swimming Pool Room `A1:J3` plus `A4:I5` (excluding hallway sites `J4` and `J5`); Screened-in Porch `K1:R3`; Greenhouse `S1:Z3`; Study `A6:D12`; Game Room `E6:I12`; Living Room `A13:I18`; Ballroom `K5:R13`; Kitchen `T4:Z9`; Dining Room `T10:Z18`; and the walkable Foyer cells `K15:R16` plus `M17:P18`. Hallway, stair, door, and open-entryway markings remain a separate topology layer above room artwork. Artwork MUST NOT determine legal geometry.
 
-The approved proportional overlay follows the annotated plan rather than equal grid rows. Approximate regions within the usable house footprint are: Pool Room `0–32% × 0–29%`; Porch `34–66% × 0–24%`; Greenhouse `68–100% × 0–24%`; Library `0–15% × 29–65%`; Game Room `17–32% × 29–65%`; Living Room `0–32% × 66–100%`; Ballroom `34–66% × 26–75%`; Foyer `34–66% × 77–100%`; Kitchen `68–100% × 26–49%`; and Dining Room `68–100% × 51–100%`. Responsive hit regions MAY compensate for the board artwork's exterior garden border but MUST preserve those relative room dimensions.
+Each orthogonal edge between two ordinary walkable cells has movement cost 1. A topology edge marked as an open entryway has cost 2; an edge marked as a doorway has cost 3. These are total edge costs, not surcharges. Every movement path has an ingress/egress crossing count, initialized to zero and capped at one. Crossing either marked edge type increments it once. A double door is one topology edge and one crossing. Entering a room ends movement; leaving a room consumes the sole crossing but may be followed by ordinary passage-space steps.
+
+The topology also defines two bidirectional secret-passage pairs between the literal corner rooms: Swimming Pool Room–Dining Room and Greenhouse–Living Room. Each endpoint SHALL have a persistent player-visible passage marker independent of the room bitmap. Markers occupy the literal outer estate corners: Swimming Pool Room top-left, Greenhouse top-right, Living Room bottom-left, and Dining Room bottom-right. Passage use is available only at `turn-start`, replaces rolling and ordinary movement, moves the suspect person directly to the paired room, and enters `room-decision`.
+
+Room sites do not expose internal movement cells. Up to six suspect people may be `located in` the same room site, and its renderer SHALL provide six stable token slots. Each individual Foyer or hallway site has maximum person occupancy one. Weapon pieces do not consume person occupancy. A legal path cannot enter or traverse an occupied capacity-one site.
+
+The coordinate labels and diagnostic colors SHALL NOT appear in the ordinary player view. A subtle square grid SHALL remain visible on each singly occupiable hallway and Foyer site so players can count paces. The production board SHALL retain the illustrated estate, outer walls, and lawn. Hallways use a light neutral floor treatment rather than black. Stair regions use a dedicated top-down tread treatment, oriented from the outer landing toward the Foyer, and MUST NOT reuse a miniature Foyer image. Every board-only room bitmap SHALL have the same width-to-height ratio as its topology bounding box. The renderer uses `100% 100%` placement only because those ratios are identical; tests SHALL read each PNG's intrinsic dimensions and compare them to `BOARD_REGIONS`. Runtime cropping and non-uniform stretching are prohibited. Board-interior bitmaps are frameless furnishing-and-floor layers and MUST NOT contain baked-in perimeter walls, doors, entryways, windows, or thresholds. Square card illustrations remain separate assets. A thicker coordinate-derived architectural overlay, with room art inset behind it, supplies shared interior partitions, physical doors, clean wall gaps for open entryways, and secret-passage marks. Consequently, every visible ingress or egress is positioned from `ENTRANCE_MARKERS` and can be validated against a topology boundary. An open entryway MUST NOT depict any door, gate, saloon door, curtain, or other closure. No room art may bleed into a hallway—specifically, the Swimming Pool Room mask excludes `J4` and `J5`. Column letters, row numbers, Greek start identifiers, and capacity data remain hidden.
 
 ## 5. Canonical RDF and information partition
 
@@ -115,11 +125,11 @@ The approved proportional overlay follows the annotated plan rather than equal g
 
 - game/session identity and profile;
 - player order, active/eliminated status, and token assignment;
-- token locations;
+- suspect-person locations and their token-to-person representation links;
 - board topology;
-- turn/phase and dice results;
-- suggestions and whether/which player refuted, but not the shown card;
-- accusation outcome after resolution;
+- turn/phase, the optional die result, remaining movement allowance, and ingress/egress crossing count;
+- room accusations and whether/which player refuted, but not the shown card;
+- final-accusation outcome after resolution;
 - public solution commitment digest.
 
 ### 5.2 Private player state
@@ -139,9 +149,26 @@ The approved proportional overlay follows the annotated plan rather than equal g
 
 ### 5.4 Current-state semantics
 
-Token location, current player, phase, and eligibility use ordinary direct triples and replacement deltas. Historical moves, suggestions, refutations, accusations, eliminations, and solution reveal remain RDF individuals.
+Suspect-person location, current player, phase, and eligibility use ordinary direct triples and replacement deltas. An accepted move deletes the person's prior `obo:BFO_0000171` assertion and inserts exactly one new assertion to the destination site in the same transaction. Historical movement acts preserve origin, destination, pace cost, and turn even though only the current direct location triple remains active. Historical room accusations, refutations, final accusations, eliminations, and solution reveal remain RDF individuals.
 
 Technical compact-code checksums and local notebook storage are not RDF.
+
+### 5.5 Shared die semantics, validation, and rendering
+
+Movement uses one fair six-sided die. Its randomization contract is one independent integer result in the inclusive range 1–6, with probability `1/6` for each result. The host-authoritative shared `RandomEngine.rollDie(6)` MUST generate the value; animation MUST NOT determine or replace the canonical result. The shared implementation SHALL use unbiased bounded-integer sampling (for example, rejection sampling over the underlying unsigned integer source) rather than a modulo mapping that gives some faces more source values than others.
+
+The implementation SHALL reuse and generalize the existing dice mechanism rather than create an Everything's Sus-only duplicate:
+
+- `docs/src/ontologies/DiceOntology.ttl` defines the reusable die, face-value, dice-rolling-act, current-face, and result relations factored from Poker Dice.
+- `docs/src/ontologies/DiceShapes.ttl` defines the reusable `rdf:value` integer constraint with inclusive bounds 1 and 6.
+- `docs/src/ontologies/PokerDiceOntology.ttl` retains compatible Poker Dice subclasses and subproperties.
+- `docs/poker-dice/rendering/dice-svg.js` is the shared accessible SVG face renderer.
+
+The game-independent semantics have been lifted into the shared Dice ontology and SHACL graph. Poker Dice retains its specialized subclasses and properties, while Everything's Sus uses `dice:SixSidedDie`, `dice:DiceRollingAct`, and `dice:DieFaceValue` directly; its movement die is never classified as a five-die Poker Dice pool member merely to reuse code.
+
+The SVG renderer SHALL receive a one-element die array and retain its existing 1–6 pip geometry and rolling state. Its API SHALL gain a backward-compatible non-holdable presentation option, such as `showHold: false`, and an accessible label override such as `Movement die: 4`. Poker Dice keeps the existing hold controls by default. The movement die is disabled while rolling and after its one canonical result has been committed for the turn.
+
+Canonical RDF records one die-rolling act, one face-value result, the player who rolled, and the turn in which it occurred. The result supplies the initial movement allowance. RDF does not record animation frames.
 
 ## 6. Setup pipeline
 
@@ -154,20 +181,30 @@ Technical compact-code checksums and local notebook storage are not RDF.
 7. Create canonical hand aggregates and visibility policies.
 8. For multi-device mode, encode each dealt hand as a five-letter player-scoped hand code.
 9. Validate inventory: 21 distinct cards distributed exactly once across solution and hands.
-10. Place every suspect token in a distinct, nonblocking Foyer start position, create the first turn from the selected order, and commit setup atomically.
+10. Use a domain-separated `foyer-placement` random stream to shuffle the six Foyer start sites: α=`L15`, β=`N15`, γ=`P15`, δ=`M16`, ε=`O16`, and ζ=`Q16`. Assign each selected player-suspect to a distinct shuffled site independently of selection and turn order. Unselected suspect people begin at an off-board reserve site. The Greek identifiers are authoring identifiers and are not printed in the production view.
+11. Assert each suspect person's initial `located in` relation, project each selected suspect's representing token into its start site, create the first turn from the selected player order, and commit setup atomically.
 
 The public table code MUST NOT derive the deal, solution, salts, or keys.
 
 ## 7. Turn and phase model
 
+A turn is an ordered sequence of optional player actions followed by mandatory cleanup:
+
+1. The player may roll the single d6 once, or skip rolling.
+2. If rolled, the player may spend zero through the full allowance on legal movement. Movement may end on a hallway or Foyer site; reaching a room is not required.
+3. After the player resolves their end location, they may submit one room accusation only if their suspect person is located in a murder-room site.
+4. A submitted room accusation must finish its deterministic refutation sequence; after it resolves, the turn ends automatically. If no room accusation is submitted, the player may end the turn directly.
+
+`endTurn` is therefore legal at every voluntary decision point: before rolling, after rolling without moving, after any legal partial movement, or after declining a room accusation. It is not legal while a submitted accusation is awaiting required refutation responses. Skipping a step does not fabricate a roll or movement act in RDF.
+
 | Phase | Legal actions | Exit |
 | --- | --- | --- |
-| `turn-start` | `accuse`, `roll`, `useSecretPassage`, `suggestIfRemaining` | Chosen action |
-| `movement` | `moveStep`, `enterRoom`, `endMovement` | Room entered or movement ends |
-| `suggestion` | `selectSuspect`, `selectWeapon`, `submitSuggestion`, `skipSuggestion` | Suggestion submitted/skipped |
+| `turn-start` | `roll`, `useSecretPassage`, `submitRoomAccusation` when already in a room, `submitFinalAccusation`, `endTurn` | Roll committed, movement choice taken, accusation submitted, or turn ended |
+| `movement` | `moveStep`, `crossBoundary`, `stopMovement`, `endTurn` | Room entered, allowance exhausted, player stops, or turn ends |
+| `room-decision` | `submitRoomAccusation` when in a room, `submitFinalAccusation`, `endTurn` | Accusation submitted or turn ended |
 | `refutation` | `cannotRefute`, `selectRefutationCard`, `confirmPrivateReveal` | First refutation or full circuit |
 | `notebook` | local notebook actions | Player ends turn |
-| `accusation` | select triple, confirm | Resolved immediately |
+| `final-accusation` | select triple, confirm | Resolved immediately |
 | `turn-cleanup` | automatic | Next eligible player or game end |
 | `complete` | reveal/verify/export | Terminal |
 
@@ -177,29 +214,33 @@ Eliminated players are skipped as active players but remain in the refutation or
 
 | Action | Principal preconditions | Canonical effects |
 | --- | --- | --- |
-| `roll` | Active, eligible player; `turn-start` | Add dice-roll act/result; enter movement |
-| `moveStep` | Destination adjacent, unblocked, movement remaining | Replace token location; retain movement act |
+| `roll` | Active, eligible player; `turn-start`; no roll yet this turn | Generate one uniform integer from 1–6; add one die-rolling act/result; set movement allowance to the result; enter movement |
+| `moveStep` | Orthogonally adjacent walkable destination; destination occupancy below capacity; at least 1 pace remains | Spend 1 pace; replace the suspect person's current `located in` triple; retain movement phase |
+| `crossBoundary` | Marked ingress/egress boundary; crossing count is 0; destination occupancy below capacity; enough allowance remains | Spend 2 paces for an open entryway or 3 for a doorway; set crossing count to 1; replace the person's location; entering a room resolves movement |
+| `stopMovement` | Movement is active | Preserve the current site as the end location; discard unused allowance; enter room decision |
 | `useSecretPassage` | Current room owns route; not otherwise moved | Replace location; consume movement choice |
-| `submitSuggestion` | Active player in named room; one suggestion maximum | Create suggestion act; move named suspect/weapon; initialize refutation cursor |
-| `cannotRefute` | Cursor player holds no suggested card | Record negative response; advance cursor |
+| `submitRoomAccusation` | Active suspect person is located in the named murder room; movement resolved; no room accusation this turn | Create room-accusation act; move named suspect person and weapon into that room; initialize refutation cursor at the next player in fixed order |
+| `cannotRefute` | Cursor player holds no card matching the room accusation | Record negative response; advance cursor deterministically with wraparound |
 | `selectRefutationCard` | Cursor player owns selected matching card | Create protected disclosure event; end refutation |
-| `accuse` | Eligible active player at turn start | Compare triple with host-only solution; reveal/complete or eliminate accuser |
-| `endTurn` | Required actions resolved | Advance to next non-eliminated active player |
+| `submitFinalAccusation` | Eligible active player at an allowed voluntary decision point whose suspect person is located on a Foyer site | Compare triple with host-only solution; reveal/complete or eliminate accuser |
+| `endTurn` | Voluntary decision point; no unresolved room accusation | Discard unused allowance and advance to next non-eliminated active player |
 | `revealSolution` | Game complete | Publish solution and salt; verify commitment |
 
 Notebook actions remain player-local UI/persistence operations and do not mutate host RDF.
 
-## 9. Refutation privacy
+## 9. Room-accusation refutation and privacy
 
-The host may know that Player B refuted Player A's suggestion, but the shown card is visible only to A and B.
+The refutation order is the fixed player order established at setup: begin with the player immediately after the accuser, advance one player at a time, and wrap at the end. Eliminated players remain in this sequence because they retain their cards. The first player holding one or more cards named by the room accusation must refute it and chooses exactly one matching card to display. No later player responds after a card is shown.
+
+The host may know that Player B refuted Player A's room accusation, but the shown card is visible only to A and B.
 
 - Pass-and-play: project the matching cards for B during a confirmed private selection screen, then project exactly the selected card for A during a second confirmed screen.
 - Multi-device baseline: B selects one matching card on B's player page and physically shows it to A. The host records only that B refuted.
 - Optional token flow: B encrypts a one-card disclosure to A using the shared ECDH module; A imports it locally. This requires a manual QR/copy step and is not required for the first UI.
 
-## 10. Accusation and commitment
+## 10. Final accusation and commitment
 
-An accusation is evaluated only on the host/pass-and-play authoritative device. Before evaluation the chosen triple is confirmed without revealing the solution.
+A final accusation is distinct from the refutable room accusation. It is legal only when the active suspect person's canonical location is one of `FOYER_SITES`; a token drawn in the Foyer is merely the projection of that required RDF fact. The action is evaluated only on the host/pass-and-play authoritative device and is compared directly with the concealed solution. Before evaluation the chosen triple is confirmed without revealing the solution. The interface SHALL keep the action visible but disabled elsewhere with the brief explanation **Return to the Foyer**.
 
 On success or terminal table defeat, the host publishes solution IRIs and commitment salt. Every client can verify the setup digest. On failure, only correctness=false and elimination are public; the solution remains concealed.
 
@@ -213,10 +254,18 @@ On success or terminal table defeat, the host publishes solution IRIs and commit
 | Each player has exactly one hand and token | SHACL |
 | Every sensitive card/hand/solution subject has a visibility policy | Shared coverage validator |
 | Player hand code reconstructs exactly its scoped hand | JS compact-code boundary test |
-| Current token has exactly one location | SHACL |
-| Movement follows topology and allowance | JS |
-| Suggested room equals current room | JS |
-| Refutation card matches suggestion and belongs to refuter | JS |
+| Every suspect person has exactly one current `located in` site | SHACL |
+| Every suspect token represents exactly one suspect person; token placement is derived | SHACL + renderer tests |
+| Room sites permit 0–6 suspect people; hallway and Foyer sites permit 0–1 | SHACL + JS |
+| A movement roll has exactly one integer result in the inclusive range 1–6 | Shared dice SHACL + JS |
+| Each die result has equal selection probability by construction | Shared random-engine boundary/statistical tests |
+| Movement follows orthogonal topology and never spends more than the roll | JS |
+| Ordinary steps cost 1, open entryways cost 2, and doorways cost 3 | JS topology fixtures |
+| At most one ingress/egress is crossed in a turn | RDF turn state + JS |
+| Room-accusation room equals the active suspect person's current room | JS |
+| Refutation follows fixed player order and stops at the first capable player | JS |
+| Refutation card matches the room accusation, belongs to the refuter, and is chosen by that refuter | JS + visibility tests |
+| `endTurn` is accepted at every voluntary decision point and rejected during unresolved refutation | JS transition tests |
 | Eliminated players cannot take active turns | JS |
 | Solution commitment verifies on reveal | Shared crypto module |
 
@@ -243,7 +292,9 @@ Undo is available in practice mode. Competitive play disables undo after private
 
 ### Host
 
-- Setup/deal, hand-code distribution, public board, turns, dice, movement, suggestions, refutation status, accusations, saves, and final reveal verification.
+- Setup/deal, randomized Foyer placement, hand-code distribution, public board, turns, one-die SVG roll, pace-by-pace movement, room accusations, refutation status, final accusations, saves, and final reveal verification.
+- During movement, expose only the four orthogonal neighboring spaces and any adjacent marked room entrance. Label an entrance action with its 2- or 3-pace cost. Keep unaffordable entrances visible but disabled with the terse reason `Not enough moves`; use an equally terse `Already crossed an entrance` when the one-crossing limit is the blocker.
+- Permit the player to stop movement and end the turn while located on a hallway or Foyer site. The UI MUST NOT force selection of a reachable room.
 - Never display a player's hand during ordinary multi-device play.
 
 ### Player
@@ -269,8 +320,10 @@ The game requires a cohesive illustrated estate-mystery system. Assets SHALL be 
 
 | Asset group | Count | Recommended master | Runtime use |
 | --- | ---: | --- | --- |
-| Estate board base | 1 | 2400×1800 landscape | Board background beneath semantic hit regions |
-| Room illustrations | 9 | 1600×1000 landscape | Room cards, board insets, landing previews |
+| Estate exterior/base | 1 | 2400×1800 landscape | Lawn, mansion perimeter, outer walls, and neutral connective floor beneath semantic hit regions |
+| Room illustrations | 9 | 1600×1000 landscape | Separately generated room cards and board insets clipped to exact room masks |
+| Hallway floor treatment | 1 tileable set | 1024×1024 | Light off-white, tan, or gray walkable spaces; never debug black |
+| Stair treatment | 1 | Proportional top-down art | Clearly recognizable aerial stairs in non-walkable stair masks |
 | Suspect portraits | 6 | 1200×1500 portrait | Suspect cards and player selection |
 | Weapon still lifes | 6 | 1200×1500 portrait | Weapon cards |
 | Room card crops | 9 | derived 1200×1500 | Room cards |
@@ -281,7 +334,7 @@ The game requires a cohesive illustrated estate-mystery system. Assets SHALL be 
 | Landing hero | 1 | 2400×1350 landscape | Game landing page |
 | UI motifs | 6–10 | transparent PNG/WebP | Dice, notebook, magnifier, passages, seals |
 
-Board topology and interactive targets SHALL be SVG/JSON geometry layered above the board image. The board illustration itself is not semantic state.
+Board topology and interactive targets SHALL be SVG/JSON geometry layered independently of the art. Production rendering does not show grid lines, row/column labels, Greek start labels, or the specification's categorical colors. A developer overlay MAY reveal them for topology debugging. The board illustration itself is not semantic state.
 
 ### 14.3 Asset identifiers
 
@@ -300,7 +353,9 @@ Every image requires meaningful alternative text. Decorative crops use empty alt
 
 ### 14.4 Current 255×255 prototype assets
 
-The active manifest uses `estate-board-04.png`, `person-mrs-mint-02.png`, `person-mr-brown-02.png`, `weapon-guitar-02.png`, `room-gameroom-03.png`, and the distinct Ballroom card art `room-ballroom-02.png`. Board rooms SHALL preserve the signature visual identity of their card artwork: the Pool Room is an indoor swimming pool, while the Game Room centers a television, console/controllers, seating, and tabletop games rather than billiards. The corresponding lower-numbered files remain alternate or prior art. In particular, `room-ballroom-01.png` is the former Hall illustration retained for the temporary Foyer inset; Foyer remains a distinct non-card semantic location.
+`board-layout.png` and its legend are topology-authoring references, not production board art. The production renderer SHALL compose the estate exterior/base, neutral hallway floor, top-down stairs, and nine topology-proportioned, frameless room interiors beneath the architectural overlay. Room masks must prevent art leakage into passages, including exclusion of `J4` and `J5` from the Swimming Pool Room. Card art and board-interior art are separate assets but SHALL retain the same visual identity. The Swimming Pool Room contains a left-to-right swimming pool with no architectural staircase emerging from the water; a small pool ladder is permitted. The Game Room centers a television, console/controllers, seating, and tabletop games rather than billiards. Prior composite boards remain versioned references. Foyer remains a distinct non-card semantic location.
+
+Board-interior furniture SHALL remain physically coherent without relying on an omitted wall. Bookcases, counters, televisions, and similar edge furniture must form a continuous floor-standing unit or sit flush against the corresponding topology edge; portraits, sconces, floating shelf fragments, and other wall-mounted objects are prohibited in frameless layers. Furniture and plants SHALL leave every topology ingress zone visually unobstructed. The Foyer uses a pale neutral floor close in value to the hallway, a low-contrast dashed fiat-boundary line, and a subtle central inlay/table; it is not enclosed by walls and must read as broadly walkable.
 
 ## 15. Proposed package structure
 
@@ -320,10 +375,8 @@ docs/everything-is-sus/
 ├── model/
 ├── rendering/
 ├── crypto/
-├── geometry/
-│   ├── board-topology.json
-│   └── board-hit-regions.svg
 ├── assets/
+│   ├── board-topology.json
 │   ├── board/
 │   ├── rooms/
 │   ├── cards/
@@ -334,10 +387,10 @@ docs/everything-is-sus/
 
 ## 16. Implementation sequence
 
-1. Finalize board topology and secret-passage layout.
+1. Playtest the square-level path edges, crossing metadata, and the two corner-room secret-passage pairs.
 2. Create the game ontology, SHACL shapes, and complete initial fixture.
 3. Implement deterministic solution/deal, visibility policies, and compact hand-code boundary tests.
-4. Implement headless movement, suggestion, refutation, accusation, and commitment tests.
+4. Implement headless movement, room-accusation, refutation, final-accusation, and commitment tests.
 5. Build pass-and-play concealment and complete a usability pass.
 6. Build host hand-code distribution and player compact-code decoder/notebook.
 7. Freeze the art manifest and generate/commission assets in consistent batches.
@@ -346,14 +399,12 @@ docs/everything-is-sus/
 
 ## 17. Open decisions
 
-The current nine-room image and direct room-adjacency graph are placeholders, not a frozen movement board. The eventual board should keep artwork separate from a responsive logical overlay: individually identified corridor squares, room zones, doorway nodes, Foyer starting spaces, and secret-passage edges in `board-topology.json`, with scalable hit regions rendered above the composite board image. Square identifiers are required internally but need not be printed for players.
+The 26×18 room geometry, doors, open entryways, Foyer, hallways, and stairs are frozen in `assets/board-topology.json`. The implemented movement graph derives individual path nodes, occupancy, and boundary costs from that topology while keeping room artwork separate from scalable hit regions. Square identifiers remain internal and are not printed for players.
 
-1. Exact grid extent, corridor geometry, doorway count, and secret-passage pairs; the six Foyer starts and broad room layout are decided.
-2. Whether movement uses one or two dice; this draft selects two and should be confirmed before fixtures.
-3. Whether remaining-in-room permits a new suggestion every turn; this draft permits it.
-4. Whether a failed accuser continues refuting; this draft requires it.
-5. Whether the first release includes manual encrypted disclosure tokens or physical screen showing only.
-6. Final character visual descriptions before image generation.
-7. Whether accusations remain legal anywhere at turn start or require the accuser to return to the Foyer. The prototype currently permits accusations anywhere.
+1. Whether the 2-pace entryway and 3-pace doorway costs need adjustment after playtesting; one fair six-sided die is now fixed.
+2. Whether remaining in a room permits a new room accusation every turn; this draft permits it.
+3. Whether a failed accuser continues refuting; this draft requires it.
+4. Whether the first release includes manual encrypted disclosure tokens or physical screen showing only.
+5. Final character visual descriptions before image generation.
 
-The implemented RDF model and room-level movement graph remain valid while these decisions are playtested. Square-level topology and accusation constraints MUST remain configuration/rule-layer concerns rather than artwork assumptions.
+The former room-level movement action remains only as a compatibility alias for loading or dispatching older clients. Canonical play uses stepwise person-location updates. Topology and accusation constraints remain configuration/rule-layer concerns rather than artwork assumptions.
