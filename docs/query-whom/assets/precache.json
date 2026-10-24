@@ -1,5 +1,5 @@
 {
-  "version": "562a45b3b330d0336086da75",
+  "version": "a81a1ddbdfc7d14df743c8cb",
   "files": [
     {
       "path": "../packages/game-mechanics/src/action-engine.js",
@@ -59,7 +59,7 @@
     },
     {
       "path": "../packages/game-mechanics/src/random-engine.js",
-      "sha256": "f514d13cf3f39d285445d1d6259c1297905d1e163d7358ce81b75de116100dec"
+      "sha256": "7799ef444ed583b8c1f7fe277ad37c78e57a2623063cc36ca6e4c3b172d013ea"
     },
     {
       "path": "../packages/game-mechanics/src/rdf-store.js",
