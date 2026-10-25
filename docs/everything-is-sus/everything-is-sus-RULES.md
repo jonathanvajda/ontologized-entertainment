@@ -49,7 +49,7 @@ The deck contains 21 unique cards: six suspects, six weapons, and nine rooms. Th
 
 ### Pass-and-play
 
-Use one device for the board and every private hand. Before private information appears, the screen names the intended player. That player confirms, reviews their cards or notebook, and conceals the screen before passing it on.
+Use one device for the board and every private hand. Before private information appears, the screen names the intended player. That player confirms, reviews their cards, uses the same comprehensive protected sleuth sheet available in multi-device play, adds optional notes, and conceals the screen before passing it on. Each detective's checkoffs and notes are stored separately on that device.
 
 This prevents accidental viewing during ordinary play, but everyone’s information still exists on the same device.
 
@@ -172,7 +172,7 @@ Beginning with the next player in the fixed turn order and wrapping around as ne
 - Refutation stops after one card is shown.
 - Nobody else may see which card was shown.
 
-In pass-and-play, use the private reveal screen. In multi-device play, the refuting player selects the card on their own device and physically shows that device only to the accuser. The accuser records the information in their notebook. If no card is available to show—whether because the accuser holds it, it is in the sealed solution, or no other player can refute—play is not blocked. The active player may always end the turn from the refutation screen.
+In pass-and-play, use the persistent private reveal sequence. First pass the concealed screen to the refuter, who confirms their identity before any matching cards appear. The refuter selects one card, may inspect it at large size, then chooses **Hide my cards and pass back**. After the screen is physically returned, the accuser confirms their identity, views only the selected card at large size, and explicitly hides it to end the turn. Escape, focus loss, backdrop clicks, and card-selection clicks do not dismiss or complete this sequence. In multi-device play, the refuting player selects the card on their own device and physically shows that device only to the accuser. The accuser records the information in their notebook. If no card is available to show—whether because the accuser holds it, it is in the sealed solution, or no other player can refute—play is not blocked. The active player may always end the turn from the refutation screen.
 
 ## 8. Detective notebook
 

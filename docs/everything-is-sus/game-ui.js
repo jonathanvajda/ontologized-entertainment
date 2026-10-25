@@ -2,12 +2,13 @@ import { createEverythingsSusGame, restoreEverythingsSusGame, serializeHostGame 
 import { BOARD_REGIONS, ENTRANCE_MARKERS, FOYER_SITES, ROOMS, SECRET_PASSAGES, SECRET_PASSAGE_CORNERS, SUSPECTS, WALKABLE_SITES, WEAPONS, boardCellStyle, boardImageUrl, boardRegionStyle, cardById, cardImageUrl, entranceMarkerStyle, isRoom } from './game-config.js';
 import { renderDice } from '../poker-dice/rendering/dice-svg.js';
 import { createInvitationUrl, renderQrCode } from '../packages/game-mechanics/src/index.js';
+import { renderSleuthSheet } from './sleuth-sheet-ui.js';
 
 const mode = document.body.dataset.mode;
 let game = null;
 let selectedSuspectIds = [];
 const app = document.querySelector('#app');
-app.innerHTML = `<header class="bar"><a href="../">Everything's Sus</a><nav><button id="rules">Rules</button><button id="load">Load</button><input id="load-file" hidden type="file" accept="application/json"><button id="save" disabled>Save</button><button id="new">New game</button></nav></header><main class="game-shell"><section class="board-panel"><div class="turn-card"><div><p class="kicker">Current detective</p><h1 id="current">Set the table</h1></div><p id="phase">Choose players to begin.</p></div><div class="estate-frame"><div class="estate-board" id="board" aria-label="Estate board"></div></div><p class="board-help">Choose movement and secret passages directly on the board. Gold badges show the pace cost. Rooms may hold several tokens.</p></section><aside class="case-panel"><div><p class="kicker">Case controls</p><h2 id="table-code">The sealed envelope</h2></div><div id="actions" class="actions"></div><div id="log" class="case-log" aria-live="polite"></div><div id="invitations"></div></aside></main><dialog id="setup"><form id="setup-form"><p class="kicker">New investigation</p><h2>Choose 3–6 suspects</h2><p>Select the detectives who are playing. Turn order will be randomized when the case is dealt.</p><div id="suspect-setup" class="suspect-setup"></div><button id="deal-case" disabled>Choose at least 3 suspects</button></form></dialog><dialog id="choice"><form id="choice-form"><h2 id="choice-title"></h2><div id="choice-fields"></div><menu><button type="button" id="cancel-choice">Cancel</button><button>Confirm</button></menu></form></dialog><dialog id="private"><div id="private-content"></div></dialog><dialog id="token-view" class="token-view"><button type="button" class="dialog-close" aria-label="Close token portrait">×</button><img alt=""><h2></h2></dialog><div id="token-preview" class="token-preview" hidden><img alt=""><strong></strong></div><dialog id="invite-view" class="invite-view"><button type="button" class="dialog-close" aria-label="Close player invitation">×</button><img class="invite-portrait" alt=""><p class="kicker">Private player invitation</p><h2></h2><div class="invite-qr"></div><p class="invite-codes"></p><p class="privacy-note">Let only this player scan the QR. It opens their private hand directly on their device.</p></dialog><dialog id="solution-reveal" class="solution-reveal"><div class="envelope-reveal" aria-hidden="true"><span></span></div><p class="kicker">The sealed solution</p><h2>Case closed</h2><div class="solution-cards"></div><button type="button" class="primary close-reveal">Continue</button></dialog>`;
+app.innerHTML = `<header class="bar"><a href="../">Everything's Sus</a><nav><button id="rules">Rules</button><button id="load">Load</button><input id="load-file" hidden type="file" accept="application/json"><button id="save" disabled>Save</button><button id="new">New game</button></nav></header><main class="game-shell"><section class="board-panel"><div class="turn-card"><p><span class="kicker">Current detective</span><img id="current-portrait" alt=""><strong id="current">Set the table</strong></p></div><div class="estate-frame"><div class="estate-board" id="board" aria-label="Estate board"></div></div></section><aside class="case-panel"><div><p class="kicker">Case controls</p><h2 id="table-code">The sealed envelope</h2></div><div id="actions" class="actions"></div><div id="log" class="case-log" aria-live="polite"></div><div id="invitations"></div></aside></main><dialog id="setup"><form id="setup-form"><p class="kicker">New investigation</p><h2>Choose 3–6 suspects</h2><p>Select the detectives who are playing. Turn order will be randomized when the case is dealt.</p><div id="suspect-setup" class="suspect-setup"></div><button id="deal-case" disabled>Choose at least 3 suspects</button></form></dialog><dialog id="choice"><form id="choice-form"><h2 id="choice-title"></h2><div id="choice-fields"></div><menu><button type="button" id="cancel-choice">Cancel</button><button>Confirm</button></menu></form></dialog><dialog id="private"><div id="private-content"></div></dialog><dialog id="token-view" class="token-view"><button type="button" class="dialog-close" aria-label="Close token portrait">×</button><img alt=""><h2></h2></dialog><div id="token-preview" class="token-preview" hidden><img alt=""><strong></strong></div><dialog id="invite-view" class="invite-view"><button type="button" class="dialog-close" aria-label="Close player invitation">×</button><img class="invite-portrait" alt=""><p class="kicker">Private player invitation</p><h2></h2><div class="invite-qr"></div><p class="invite-codes"></p><p class="privacy-note">Let only this player scan the QR. It opens their private hand directly on their device.</p></dialog><dialog id="solution-reveal" class="solution-reveal"><div class="envelope-reveal" aria-hidden="true"><span></span></div><p class="kicker">The sealed solution</p><h2>Case closed</h2><div class="solution-cards"></div><button type="button" class="primary close-reveal">Continue</button></dialog>`;
 
 const $ = (selector) => document.querySelector(selector);
 const setup = $('#setup');
@@ -20,6 +21,7 @@ $('#cancel-choice').onclick = () => $('#choice').close();
 $('#token-view .dialog-close').onclick = () => $('#token-view').close();
 $('#invite-view .dialog-close').onclick = () => $('#invite-view').close();
 $('#solution-reveal .close-reveal').onclick = () => $('#solution-reveal').close();
+$('#private').addEventListener('cancel', (event) => event.preventDefault());
 $('#load-file').onchange = async (event) => {
   try {
     game = restoreEverythingsSusGame(await event.target.files[0].text());
@@ -65,8 +67,12 @@ $('#save').onclick = () => {
 
 function render() {
   const state = game.state(); const active = state.players[state.currentPlayerIndex];
-  $('#current').textContent = state.complete ? (state.winnerIri ? `${state.players.find((player) => player.iri === state.winnerIri)?.name} solved it` : 'The mystery won') : active.name;
-  $('#phase').textContent = phaseText(state);
+  const displayed = state.winnerIri ? state.players.find((player) => player.iri === state.winnerIri) : active;
+  $('#current').textContent = state.complete ? (state.winnerIri ? `${displayed?.name} solved it` : 'The mystery won') : active.name;
+  const portrait = SUSPECTS.find((suspect) => suspect.id === displayed?.tokenId);
+  $('#current-portrait').src = portrait ? cardImageUrl(portrait) : '';
+  $('#current-portrait').alt = portrait ? `${portrait.label} portrait` : '';
+  $('#current-portrait').hidden = !portrait;
   $('#table-code').textContent = mode === 'host' ? `Table ${state.code}` : 'The sealed envelope';
   renderBoard(state); renderActions(state);
 }
@@ -196,16 +202,48 @@ function resolveRefutation() {
 
 function privateReveal(refutation) {
   const dialog = $('#private'); const content = $('#private-content');
-  content.innerHTML = `<p class="kicker">Private refutation</p><h2>Pass to ${refutation.player.name}</h2><p>Only ${refutation.player.name} should continue.</p><button class="primary" id="confirm-refuter">I am ${refutation.player.name}</button><div class="private-cards" hidden></div>`;
-  content.querySelector('#confirm-refuter').onclick = (event) => { event.currentTarget.remove(); content.querySelector('.private-cards').hidden = false; };
-  for (const card of refutation.matches) { const button = document.createElement('button'); button.className = 'show-card'; button.innerHTML = `<img src="${cardImageUrl(card)}" alt=""><span>${card.label}</span>`; button.onclick = () => { dialog.close(); act('resolveRefutation', { refuterIri: refutation.player.iri, cardId: card.id }); }; content.querySelector('.private-cards').append(button); }
+  const state = game.state(); const accuser = state.players[state.currentPlayerIndex];
+
+  const showHandoff = () => {
+    content.innerHTML = `<div class="private-handoff"><p class="kicker">Private refutation</p><h2>Pass to ${refutation.player.name}</h2><p>The matching cards stay concealed until ${refutation.player.name} confirms.</p><button class="primary" id="confirm-refuter">I am ${refutation.player.name}</button></div>`;
+    content.querySelector('#confirm-refuter').onclick = showChoices;
+  };
+
+  const showChoices = () => {
+    content.innerHTML = `<p class="kicker">Private evidence</p><h2>Choose one card</h2><p>Only ${refutation.player.name} should see these choices.</p><div class="private-cards refutation-choices"></div>`;
+    for (const card of refutation.matches) {
+      const button = document.createElement('button'); button.type = 'button'; button.className = 'show-card';
+      button.innerHTML = `<img src="${cardImageUrl(card)}" alt=""><span>${card.label}</span>`;
+      button.onclick = () => showSelection(card);
+      content.querySelector('.private-cards').append(button);
+    }
+  };
+
+  const showSelection = (card) => {
+    content.innerHTML = `<p class="kicker">Selected evidence</p><h2>${card.label}</h2><article class="private-card-focus"><img src="${cardImageUrl(card)}" alt="${card.label}"><span>${card.category}</span><strong>${card.label}</strong></article><div class="private-reveal-actions"><button type="button" id="choose-another">Choose a different card</button><button type="button" class="primary" id="pass-back">Hide my cards and pass back</button></div>`;
+    content.querySelector('#choose-another').onclick = showChoices;
+    content.querySelector('#pass-back').onclick = () => showPassBack(card);
+  };
+
+  const showPassBack = (card) => {
+    content.innerHTML = `<div class="private-handoff"><p class="kicker">Cards concealed</p><h2>Pass back to ${accuser.name}</h2><p>The selected evidence will remain hidden until ${accuser.name} confirms.</p><button class="primary" id="confirm-accuser">I am ${accuser.name}</button></div>`;
+    content.querySelector('#confirm-accuser').onclick = () => showAccuserCard(card);
+  };
+
+  const showAccuserCard = (card) => {
+    content.innerHTML = `<p class="kicker">Private evidence for ${accuser.name}</p><h2>${card.label}</h2><article class="private-card-focus"><img src="${cardImageUrl(card)}" alt="${card.label}"><span>${card.category}</span><strong>${card.label}</strong></article><button type="button" class="primary private-finish" id="finish-refutation">Hide card and end turn</button>`;
+    content.querySelector('#finish-refutation').onclick = () => { dialog.close(); act('resolveRefutation', { refuterIri: refutation.player.iri, cardId: card.id }); };
+  };
+
+  showHandoff();
   dialog.showModal();
 }
 
 function privateHand(player) {
   const dialog = $('#private'); const content = $('#private-content');
-  content.innerHTML = `<p class="kicker">Private hand</p><h2>Pass to ${player.name}</h2><p>Only ${player.name} should continue.</p><button class="primary" id="confirm-hand">I am ${player.name}</button><section id="hand-details" hidden><div class="private-cards"></div><label class="notebook">Detective notebook<textarea rows="7" placeholder="Record deductions…"></textarea></label><button class="primary" id="close-hand">Hide my hand</button></section>`;
+  content.innerHTML = `<p class="kicker">Private hand</p><h2>Pass to ${player.name}</h2><p>Only ${player.name} should continue.</p><button class="primary" id="confirm-hand">I am ${player.name}</button><section id="hand-details" hidden><div class="private-cards"></div><section class="sleuth-sheet pass-sleuth-sheet"><p class="kicker">Private deductions</p><h3>Sleuth sheet</h3><p>Your own cards are already marked. The final possibility in each category is protected.</p><table><thead><tr><th scope="col">Person, weapon, or room</th><th scope="col">Ruled out</th></tr></thead><tbody></tbody></table></section><label class="notebook">Additional notes<textarea rows="7" placeholder="Record deductions…"></textarea></label><button class="primary" id="close-hand">Hide my hand</button></section>`;
   for (const card of player.hand) { const item = document.createElement('article'); item.className = 'private-evidence-card'; item.innerHTML = `<img src="${cardImageUrl(card)}" alt="${card.label}"><span>${card.category}</span><strong>${card.label}</strong>`; content.querySelector('.private-cards').append(item); }
+  renderSleuthSheet(content.querySelector('.sleuth-sheet tbody'), player.hand, `everything-is-sus-pass-sleuth-${player.iri}`);
   const notes = content.querySelector('textarea'); const notesKey = `everything-is-sus-pass-notes-${player.iri}`; notes.value = localStorage.getItem(notesKey) || ''; notes.oninput = () => localStorage.setItem(notesKey, notes.value);
   content.querySelector('#confirm-hand').onclick = (event) => { event.currentTarget.remove(); content.querySelector('#hand-details').hidden = false; };
   content.querySelector('#close-hand').onclick = () => dialog.close(); dialog.showModal();
@@ -224,7 +262,6 @@ async function showInvites() {
 }
 
 function note(text, error = false) { const paragraph = document.createElement('p'); paragraph.textContent = text; paragraph.className = error ? 'error' : ''; $('#log').prepend(paragraph); }
-function phaseText(state) { return { 'turn-start': 'Roll, take a room action, make a final accusation, or end the turn.', movement: `Choose each step. ${state.moves} paces remain.`, 'room-decision': 'You may make an accusation or end the turn.', refutation: 'The first eligible player clockwise may show one card.', complete: 'The sealed solution may now be verified.' }[state.phase] || state.phase; }
 function actionText(type, value, params, before) {
   if (type === 'roll') return `Rolled ${value}.`;
   if (type === 'moveStep') return `Moved to ${isRoom(value.destination) ? cardById(value.destination)?.label : 'a new space'} for ${value.cost} ${value.cost === 1 ? 'pace' : 'paces'}.`;
@@ -267,4 +304,3 @@ function showSolutionReveal() {
 }
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('../service-worker.js', { scope: '../' });
-window.addEventListener('blur', () => { if ($('#private')?.open) $('#private').close(); });

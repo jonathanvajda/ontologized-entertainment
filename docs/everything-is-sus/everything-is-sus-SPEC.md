@@ -238,6 +238,7 @@ The host may know that Player B refuted Player A's room accusation, but the show
 The public accusation event and change log SHALL preserve the announced suspect, weapon, and current room. The accusation UI SHALL render that room as a fixed, non-editable third field. Failure to produce a refutation card is a valid outcome and MUST NOT trap the game in `refutation`; an explicit **End turn** remains available.
 
 - Pass-and-play: project the matching cards for B during a confirmed private selection screen, then project exactly the selected card for A during a second confirmed screen.
+- The pass-and-play screen SHALL remain neutral until B confirms identity. Selecting a card SHALL enlarge it without resolving the refutation. B must explicitly conceal the choices and initiate pass-back; the neutral handoff then requires A to confirm before the selected card appears. Only A's explicit **Hide card and end turn** action resolves the refutation. Cancel/Escape, window blur, backdrop interaction, and card selection MUST NOT advance the turn or dismiss this workflow.
 - Multi-device baseline: B selects one matching card on B's player page and physically shows it to A. The host records only that B refuted.
 - Optional token flow: B encrypts a one-card disclosure to A using the shared ECDH module; A imports it locally. This requires a manual QR/copy step and is not required for the first UI.
 
@@ -292,6 +293,8 @@ Undo is available in practice mode. Competitive play disables undo after private
 - Board and public status remain visible.
 - Full-screen neutral handoff replaces private content.
 - Private hand/notebook DOM is created only after confirmation.
+- Each private hand SHALL include the complete suspect, weapon, and room sleuth sheet with automatic own-card marks, protected final candidates, and player-scoped local persistence, plus freeform notes.
+- The board header SHALL use one compact current-detective row ordered as label, suspect portrait, then name. It SHALL omit redundant phase instructions and board-help copy already represented by the action controls and board affordances.
 
 ### Host
 

@@ -1,6 +1,6 @@
-const CACHE = 'everything-is-sus-v27';
+const CACHE = 'everything-is-sus-v29';
 const ASSETS = [
-  './', './index.html', './everything-is-sus.css', './game-config.js', './game-ui.js', './player.js',
+  './', './index.html', './everything-is-sus.css', './game-config.js', './game-ui.js', './player.js', './sleuth-sheet-ui.js',
   './manifest.webmanifest', './everything-is-sus-RULES.md', './pass-and-play/', './host/', './player/',
   './model/everything-is-sus-game.js', './model/compact-hand-code.js', './model/sleuth-sheet-state.js', './assets/manifest.json', './assets/board-topology.json', './assets/art/board-layout.png', './assets/art/board-layout-legend.png', './assets/art/board-layout-and-legend.png', './assets/art/estate-board-01.png', './assets/art/estate-board-02.png', './assets/art/estate-board-03.png', './assets/art/estate-board-04.png',
   './assets/art/person-mrs-eggshell.png', './assets/art/person-lt-marinara.png',
