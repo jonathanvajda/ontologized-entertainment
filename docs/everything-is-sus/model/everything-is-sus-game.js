@@ -21,9 +21,13 @@ export async function createEverythingsSusGame({names,tokenIds,mode='pass-and-pl
   if(selectedTokens.length!==clean.length||new Set(selectedTokens).size!==clean.length||selectedTokens.some(id=>!SUSPECTS.some(suspect=>suspect.id===id)))throw new RangeError('Each player must choose a different suspect.');
 
   const random=new RandomEngine(seed);
+  const setupSeed=random.getState();
+  const selectedParticipants=clean.map((name,index)=>({name,tokenId:selectedTokens[index]})).sort((left,right)=>left.tokenId.localeCompare(right.tokenId));
+  const turnOrderRandom=new RandomEngine(`turn-order:${setupSeed}`);
+  const orderedParticipants=turnOrderRandom.shuffle(selectedParticipants);
   const solution=[random.drawOne(SUSPECTS).id,random.drawOne(WEAPONS).id,random.drawOne(ROOMS).id];
   const remaining=random.shuffle(CARDS.filter(card=>!solution.includes(card.id)));
-  const placementRandom=new RandomEngine(`foyer-placement:${random.getState()}`);
+  const placementRandom=new RandomEngine(`foyer-placement:${setupSeed}`);
   const starts=placementRandom.shuffle(START_SITES);
   const commitment=await createCommitment(solution.slice().sort());
   const code=generateGameCode(6);
@@ -33,13 +37,13 @@ export async function createEverythingsSusGame({names,tokenIds,mode='pass-and-pl
   ROOMS.forEach(room=>store.addQuads([q(NS+'room-'+room.id,P.type,NS+'Room'),q(NS+'room-'+room.id,P.type,BFO+'BFO_0000029'),q(NS+'room-'+room.id,P.label,lit(room.label))]));
   WALKABLE_SITES.forEach(site=>store.addQuads([q(NS+'site-'+site,P.type,NS+(FOYER_SITES.includes(site)?'FoyerSpace':'HallwaySpace')),q(NS+'site-'+site,P.type,BFO+'BFO_0000029'),q(NS+'site-'+site,P.label,lit(site))]));
   store.addQuads([q(NS+'site-reserve',P.type,NS+'BoardReserve'),q(NS+'site-reserve',P.type,BFO+'BFO_0000029'),q(NS+'site-reserve',P.label,lit('Off-board suspect reserve'))]);
-  SUSPECTS.forEach((suspect)=>{const playerIndex=selectedTokens.indexOf(suspect.id);const initialSite=playerIndex>=0?starts[playerIndex]:'reserve';store.addQuads([
+  SUSPECTS.forEach((suspect)=>{const playerIndex=selectedParticipants.findIndex(player=>player.tokenId===suspect.id);const initialSite=playerIndex>=0?starts[playerIndex]:'reserve';store.addQuads([
     q(NS+'person-'+suspect.id,P.type,NS+'SuspectPerson'),q(NS+'person-'+suspect.id,P.label,lit(suspect.label)),q(NS+'person-'+suspect.id,P.location,nn(NS+'site-'+initialSite)),
     q(NS+'token-'+suspect.id,P.type,NS+'SuspectToken'),q(NS+'token-'+suspect.id,P.label,lit(suspect.label)),q(NS+'token-'+suspect.id,P.represents,nn(NS+'person-'+suspect.id))
   ])});
   WEAPONS.forEach(weapon=>store.addQuads([q(NS+'weapon-'+weapon.id,P.type,NS+'WeaponToken'),q(NS+'weapon-'+weapon.id,P.label,lit(weapon.label))]));
 
-  const players=clean.map((name,index)=>({iri:NS+'player-'+(index+1),name,order:index,tokenId:selectedTokens[index],handIri:NS+'hand-'+(index+1)}));
+  const players=orderedParticipants.map((participant,index)=>({iri:NS+'player-'+(index+1),name:participant.name,order:index,tokenId:participant.tokenId,handIri:NS+'hand-'+(index+1)}));
   players.forEach(player=>store.addQuads([q(SESSION,NS+'hasPlayer',nn(player.iri)),q(player.iri,P.type,NS+'Detective'),q(player.iri,P.label,lit(player.name)),q(player.iri,P.order,lit(player.order,XSD+'integer')),q(player.iri,P.eliminated,lit(false,XSD+'boolean')),q(player.iri,P.token,nn(NS+'token-'+player.tokenId)),q(player.iri,P.controls,nn(NS+'person-'+player.tokenId)),q(player.handIri,P.type,NS+'PlayerHand'),q(player.handIri,P.owner,nn(player.iri))]));
   solution.forEach(id=>store.addQuad(q(NS+'card-'+id,P.member,nn(NS+'sealed-solution'))));
   remaining.forEach((card,index)=>store.addQuad(q(NS+'card-'+card.id,P.member,nn(players[index%players.length].handIri))));

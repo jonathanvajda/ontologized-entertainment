@@ -172,17 +172,18 @@ Canonical RDF records one die-rolling act, one face-value result, the player who
 
 ## 6. Setup pipeline
 
-1. Render all six suspect portraits as toggles. Validate that three to six are active and preserve selection order as turn order; this interaction makes a duplicate suspect unrepresentable and derives player count from the active set.
+1. Render all six suspect portraits as unordered toggles. Validate that three to six are active; this interaction makes a duplicate suspect unrepresentable and derives player count from the active set. Do not display provisional turn numbers while selecting.
 2. Generate a public table code using cryptographic randomness.
 3. Generate a host-private gameplay seed. Suspect choices are public context and are not counted as entropy.
-4. Select one card from each category for the solution using the shared deterministic random engine seeded from host-private entropy.
-5. Canonicalize solution card IRIs, create a random commitment salt, and publish the SHA-256 commitment.
-6. Shuffle the remaining 18 cards and deal round-robin without replacement.
-7. Create canonical hand aggregates and visibility policies.
-8. For multi-device mode, encode each dealt hand as a five-letter player-scoped hand code.
-9. Validate inventory: 21 distinct cards distributed exactly once across solution and hands.
-10. Use a domain-separated `foyer-placement` random stream to shuffle the six Foyer start sites: α=`L15`, β=`N15`, γ=`P15`, δ=`M16`, ε=`O16`, and ζ=`Q16`. Assign each selected player-suspect to a distinct shuffled site independently of selection and turn order. Unselected suspect people begin at an off-board reserve site. The Greek identifiers are authoring identifiers and are not printed in the production view.
-11. Assert each suspect person's initial `located in` relation, project each selected suspect's representing token into its start site, create the first turn from the selected player order, and commit setup atomically.
+4. Canonicalize the selected player-suspect pairs by suspect identifier, then use a domain-separated `turn-order` random stream to shuffle those intact pairs. Portrait click order MUST NOT affect the result for the same selected set and seed.
+5. Select one card from each category for the solution using the shared deterministic random engine seeded from host-private entropy.
+6. Canonicalize solution card IRIs, create a random commitment salt, and publish the SHA-256 commitment.
+7. Shuffle the remaining 18 cards and deal round-robin without replacement in finalized turn order.
+8. Create canonical hand aggregates and visibility policies.
+9. For multi-device mode, encode each dealt hand as a five-letter player-scoped hand code.
+10. Validate inventory: 21 distinct cards distributed exactly once across solution and hands.
+11. Use an independent domain-separated `foyer-placement` random stream to shuffle the six Foyer start sites: α=`L15`, β=`N15`, γ=`P15`, δ=`M16`, ε=`O16`, and ζ=`Q16`. Assign each selected player-suspect to a distinct shuffled site independently of portrait-selection order and turn order. Unselected suspect people begin at an off-board reserve site. The Greek identifiers are authoring identifiers and are not printed in the production view.
+12. Assert each suspect person's initial `located in` relation, project each selected suspect's representing token into its start site, create the first turn from the randomized order, and commit setup atomically.
 
 The public table code MUST NOT derive the deal, solution, salts, or keys.
 

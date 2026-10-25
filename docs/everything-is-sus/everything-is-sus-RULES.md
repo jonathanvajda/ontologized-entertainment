@@ -64,13 +64,14 @@ The short table code identifies the game but contains no deal or solution. A pri
 ## 4. Setup
 
 1. Choose pass-and-play or local multi-device.
-2. On the setup screen, select three to six suspect portraits in the desired turn order. Selecting a portrait marks it active; selecting it again removes it. The number selected is the player count, so duplicate suspects are impossible.
-3. The game randomly selects one suspect, one weapon, and one room for the sealed solution.
-4. The remaining 18 cards are shuffled and dealt one at a time. Some players may receive one more card than others.
-5. In pass-and-play, each player privately reviews their hand in turn.
-6. In multi-device play, the host presents a separate five-letter hand code to each player. Each player enters only their own code and access details.
-7. Randomly assign the selected player-suspects without replacement among the six nonblocking Foyer start sites marked internally as α, β, γ, δ, ε, and ζ. The assignment is independent of player selection and turn order; α is not automatically the first player. Unselected suspects begin in an off-board reserve until named in a room accusation. Place each selected suspect's token on the site occupied by the person it represents.
-8. The first selected portrait takes the first turn. Play then follows the generated turn order.
+2. On the setup screen, select three to six suspect portraits. Selection order has no effect; selecting a portrait marks it active, selecting it again removes it, and duplicate suspects are impossible.
+3. Randomize the selected player-suspect pairs into a fixed turn order. The resulting order is displayed after the case is dealt and governs turns and clockwise refutation for the entire game.
+4. The game randomly selects one suspect, one weapon, and one room for the sealed solution.
+5. The remaining 18 cards are shuffled and dealt one at a time in the finalized turn order. Some players may receive one more card than others.
+6. In pass-and-play, each player privately reviews their hand in turn.
+7. In multi-device play, the host presents a separate five-letter hand code to each player. Each player enters only their own code and access details.
+8. Randomly assign the selected player-suspects without replacement among the six nonblocking Foyer start sites marked internally as α, β, γ, δ, ε, and ζ. The assignment is independent of portrait-selection order and turn order; α is not automatically the first player. Unselected suspects begin in an off-board reserve until named in a room accusation. Place each selected suspect's token on the site occupied by the person it represents.
+9. The first player in the randomized order takes the first turn.
 
 The host publishes a cryptographic commitment to the sealed solution during setup. When the game ends, the revealed solution can be checked against that original commitment.
 

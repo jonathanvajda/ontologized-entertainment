@@ -96,17 +96,22 @@ test('seeded setup, Foyer placement, and one-die sequence are deterministic', as
   const left = await createEverythingsSusGame({ names, seed: 'repeatable' });
   const right = await createEverythingsSusGame({ names, seed: 'repeatable' });
   assert.deepEqual(left.solution, right.solution);
+  assert.deepEqual(left.state().players.map((player) => player.tokenId), right.state().players.map((player) => player.tokenId));
   assert.deepEqual(left.state().locations, right.state().locations);
   const leftRoll = left.act('roll').value; const rightRoll = right.act('roll').value;
   assert.equal(leftRoll, rightRoll); assert.ok(leftRoll >= 1 && leftRoll <= 6);
 });
 
-test('chosen suspects establish turn order and receive unique randomized Foyer sites', async () => {
+test('chosen suspects receive deterministic randomized turn order and Foyer sites independent of selection order', async () => {
   const tokenIds = ['peach', 'marinara', 'mint'];
   const chosenNames = ['Ms. Peach', 'Lt. Marinara', 'Mrs. Mint'];
   const game = await createEverythingsSusGame({ names: chosenNames, tokenIds, seed: 'roles' });
+  const reversed = await createEverythingsSusGame({ names: [...chosenNames].reverse(), tokenIds: [...tokenIds].reverse(), seed: 'roles' });
   const state = game.state();
-  assert.deepEqual(state.players.map((player) => player.tokenId), tokenIds);
+  assert.deepEqual(state.players.map((player) => player.tokenId), ['marinara', 'mint', 'peach']);
+  assert.deepEqual(reversed.state().players.map((player) => player.tokenId), state.players.map((player) => player.tokenId));
+  assert.deepEqual(reversed.state().locations, state.locations);
+  assert.deepEqual(state.players.map((player) => [player.name, player.tokenId]), [['Lt. Marinara', 'marinara'], ['Mrs. Mint', 'mint'], ['Ms. Peach', 'peach']]);
   const occupiedStarts = tokenIds.map((id) => state.locations[id]);
   assert.equal(new Set(occupiedStarts).size, 3);
   assert.equal(occupiedStarts.every((site) => START_SITES.includes(site)), true);
@@ -168,6 +173,11 @@ test('room accusation may be skipped or refuted, and resolution concludes the tu
   const accusation = game.act('roomAccuse', { suspectId: 'mint', weaponId: 'rope' });
   assert.equal(accusation.ok, true); assert.equal(game.state().phase, 'refutation');
   const refutation = game.refutation();
+  if (refutation) {
+    const accusationIds = Object.values(game.state().roomAccusation);
+    const expected = game.state().players.slice(1).find((player) => player.hand.some((card) => accusationIds.includes(card.id)));
+    assert.equal(refutation.player.iri, expected.iri);
+  }
   const result = refutation ? game.act('resolveRefutation', { refuterIri: refutation.player.iri, cardId: refutation.matches[0].id }) : game.act('resolveRefutation');
   assert.equal(result.ok, true); assert.equal(game.state().currentPlayerIndex, 1); assert.equal(game.state().phase, 'turn-start');
 });
