@@ -111,7 +111,7 @@ Adjacency describes architectural reachability, not necessarily a single movemen
 
 The approved topology is the explicit 26-column (`A`–`Z`) by 18-row (`1`–`18`) plan in `specs/everything-is-sus/board-layout.png`. Runtime room masks are exact cell sets: Swimming Pool Room `A1:J3` plus `A4:I5` (excluding hallway sites `J4` and `J5`); Screened-in Porch `K1:R3`; Greenhouse `S1:Z3`; Study `A6:D12`; Game Room `E6:I12`; Living Room `A13:I18`; Ballroom `K5:R13`; Kitchen `T4:Z9`; Dining Room `T10:Z18`; and the walkable Foyer cells `K15:R16` plus `M17:P18`. Hallway, stair, door, and open-entryway markings remain a separate topology layer above room artwork. Artwork MUST NOT determine legal geometry.
 
-Each orthogonal edge between two ordinary walkable cells has movement cost 1. A topology edge marked as an open entryway has cost 2; an edge marked as a doorway has cost 3. These are total edge costs, not surcharges. Every movement path has an ingress/egress crossing count, initialized to zero and capped at one. Crossing either marked edge type increments it once. A double door is one topology edge and one crossing. Entering a room ends movement; leaving a room consumes the sole crossing but may be followed by ordinary passage-space steps.
+Each orthogonal edge between two ordinary walkable cells has movement cost 1. A topology edge marked as an open entryway also has cost 1; an edge marked as a doorway has cost 2. These are total edge costs, not surcharges. Every movement path has an ingress/egress crossing count, initialized to zero and capped at one. Crossing either marked edge type increments it once. A double door is one topology edge and one crossing. Entering a room ends movement; leaving a room consumes the sole crossing but may be followed by ordinary passage-space steps.
 
 The topology also defines two bidirectional secret-passage pairs between the literal corner rooms: Swimming Pool Room–Dining Room and Greenhouse–Living Room. Each endpoint SHALL have a persistent player-visible passage marker independent of the room bitmap. Markers occupy the literal outer estate corners: Swimming Pool Room top-left, Greenhouse top-right, Living Room bottom-left, and Dining Room bottom-right. The active endpoint marker SHALL be clickable at `turn-start` and during `movement` while the person remains in that room. Passage use discards any rolled allowance, moves the suspect person directly to the paired room, and enters `room-decision`.
 
@@ -216,7 +216,7 @@ Eliminated players are skipped as active players but remain in the refutation or
 | --- | --- | --- |
 | `roll` | Active, eligible player; `turn-start`; no roll yet this turn | Generate one uniform integer from 1–6; add one die-rolling act/result; set movement allowance to the result; enter movement |
 | `moveStep` | Orthogonally adjacent walkable destination; destination occupancy below capacity; at least 1 pace remains | Spend 1 pace; replace the suspect person's current `located in` triple; retain movement phase |
-| `crossBoundary` | Marked ingress/egress boundary; crossing count is 0; destination occupancy below capacity; enough allowance remains | Spend 2 paces for an open entryway or 3 for a doorway; set crossing count to 1; replace the person's location; entering a room resolves movement |
+| `crossBoundary` | Marked ingress/egress boundary; crossing count is 0; destination occupancy below capacity; enough allowance remains | Spend 1 pace for an open entryway or 2 for a doorway; set crossing count to 1; replace the person's location; entering a room resolves movement |
 | `stopMovement` | Movement is active | Preserve the current site as the end location; discard unused allowance; enter room decision |
 | `useSecretPassage` | Current room owns route; phase is `turn-start` or `movement`; person has not left the endpoint room | Replace location; discard remaining allowance; enter room decision |
 | `submitRoomAccusation` | Active suspect person is located in the named murder room; movement resolved; no room accusation this turn | Create room-accusation act; move named suspect person and weapon into that room; initialize refutation cursor at the next player in fixed order |
@@ -262,7 +262,7 @@ On success or terminal table defeat, the host publishes solution IRIs and commit
 | A movement roll has exactly one integer result in the inclusive range 1–6 | Shared dice SHACL + JS |
 | Each die result has equal selection probability by construction | Shared random-engine boundary/statistical tests |
 | Movement follows orthogonal topology and never spends more than the roll | JS |
-| Ordinary steps cost 1, open entryways cost 2, and doorways cost 3 | JS topology fixtures |
+| Ordinary steps and open entryways cost 1; doorways cost 2 | JS topology fixtures |
 | At most one ingress/egress is crossed in a turn | RDF turn state + JS |
 | Room-accusation room equals the active suspect person's current room | JS |
 | Refutation follows fixed player order and stops at the first capable player | JS |
@@ -406,7 +406,7 @@ docs/everything-is-sus/
 
 The 26×18 room geometry, doors, open entryways, Foyer, hallways, and stairs are frozen in `assets/board-topology.json`. The implemented movement graph derives individual path nodes, occupancy, and boundary costs from that topology while keeping room artwork separate from scalable hit regions. Square identifiers remain internal and are not printed for players.
 
-1. Whether the 2-pace entryway and 3-pace doorway costs need adjustment after playtesting; one fair six-sided die is now fixed.
+1. Playtesting resolved boundary costs at 1 pace for an open entryway and 2 paces for a doorway; one fair six-sided die remains fixed.
 2. Whether remaining in a room permits a new room accusation every turn; this draft permits it.
 3. Whether a failed accuser continues refuting; this draft requires it.
 4. Whether the first release includes manual encrypted disclosure tokens or physical screen showing only.

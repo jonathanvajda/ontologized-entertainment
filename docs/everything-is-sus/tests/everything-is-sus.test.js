@@ -27,6 +27,14 @@ async function gameWithRollAtLeast(minimum, prefix = 'roll') {
   throw new Error('No suitable deterministic roll found.');
 }
 
+async function gameWithRollValue(value, prefix = 'exact-roll') {
+  for (let index = 0; index < 100; index += 1) {
+    const game = await createEverythingsSusGame({ names, seed: `${prefix}-${index}` });
+    if (game.act('roll').value === value) return game;
+  }
+  throw new Error(`Could not produce roll ${value}.`);
+}
+
 test('board geometry uses the approved 26 by 18 topology without image-frame offsets', () => {
   assert.deepEqual(BOARD_REGIONS.study, { column: 1, row: 6, width: 4, height: 7 });
   assert.deepEqual(BOARD_REGIONS.ballroom, { column: 11, row: 5, width: 8, height: 9 });
@@ -132,17 +140,26 @@ test('occupied walkable sites are disabled and never traversed', async () => {
   assert.equal(game.act('moveStep', { destination: target }).ok, false);
 });
 
-test('doors cost three, entryways cost two, and only one crossing is allowed per turn', async () => {
-  const game = await gameWithRollAtLeast(3, 'ingress'); const active = game.state().players[0];
+test('doors cost two, entryways cost one, and only one crossing is allowed per turn', async () => {
+  const game = await gameWithRollAtLeast(2, 'ingress'); const active = game.state().players[0];
   placePerson(game, active.tokenId, 'ballroom');
   const exit = game.movementOptions().find((option) => option.destination === 'N4');
-  assert.equal(exit.cost, 2); assert.equal(exit.kind, 'entryway'); assert.equal(exit.available, true);
+  assert.equal(exit.cost, 1); assert.equal(exit.kind, 'entryway'); assert.equal(exit.available, true);
   game.act('moveStep', { destination: 'N4' });
-  assert.equal(game.state().moves, game.state().die - 2);
+  assert.equal(game.state().moves, game.state().die - 1);
   const reentry = game.movementOptions().find((option) => option.destination === 'ballroom');
   const door = game.movementOptions().find((option) => option.destination === 'screened-porch');
   assert.equal(reentry.available, false); assert.equal(reentry.reason, 'Already crossed an entrance');
-  assert.equal(door.cost, 3); assert.equal(door.available, false);
+  assert.equal(door.cost, 2); assert.equal(door.available, false);
+});
+
+test('a roll of one can cross an open entryway but not a doorway', async () => {
+  const game = await gameWithRollValue(1, 'one-pace-boundary'); const active = game.state().players[0];
+  placePerson(game, active.tokenId, 'N4');
+  const entryway = game.movementOptions().find((option) => option.destination === 'ballroom');
+  const doorway = game.movementOptions().find((option) => option.destination === 'screened-porch');
+  assert.equal(entryway.cost, 1); assert.equal(entryway.available, true);
+  assert.equal(doorway.cost, 2); assert.equal(doorway.available, false); assert.equal(doorway.reason, 'Not enough moves');
 });
 
 test('room accusation may be skipped or refuted, and resolution concludes the turn', async () => {
@@ -179,14 +196,14 @@ test('a rolled player may still choose the current room secret passage', async (
   assert.equal(game.state().phase, 'room-decision');
 });
 
-test('greenhouse door and kitchen hallway entry are traversable from their hallway sites', async () => {
-  const game = await gameWithRollAtLeast(3, 'east-hall-access'); const active = game.state().players[0];
+test('greenhouse door and kitchen hallway entry use their reduced boundary costs', async () => {
+  const game = await gameWithRollAtLeast(2, 'east-hall-access'); const active = game.state().players[0];
   placePerson(game, active.tokenId, 'S4');
   let option = game.movementOptions().find((candidate) => candidate.destination === 'greenhouse');
-  assert.equal(option.available, true); assert.equal(option.cost, 3); assert.equal(option.kind, 'door');
+  assert.equal(option.available, true); assert.equal(option.cost, 2); assert.equal(option.kind, 'door');
   placePerson(game, active.tokenId, 'S8');
   option = game.movementOptions().find((candidate) => candidate.destination === 'kitchen');
-  assert.equal(option.available, true); assert.equal(option.cost, 2); assert.equal(option.kind, 'entryway');
+  assert.equal(option.available, true); assert.equal(option.cost, 1); assert.equal(option.kind, 'entryway');
 });
 
 test('an unresolved room accusation never prevents ending the turn', async () => {

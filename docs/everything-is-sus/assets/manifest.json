@@ -1,5 +1,5 @@
 {
-  "version": 9,
+  "version": 10,
   "board": { "src": "./art/board-layout.png", "alt": "Exact 26 by 18 estate grid with rooms, walkable halls, doors, open entryways, foyer, and stairs" },
   "topology": "./board-topology.json",
   "entities": {

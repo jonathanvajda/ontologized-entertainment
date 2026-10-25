@@ -47,21 +47,21 @@ export const WALKABLE_SITES=Object.freeze(Array.from({length:BOARD_ROWS},(_,row)
 export const START_SITES=Object.freeze(['L15','N15','P15','M16','O16','Q16']);
 
 export const ENTRANCES=Object.freeze([
-  {id:'pool-porch-door',kind:'door',cost:3,fromRoom:'pool-room',toRoom:'screened-porch'},
-  {id:'porch-south-door',kind:'door',cost:3,room:'screened-porch',sites:['N4','O4']},
-  {id:'ballroom-north-entry',kind:'entryway',cost:2,room:'ballroom',sites:['N4','O4']},
-  {id:'greenhouse-hall-door',kind:'door',cost:3,room:'greenhouse',sites:['S4']},
-  {id:'greenhouse-kitchen-door',kind:'door',cost:3,fromRoom:'greenhouse',toRoom:'kitchen'},
-  {id:'study-game-door',kind:'door',cost:3,fromRoom:'study',toRoom:'game-room'},
-  {id:'study-living-door',kind:'door',cost:3,fromRoom:'study',toRoom:'living-room'},
-  {id:'game-hall-door',kind:'door',cost:3,room:'game-room',sites:['J11']},
-  {id:'ballroom-west-entry',kind:'entryway',cost:2,room:'ballroom',sites:['J8','J9']},
-  {id:'ballroom-east-entry',kind:'entryway',cost:2,room:'ballroom',sites:['S8','S9']},
-  {id:'kitchen-west-entry',kind:'entryway',cost:2,room:'kitchen',sites:['S8','S9']},
-  {id:'ballroom-south-entry',kind:'entryway',cost:2,room:'ballroom',sites:['N14','O14']},
-  {id:'kitchen-dining-door',kind:'door',cost:3,fromRoom:'kitchen',toRoom:'dining-room'},
-  {id:'living-hall-entry',kind:'entryway',cost:2,room:'living-room',sites:['J15','J16']},
-  {id:'dining-hall-entry',kind:'entryway',cost:2,room:'dining-room',sites:['S15','S16']}
+  {id:'pool-porch-door',kind:'door',cost:2,fromRoom:'pool-room',toRoom:'screened-porch'},
+  {id:'porch-south-door',kind:'door',cost:2,room:'screened-porch',sites:['N4','O4']},
+  {id:'ballroom-north-entry',kind:'entryway',cost:1,room:'ballroom',sites:['N4','O4']},
+  {id:'greenhouse-hall-door',kind:'door',cost:2,room:'greenhouse',sites:['S4']},
+  {id:'greenhouse-kitchen-door',kind:'door',cost:2,fromRoom:'greenhouse',toRoom:'kitchen'},
+  {id:'study-game-door',kind:'door',cost:2,fromRoom:'study',toRoom:'game-room'},
+  {id:'study-living-door',kind:'door',cost:2,fromRoom:'study',toRoom:'living-room'},
+  {id:'game-hall-door',kind:'door',cost:2,room:'game-room',sites:['J11']},
+  {id:'ballroom-west-entry',kind:'entryway',cost:1,room:'ballroom',sites:['J8','J9']},
+  {id:'ballroom-east-entry',kind:'entryway',cost:1,room:'ballroom',sites:['S8','S9']},
+  {id:'kitchen-west-entry',kind:'entryway',cost:1,room:'kitchen',sites:['S8','S9']},
+  {id:'ballroom-south-entry',kind:'entryway',cost:1,room:'ballroom',sites:['N14','O14']},
+  {id:'kitchen-dining-door',kind:'door',cost:2,fromRoom:'kitchen',toRoom:'dining-room'},
+  {id:'living-hall-entry',kind:'entryway',cost:1,room:'living-room',sites:['J15','J16']},
+  {id:'dining-hall-entry',kind:'entryway',cost:1,room:'dining-room',sites:['S15','S16']}
 ]);
 
 export const ENTRANCE_MARKERS=Object.freeze([

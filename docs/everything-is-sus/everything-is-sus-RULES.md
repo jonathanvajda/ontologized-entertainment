@@ -105,8 +105,8 @@ The player may roll one fair six-sided die once on the host or shared page. Each
 
 - From a hallway or Foyer space, the board highlights each legal adjacent destination. Movement choices are made directly on those nearby board spaces rather than through ambiguous directional controls in a separate panel. Diagonal movement is never offered.
 - Moving to an orthogonally adjacent walkable space normally costs 1 pace.
-- Crossing an open entryway costs 2 paces total. An entryway is simply an unobstructed gap in the wall: it has no door, gate, curtain, or other physical barrier.
-- Crossing a doorway costs 3 paces total. A paired or double door is one doorway crossing, not two.
+- Crossing an open entryway costs 1 pace total, the same as an ordinary unobstructed step. An entryway is simply a gap in the wall: it has no door, gate, curtain, or other physical barrier.
+- Crossing a doorway costs 2 paces total. A paired or double door is one doorway crossing, not two.
 - The special crossing cost replaces the ordinary 1-pace step cost; it is not added to it.
 - A player may cross no more than one marked ingress or egress during a turn. A doorway and an open entryway both count toward this limit.
 - A player who cannot pay the complete crossing cost may not cross that boundary.
@@ -117,7 +117,7 @@ The player may roll one fair six-sided die once on the host or shared page. Each
 - A player who begins a turn in a room may leave through one marked egress and continue through passage spaces, but may not enter another room during that turn because that would cross a second ingress/egress.
 - A player who begins in a corner room may use its shown secret passage before or after rolling, provided they have not left that room. Using it discards any unspent paces, moves directly to the paired room, and ends movement.
 
-When a person is adjacent to a marked room entrance, the room itself becomes a board control and reports the 2- or 3-pace cost. Unavailable destinations are not duplicated in the side panel. The Greenhouse has a 3-pace doorway from hallway site S4, and the Kitchen has a 2-pace open entryway from hallway sites S8/S9, aligned across the hall from the Ballroom opening, in addition to its connection with the Dining Room.
+When a person is adjacent to a marked room entrance, the room itself becomes a board control and reports its cost. Unavailable destinations are not duplicated in the side panel. The Greenhouse has a 2-pace doorway from hallway site S4, and the Kitchen has a 1-pace open entryway from hallway sites S8/S9, aligned across the hall from the Ballroom opening, in addition to its connection with the Dining Room.
 
 Each room is one location rather than a collection of movement spaces. It may contain zero through six suspect people, and the board must be able to display all six corresponding tokens in one room. Weapon pieces do not count against this person capacity.
 
