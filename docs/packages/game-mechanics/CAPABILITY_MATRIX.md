@@ -27,5 +27,5 @@ The package also implements the technical specification’s module boundaries, s
 | CAP-041 audience/phase projection | RDF `VisibilityPolicy` index and disposable projected stores |
 | CAP-042 pass-and-play privacy | Confirmed reveal, timeout, blur concealment, and neutral handoff lifecycle |
 | CAP-043 device isolation | Host-complete RDF plus AES-GCM player RDF capsules |
-| CAP-044 zero-server invitation | Base64url URL fragments, QR-compatible tokens, copy/paste, and file-compatible objects |
+| CAP-044 zero-server invitation | Base64url URL fragments, shared accessible SVG QR rendering through the vendored generator, copy/paste, and file-compatible objects |
 | CAP-045 disclosure/commitment | P-256 ECDH targeted envelopes and salted SHA-256 commitments |

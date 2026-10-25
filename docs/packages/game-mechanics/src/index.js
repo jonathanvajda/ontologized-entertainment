@@ -4,6 +4,7 @@ export * from './game-loader.js';
 export * from './hidden-information/index.js';
 export * from './logger.js';
 export * from './persistence.js';
+export * from './qr-code.js';
 export * from './random-engine.js';
 export * from './rdf-store.js';
 export * from './render-adapter.js';

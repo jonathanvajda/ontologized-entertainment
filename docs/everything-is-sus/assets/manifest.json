@@ -1,5 +1,5 @@
 {
-  "version": 8,
+  "version": 9,
   "board": { "src": "./art/board-layout.png", "alt": "Exact 26 by 18 estate grid with rooms, walkable halls, doors, open entryways, foyer, and stairs" },
   "topology": "./board-topology.json",
   "entities": {
@@ -32,7 +32,7 @@
     "kitchen": "./art/room-kitchen-board-03.png",
     "study": "./art/room-study-board-02.png",
     "game-room": "./art/room-gameroom-board-02.png",
-    "screened-porch": "./art/room-screened-in-porch-board-02.png",
+    "screened-porch": "./art/room-screened-in-porch-board-03.png",
     "greenhouse": "./art/room-greenhouse-board-02.png",
     "pool-room": "./art/room-pool-room-board-01.png"
   },

@@ -25,13 +25,14 @@ The baseline ontology is `../../src/ontologies/GameOntology.ttl`; optional struc
 
 ## Hidden information
 
-The optional `src/hidden-information/` modules add audience- and phase-aware RDF projections, pass-and-play concealment, encrypted player-scoped RDF capsules, URL-fragment transport, targeted ECDH disclosures, and solution commitments.
+The optional `src/hidden-information/` modules add audience- and phase-aware RDF projections, pass-and-play concealment, encrypted player-scoped RDF capsules, URL-fragment transport, targeted ECDH disclosures, and solution commitments. The sibling `qr-code.js` adapter turns those fragment invitations into accessible SVG QR codes using the already-vendored `qrcode` generator; it does not add a network or build-time dependency.
 
 ```js
 import {
   projectVisibleStore,
   createEncryptedRdfCapsule,
-  createPrivacyScreen
+  createPrivacyScreen,
+  renderQrCode
 } from './src/index.js';
 ```
 

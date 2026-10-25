@@ -5,7 +5,7 @@ import {
   encryptJson, decryptJson, createEncryptedRdfCapsule, openEncryptedRdfCapsule,
   createVisibilityIndex, projectVisibleStore, validateVisibilityCoverage, VISIBILITY,
   generateDisclosureIdentity, createDisclosure, openDisclosure,
-  createInvitationUrl, readInvitationUrl, createPrivacyScreen, randomBytes, wrapSecretWithPin, unwrapSecretWithPin
+  createInvitationUrl, readInvitationUrl, createPrivacyScreen, createQrSvgMarkup, randomBytes, wrapSecretWithPin, unwrapSecretWithPin
 } from '../src/index.js';
 
 const nn = namedNode; const q = (s, p, o) => quad(nn(s), nn(p), typeof o === 'string' ? nn(o) : o);
@@ -60,6 +60,19 @@ test('ECDH disclosures decrypt only for the targeted identity', async () => {
 test('fragment invitations round-trip without putting secrets in the query string', () => {
   const url = createInvitationUrl('https://example.test/player/', { gameCode: 'TABLE7', capsule: 'secret-token' });
   assert.equal(new URL(url).search, ''); assert.deepEqual(readInvitationUrl(url), { capsule: 'secret-token', gameCode: 'TABLE7' });
+});
+
+test('shared QR adapter produces scalable markup from an injected audited generator', () => {
+  const calls = [];
+  const factory = (version, correction) => ({
+    addData(value, mode) { calls.push({ value, mode, version, correction }); },
+    make() { calls.push('made'); },
+    createSvgTag(options) { calls.push(options); return '<svg viewBox="0 0 10 10"></svg>'; }
+  });
+  assert.match(createQrSvgMarkup('invite-value', { factory, cellSize: 5, margin: 3 }), /^<svg/);
+  assert.deepEqual(calls[0], { value: 'invite-value', mode: 'Byte', version: 0, correction: 'M' });
+  assert.equal(calls[1], 'made');
+  assert.deepEqual(calls[2], { cellSize: 5, margin: 3, scalable: true });
 });
 
 test('PIN wrapping round-trips but remains explicitly a local convenience lock', async () => {

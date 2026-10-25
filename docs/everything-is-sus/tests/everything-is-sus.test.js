@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { createEverythingsSusGame, restoreEverythingsSusGame, serializeHostGame } from '../model/everything-is-sus-game.js';
 import { BOARD_REGIONS, CARDS, ENTRANCE_MARKERS, ROOMS, SECRET_PASSAGES, SECRET_PASSAGE_CORNERS, START_SITES, SUSPECTS, WEAPONS, boardRegionStyle } from '../game-config.js';
 import { openHandCode } from '../model/compact-hand-code.js';
+import { normalizeSleuthMarks, remainingSleuthCandidates } from '../model/sleuth-sheet-state.js';
 import { namedNode, quad } from '../../packages/game-mechanics/src/index.js';
 
 const names = ['Ada', 'Bert', 'Cy'];
@@ -42,7 +43,7 @@ test('every rendered door and open entryway lies on its topology boundary', () =
     'pool-porch-door':['x',10], 'porch-south-door':['y',3], 'ballroom-north-entry':['y',4],
     'greenhouse-hall-door':['y',3], 'greenhouse-kitchen-door':['y',3], 'study-game-door':['x',4],
     'study-living-door':['y',12], 'game-hall-door':['x',9], 'ballroom-west-entry':['x',10],
-    'ballroom-east-entry':['x',18], 'ballroom-south-entry':['y',13], 'kitchen-dining-door':['y',9],
+    'ballroom-east-entry':['x',18], 'kitchen-west-entry':['x',19], 'ballroom-south-entry':['y',13], 'kitchen-dining-door':['y',9],
     'living-hall-entry':['x',9], 'dining-hall-entry':['x',19]
   };
   assert.equal(ENTRANCE_MARKERS.length, Object.keys(boundaries).length);
@@ -166,6 +167,46 @@ test('corner-room secret passages are paired diagonally and end movement in the 
   assert.equal(game.act('secretPassage').value, 'dining-room');
   assert.equal(game.state().locations[active.tokenId], 'dining-room');
   assert.equal(game.state().phase, 'room-decision');
+});
+
+test('a rolled player may still choose the current room secret passage', async () => {
+  const game = await createEverythingsSusGame({ names, seed: 'rolled-secret-passage' }); const active = game.state().players[0];
+  placePerson(game, active.tokenId, 'greenhouse');
+  assert.equal(game.act('roll').ok, true);
+  assert.equal(game.act('secretPassage').value, 'living-room');
+  assert.equal(game.state().locations[active.tokenId], 'living-room');
+  assert.equal(game.state().moves, 0);
+  assert.equal(game.state().phase, 'room-decision');
+});
+
+test('greenhouse door and kitchen hallway entry are traversable from their hallway sites', async () => {
+  const game = await gameWithRollAtLeast(3, 'east-hall-access'); const active = game.state().players[0];
+  placePerson(game, active.tokenId, 'S4');
+  let option = game.movementOptions().find((candidate) => candidate.destination === 'greenhouse');
+  assert.equal(option.available, true); assert.equal(option.cost, 3); assert.equal(option.kind, 'door');
+  placePerson(game, active.tokenId, 'S8');
+  option = game.movementOptions().find((candidate) => candidate.destination === 'kitchen');
+  assert.equal(option.available, true); assert.equal(option.cost, 2); assert.equal(option.kind, 'entryway');
+});
+
+test('an unresolved room accusation never prevents ending the turn', async () => {
+  const game = await createEverythingsSusGame({ names, seed: 'end-unavailable-accusation' }); const active = game.state().players[0];
+  placePerson(game, active.tokenId, 'living-room');
+  assert.equal(game.act('roomAccuse', { suspectId: 'mint', weaponId: 'rope' }).ok, true);
+  assert.equal(game.state().phase, 'refutation');
+  assert.equal(game.act('endTurn').ok, true);
+  assert.equal(game.state().currentPlayerIndex, 1);
+  assert.equal(game.state().phase, 'turn-start');
+});
+
+test('sleuth marks preserve one local candidate in every category', () => {
+  const own = ['eggshell', 'shovel', 'ballroom'];
+  const allOtherIds = CARDS.filter((card) => !own.includes(card.id)).map((card) => card.id);
+  const normalized = normalizeSleuthMarks(CARDS, own, allOtherIds);
+  for (const category of ['suspect', 'weapon', 'room']) {
+    assert.equal(remainingSleuthCandidates(CARDS, own, normalized, category).length, 1);
+  }
+  assert.equal(normalized.has('eggshell'), false);
 });
 
 test('a final accusation is rejected unless the active suspect person is on a Foyer square', async () => {

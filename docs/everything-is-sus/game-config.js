@@ -14,7 +14,7 @@ export const ROOMS=[
   ['kitchen','Kitchen','room-kitchen-topdown-02.png','room-kitchen-board-03.png'],
   ['study','Study','room-study-topdown-02.png','room-study-board-02.png'],
   ['game-room','Game Room','room-gameroom-topdown-04.png','room-gameroom-board-02.png'],
-  ['screened-porch','Screened-in Porch','room-screened-in-porch-topdown-02.png','room-screened-in-porch-board-02.png'],
+  ['screened-porch','Screened-in Porch','room-screened-in-porch-topdown-02.png','room-screened-in-porch-board-03.png'],
   ['greenhouse','Greenhouse','room-greenhouse-topdown-02.png','room-greenhouse-board-02.png'],
   ['pool-room','Swimming Pool Room','room-pool-room-topdown-02.png','room-pool-room-board-01.png']
 ].map(([id,label,image,boardImage])=>({id,label,category:'room',image,boardImage}));
@@ -57,6 +57,7 @@ export const ENTRANCES=Object.freeze([
   {id:'game-hall-door',kind:'door',cost:3,room:'game-room',sites:['J11']},
   {id:'ballroom-west-entry',kind:'entryway',cost:2,room:'ballroom',sites:['J8','J9']},
   {id:'ballroom-east-entry',kind:'entryway',cost:2,room:'ballroom',sites:['S8','S9']},
+  {id:'kitchen-west-entry',kind:'entryway',cost:2,room:'kitchen',sites:['S8','S9']},
   {id:'ballroom-south-entry',kind:'entryway',cost:2,room:'ballroom',sites:['N14','O14']},
   {id:'kitchen-dining-door',kind:'door',cost:3,fromRoom:'kitchen',toRoom:'dining-room'},
   {id:'living-hall-entry',kind:'entryway',cost:2,room:'living-room',sites:['J15','J16']},
@@ -74,6 +75,7 @@ export const ENTRANCE_MARKERS=Object.freeze([
   {id:'game-hall-door',kind:'door',x:9,y:9.9,width:.16,height:1.15},
   {id:'ballroom-west-entry',kind:'entryway',x:10,y:7.15,width:.16,height:1.7},
   {id:'ballroom-east-entry',kind:'entryway',x:18,y:7.15,width:.16,height:1.7},
+  {id:'kitchen-west-entry',kind:'entryway',x:19,y:7.15,width:.16,height:1.7},
   {id:'ballroom-south-entry',kind:'entryway',x:13.15,y:13,width:1.7,height:.16},
   {id:'kitchen-dining-door',kind:'door',x:22.25,y:9,width:1.5,height:.16},
   {id:'living-hall-entry',kind:'entryway',x:9,y:14.1,width:.16,height:1.75},

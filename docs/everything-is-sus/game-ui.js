@@ -1,12 +1,13 @@
 import { createEverythingsSusGame, restoreEverythingsSusGame, serializeHostGame } from './model/everything-is-sus-game.js';
 import { BOARD_REGIONS, ENTRANCE_MARKERS, FOYER_SITES, ROOMS, SECRET_PASSAGES, SECRET_PASSAGE_CORNERS, SUSPECTS, WALKABLE_SITES, WEAPONS, boardCellStyle, boardImageUrl, boardRegionStyle, cardById, cardImageUrl, entranceMarkerStyle, isRoom } from './game-config.js';
 import { renderDice } from '../poker-dice/rendering/dice-svg.js';
+import { createInvitationUrl, renderQrCode } from '../packages/game-mechanics/src/index.js';
 
 const mode = document.body.dataset.mode;
 let game = null;
 let selectedSuspectIds = [];
 const app = document.querySelector('#app');
-app.innerHTML = `<header class="bar"><a href="../">Everything's Sus</a><nav><button id="rules">Rules</button><button id="load">Load</button><input id="load-file" hidden type="file" accept="application/json"><button id="save" disabled>Save</button><button id="new">New game</button></nav></header><main class="game-shell"><section class="board-panel"><div class="turn-card"><div><p class="kicker">Current detective</p><h1 id="current">Set the table</h1></div><p id="phase">Choose players to begin.</p></div><div class="estate-frame"><div class="estate-board" id="board" aria-label="Estate board"></div></div><p class="board-help">Select a gold-highlighted space to move. Room art represents the whole room; tokens inside a room may share it.</p></section><aside class="case-panel"><div><p class="kicker">Case controls</p><h2 id="table-code">The sealed envelope</h2></div><div id="actions" class="actions"></div><div id="log" class="case-log" aria-live="polite"></div><div id="invitations"></div></aside></main><dialog id="setup"><form id="setup-form"><p class="kicker">New investigation</p><h2>Choose 3–6 suspects</h2><p>Select portraits in the order they will take turns.</p><div id="suspect-setup" class="suspect-setup"></div><button id="deal-case" disabled>Choose at least 3 suspects</button></form></dialog><dialog id="choice"><form id="choice-form"><h2 id="choice-title"></h2><div id="choice-fields"></div><menu><button type="button" id="cancel-choice">Cancel</button><button>Confirm</button></menu></form></dialog><dialog id="private"><div id="private-content"></div></dialog>`;
+app.innerHTML = `<header class="bar"><a href="../">Everything's Sus</a><nav><button id="rules">Rules</button><button id="load">Load</button><input id="load-file" hidden type="file" accept="application/json"><button id="save" disabled>Save</button><button id="new">New game</button></nav></header><main class="game-shell"><section class="board-panel"><div class="turn-card"><div><p class="kicker">Current detective</p><h1 id="current">Set the table</h1></div><p id="phase">Choose players to begin.</p></div><div class="estate-frame"><div class="estate-board" id="board" aria-label="Estate board"></div></div><p class="board-help">Choose movement and secret passages directly on the board. Gold badges show the pace cost. Rooms may hold several tokens.</p></section><aside class="case-panel"><div><p class="kicker">Case controls</p><h2 id="table-code">The sealed envelope</h2></div><div id="actions" class="actions"></div><div id="log" class="case-log" aria-live="polite"></div><div id="invitations"></div></aside></main><dialog id="setup"><form id="setup-form"><p class="kicker">New investigation</p><h2>Choose 3–6 suspects</h2><p>Select portraits in the order they will take turns.</p><div id="suspect-setup" class="suspect-setup"></div><button id="deal-case" disabled>Choose at least 3 suspects</button></form></dialog><dialog id="choice"><form id="choice-form"><h2 id="choice-title"></h2><div id="choice-fields"></div><menu><button type="button" id="cancel-choice">Cancel</button><button>Confirm</button></menu></form></dialog><dialog id="private"><div id="private-content"></div></dialog><dialog id="token-view" class="token-view"><button type="button" class="dialog-close" aria-label="Close token portrait">×</button><img alt=""><h2></h2></dialog><div id="token-preview" class="token-preview" hidden><img alt=""><strong></strong></div><dialog id="invite-view" class="invite-view"><button type="button" class="dialog-close" aria-label="Close player invitation">×</button><img class="invite-portrait" alt=""><p class="kicker">Private player invitation</p><h2></h2><div class="invite-qr"></div><p class="invite-codes"></p><p class="privacy-note">Let only this player scan the QR. It opens their private hand directly on their device.</p></dialog><dialog id="solution-reveal" class="solution-reveal"><div class="envelope-reveal" aria-hidden="true"><span></span></div><p class="kicker">The sealed solution</p><h2>Case closed</h2><div class="solution-cards"></div><button type="button" class="primary close-reveal">Continue</button></dialog>`;
 
 const $ = (selector) => document.querySelector(selector);
 const setup = $('#setup');
@@ -16,6 +17,9 @@ $('#new').onclick = () => { selectedSuspectIds = []; renderSuspectSetup(); setup
 $('#load').onclick = () => $('#load-file').click();
 $('#rules').onclick = () => location.href = '../everything-is-sus-RULES.md';
 $('#cancel-choice').onclick = () => $('#choice').close();
+$('#token-view .dialog-close').onclick = () => $('#token-view').close();
+$('#invite-view .dialog-close').onclick = () => $('#invite-view').close();
+$('#solution-reveal .close-reveal').onclick = () => $('#solution-reveal').close();
 $('#load-file').onchange = async (event) => {
   try {
     game = restoreEverythingsSusGame(await event.target.files[0].text());
@@ -76,15 +80,17 @@ function renderBoard(state) {
 
   for (const room of ROOMS) {
     const option = optionByDestination.get(room.id);
-    const element = document.createElement(option?.available ? 'button' : 'section');
+    const element = document.createElement('section');
     element.dataset.room = room.id;
     element.className = `room-card${option?.available ? ' is-available' : ''}${currentLocation === room.id ? ' is-current' : ''}`;
     element.style.cssText = boardRegionStyle(room.id);
     element.style.setProperty('--room-art', `url("${boardImageUrl(room)}")`);
     element.style.setProperty('--board-clip', BOARD_REGIONS[room.id].clip || 'inset(0)');
     const passage = SECRET_PASSAGE_CORNERS[room.id];
-    element.innerHTML = `<span class="room-label">${room.label}</span><b class="tokens"></b>${passage ? `<span class="secret-passage ${passage.corner}" role="img" aria-label="Secret passage to ${cardById(SECRET_PASSAGES[room.id]).label}" title="Secret passage to ${cardById(SECRET_PASSAGES[room.id]).label}">${passage.symbol}</span>` : ''}${option?.available ? `<small class="entry-cost">${option.cost} paces</small>` : ''}`;
-    if (option?.available) { element.type = 'button'; element.setAttribute('aria-label', `${option.label}, ${option.cost} paces`); element.onclick = () => act('moveStep', { destination: room.id }); }
+    const passageAvailable = room.id === currentLocation && SECRET_PASSAGES[room.id] && ['turn-start', 'movement'].includes(state.phase);
+    element.innerHTML = `${option?.available ? `<button type="button" class="room-move-target" aria-label="${option.label}, ${option.cost} paces"></button>` : ''}<span class="room-label">${room.label}</span><div class="tokens"></div>${passage ? `<${passageAvailable ? 'button' : 'span'} class="secret-passage ${passage.corner}${passageAvailable ? ' is-available' : ''}" ${passageAvailable ? 'type="button"' : 'role="img"'} aria-label="Secret passage to ${cardById(SECRET_PASSAGES[room.id]).label}" title="Secret passage to ${cardById(SECRET_PASSAGES[room.id]).label}">${passage.symbol}</${passageAvailable ? 'button' : 'span'}>` : ''}${option?.available ? `<small class="entry-cost">${option.cost} paces</small>` : ''}`;
+    element.querySelector('.room-move-target')?.addEventListener('click', () => act('moveStep', { destination: room.id }));
+    element.querySelector('.secret-passage.is-available')?.addEventListener('click', () => act('secretPassage'));
     addTokens(element.querySelector('.tokens'), state, room.id);
     board.append(element);
   }
@@ -99,12 +105,17 @@ function renderBoard(state) {
 
   for (const siteId of WALKABLE_SITES) {
     const option = optionByDestination.get(siteId);
-    const cell = document.createElement('button'); cell.type = 'button';
+    const cell = document.createElement('div');
     cell.className = `board-space${FOYER_SITES.includes(siteId) ? ' foyer-site' : ''}${option?.available ? ' is-available' : ''}${currentLocation === siteId ? ' is-current' : ''}`;
     cell.style.cssText = boardCellStyle(siteId);
-    cell.disabled = !option?.available;
-    cell.setAttribute('aria-label', option?.available ? `${option.label} to board space ${siteId}, ${option.cost} pace` : `Board space ${siteId}`);
-    if (option?.available) cell.onclick = () => act('moveStep', { destination: siteId });
+    cell.setAttribute('role', 'group');
+    cell.setAttribute('aria-label', `Board space ${siteId}`);
+    if (option?.available) {
+      const target = document.createElement('button'); target.type = 'button'; target.className = 'space-move-target';
+      target.setAttribute('aria-label', `${option.label} to board space ${siteId}, ${option.cost} ${option.cost === 1 ? 'pace' : 'paces'}`);
+      target.onclick = () => act('moveStep', { destination: siteId }); cell.append(target);
+      cell.insertAdjacentHTML('beforeend', `<small class="move-cost">${option.cost}</small>`);
+    }
     addTokens(cell, state, siteId);
     board.append(cell);
   }
@@ -114,8 +125,12 @@ function renderBoard(state) {
 
 function addTokens(container, state, location) {
   for (const suspect of SUSPECTS.filter((item) => state.locations[item.id] === location)) {
-    const token = document.createElement('i'); token.className = 'token-chip'; token.title = suspect.label;
-    token.style.backgroundImage = `url("${cardImageUrl(suspect)}")`; container.append(token);
+    const token = document.createElement('button'); token.type = 'button'; token.className = 'token-piece'; token.dataset.label = suspect.label; token.setAttribute('aria-label', `Inspect ${suspect.label}`);
+    token.innerHTML = `<i class="token-chip"></i><span>${suspect.label}</span>`; token.querySelector('i').style.backgroundImage = `url("${cardImageUrl(suspect)}")`;
+    token.onmouseenter = token.onfocus = () => showTokenPreview(suspect, token);
+    token.onmouseleave = token.onblur = hideTokenPreview;
+    token.onclick = (event) => { event.stopPropagation(); showTokenDialog(suspect); };
+    container.append(token);
   }
 }
 
@@ -137,22 +152,16 @@ function renderActions(state) {
 
   if (state.phase === 'turn-start') {
     add('Roll one die', () => act('roll'), 'primary');
-    if (SECRET_PASSAGES[location]) add(`Use passage to ${cardById(SECRET_PASSAGES[location]).label}`, () => act('secretPassage'));
     if (isRoom(location)) add(`Make room accusation in ${cardById(location).label}`, roomAccuse);
     addFinalAccusation(location); add('End turn', () => act('endTurn'));
   } else if (state.phase === 'movement') {
     const summary = document.createElement('p'); summary.className = 'roll-result'; summary.innerHTML = `Rolled <strong>${state.die}</strong> · <strong>${state.moves}</strong> paces remain`; box.append(summary);
-    const options = game.movementOptions(); const controls = document.createElement('div'); controls.className = 'movement-controls'; box.append(controls);
-    for (const option of options) {
-      const label = option.kind === 'step' ? option.label : `${option.label} · ${option.cost} paces`;
-      add(label, () => act('moveStep', { destination: option.destination }), option.kind === 'step' ? 'direction' : 'entry', controls, !option.available, option.reason);
-    }
-    if (!options.length) controls.innerHTML = '<p>No adjacent move is available.</p>';
+    const options = game.movementOptions(); const guidance = document.createElement('p'); guidance.className = 'movement-guidance'; guidance.textContent = options.some((option) => option.available) ? 'Choose a highlighted destination on the board. Cost badges show the paces required.' : 'No legal board move is available. You may stop moving or end the turn.'; box.append(guidance);
     add('Stop moving', () => act('stopMovement')); addFinalAccusation(location); add('End turn', () => act('endTurn'));
   } else if (state.phase === 'room-decision') {
     if (isRoom(location)) add(`Make room accusation in ${cardById(location).label}`, roomAccuse, 'primary');
     addFinalAccusation(location); add('End turn', () => act('endTurn'));
-  } else if (state.phase === 'refutation') resolveRefutation();
+  } else if (state.phase === 'refutation') { resolveRefutation(); add('End turn without a shown card', () => act('endTurn')); }
 }
 
 function add(label, handler, className = '', parent = $('#actions'), disabled = false, reason = '') {
@@ -167,18 +176,18 @@ function addFinalAccusation(location) {
   add('Make final accusation', finalAccuse, 'danger', $('#actions'), !allowed, allowed ? '' : 'Return to the Foyer');
 }
 
-function act(type, params = {}) { const result = game.act(type, params); if (!result.ok) return note(result.message, true); note(actionText(type, result.value)); render(); }
-function roomAccuse() { choose('Make a room accusation', [select('Suspect', 'suspectId', SUSPECTS), select('Weapon', 'weaponId', WEAPONS)], (value) => act('roomAccuse', value)); }
+function act(type, params = {}) { const before = game.state(); const result = game.act(type, params); if (!result.ok) { const canEnd = ['turn-start', 'movement', 'room-decision', 'refutation'].includes(before.phase); note(`${result.message}${canEnd ? ' You may still end your turn.' : ''}`, true); render(); return result; } note(actionText(type, result.value, params, before)); render(); return result; }
+function roomAccuse() { const state = game.state(); const active = state.players[state.currentPlayerIndex]; const room = cardById(state.locations[active.tokenId]); choose('Make a room accusation', [select('Person', 'suspectId', SUSPECTS), select('Weapon', 'weaponId', WEAPONS), `<div class="fixed-choice"><span>Room</span><strong>${room?.label || 'Current room'}</strong></div>`], (value) => act('roomAccuse', value)); }
 function finalAccuse() {
   choose('Make a final accusation', [select('Suspect', 'suspectId', SUSPECTS), select('Weapon', 'weaponId', WEAPONS), select('Room', 'roomId', ROOMS)], (value) => {
     if (!confirm('An incorrect final accusation removes you from future turns. Continue?')) return;
-    const result = game.act('accuse', value); note(result.ok ? (result.value ? 'The final accusation is correct!' : 'The final accusation was wrong. The next detective begins.') : result.message, !result.ok); render();
+    const result = game.act('accuse', value); note(result.ok ? finalAccusationText(value, result.value) : result.message, !result.ok); render(); if (result.ok && (result.value || game.state().complete)) showSolutionReveal();
   });
 }
 
 function resolveRefutation() {
   const refutation = game.refutation();
-  if (!refutation) return add('No one can refute — end turn', () => act('resolveRefutation', {}), 'primary');
+  if (!refutation) { const message = document.createElement('p'); message.textContent = 'No other players could provide evidence against this accusation.'; $('#actions').append(message); return; }
   if (mode === 'host') {
     const message = document.createElement('p'); message.textContent = `Ask ${refutation.player.name} to choose one matching card on their device.`; $('#actions').append(message);
     add(`${refutation.player.name} showed a card — end turn`, () => act('resolveRefutation', { refuterIri: refutation.player.iri }), 'primary');
@@ -210,13 +219,52 @@ const select = (label, name, items) => `<label>${label}<select name="${name}">${
 
 async function showInvites() {
   const invites = await game.playerAccessCodes(); const box = $('#invitations');
-  box.innerHTML = '<h3>Turn order &amp; player codes</h3><p>Each player enters the table code shown above, their suspect, and their private code.</p><div class="player-code-list"></div>';
-  for (const invite of invites) { const suspect = SUSPECTS.find((item) => item.id === invite.suspectId); const row = document.createElement('div'); row.className = 'player-code-row'; row.innerHTML = `<img src="${cardImageUrl(suspect)}" alt=""><span><small>Turn ${invite.turnOrder}</small><strong>${invite.name}</strong></span><b aria-label="Private code ${invite.handCode}">${invite.handCode}</b>`; box.querySelector('.player-code-list').append(row); }
+  box.innerHTML = '<h3>Turn order &amp; player codes</h3><p>Select a player to show their portrait and private invitation QR.</p><div class="player-code-list"></div>';
+  for (const invite of invites) { const suspect = SUSPECTS.find((item) => item.id === invite.suspectId); const row = document.createElement('button'); row.type = 'button'; row.className = 'player-code-row'; row.innerHTML = `<img src="${cardImageUrl(suspect)}" alt=""><span><small>Turn ${invite.turnOrder}</small><strong>${invite.name}</strong></span><b aria-label="Private code ${invite.handCode}">${invite.handCode}</b>`; row.onclick = () => showInvite(invite, suspect); box.querySelector('.player-code-list').append(row); }
 }
 
 function note(text, error = false) { const paragraph = document.createElement('p'); paragraph.textContent = text; paragraph.className = error ? 'error' : ''; $('#log').prepend(paragraph); }
 function phaseText(state) { return { 'turn-start': 'Roll, take a room action, make a final accusation, or end the turn.', movement: `Choose each step. ${state.moves} paces remain.`, 'room-decision': 'You may make an accusation or end the turn.', refutation: 'The first eligible player clockwise may show one card.', complete: 'The sealed solution may now be verified.' }[state.phase] || state.phase; }
-function actionText(type, value) { return { roll: `Rolled ${value}.`, moveStep: `Moved to ${isRoom(value.destination) ? cardById(value.destination)?.label : 'a new space'} for ${value.cost} ${value.cost === 1 ? 'pace' : 'paces'}.`, stopMovement: 'Movement stopped.', secretPassage: 'Used a secret passage.', roomAccuse: 'Room accusation announced.', resolveRefutation: value ? 'A card was shown privately. The next detective begins.' : 'No one could refute. The next detective begins.', endTurn: 'The next detective begins.' }[type] || 'Action complete.'; }
+function actionText(type, value, params, before) {
+  if (type === 'roll') return `Rolled ${value}.`;
+  if (type === 'moveStep') return `Moved to ${isRoom(value.destination) ? cardById(value.destination)?.label : 'a new space'} for ${value.cost} ${value.cost === 1 ? 'pace' : 'paces'}.`;
+  if (type === 'stopMovement') return 'Movement stopped.';
+  if (type === 'secretPassage') return `Used the secret passage to ${cardById(value)?.label}.`;
+  if (type === 'roomAccuse') {
+    const active = before.players[before.currentPlayerIndex];
+    return `${active.name} announced: ${cardById(params.suspectId).label}, with the ${cardById(params.weaponId).label}, in the ${cardById(before.locations[active.tokenId]).label}.`;
+  }
+  if (type === 'resolveRefutation') return value ? 'A card was shown privately. The next detective begins.' : 'No other players could provide evidence against this accusation. The next detective begins.';
+  if (type === 'endTurn') return 'The next detective begins.';
+  return 'Action complete.';
+}
+
+function finalAccusationText(value, correct) { return `Final accusation: ${cardById(value.suspectId).label}, with the ${cardById(value.weaponId).label}, in the ${cardById(value.roomId).label}. ${correct ? 'Correct!' : 'Incorrect; the next detective begins.'}`; }
+function showTokenPreview(suspect, token) {
+  const preview = $('#token-preview'); const tokenBox = token.getBoundingClientRect();
+  preview.querySelector('img').src = cardImageUrl(suspect); preview.querySelector('img').alt = ''; preview.querySelector('strong').textContent = suspect.label; preview.hidden = false;
+  const previewBox = preview.getBoundingClientRect();
+  const left = Math.min(innerWidth - previewBox.width - 8, Math.max(8, tokenBox.right + 10));
+  const top = Math.min(innerHeight - previewBox.height - 8, Math.max(8, tokenBox.top + tokenBox.height / 2 - previewBox.height / 2));
+  preview.style.left = `${left}px`; preview.style.top = `${top}px`;
+}
+function hideTokenPreview() { $('#token-preview').hidden = true; }
+function showTokenDialog(suspect) { hideTokenPreview(); const dialog = $('#token-view'); dialog.querySelector('img').src = cardImageUrl(suspect); dialog.querySelector('img').alt = suspect.label; dialog.querySelector('h2').textContent = suspect.label; dialog.showModal(); }
+
+function showInvite(invite, suspect) {
+  const dialog = $('#invite-view');
+  const playerUrl = new URL('./player/', new URL('../', location.href));
+  const url = createInvitationUrl(playerUrl.href, { tableCode: invite.tableCode, suspectId: invite.suspectId, handCode: invite.handCode });
+  dialog.querySelector('.invite-portrait').src = cardImageUrl(suspect); dialog.querySelector('.invite-portrait').alt = suspect.label; dialog.querySelector('h2').textContent = invite.name;
+  dialog.querySelector('.invite-codes').textContent = `Table ${invite.tableCode} · Private code ${invite.handCode}`;
+  renderQrCode(dialog.querySelector('.invite-qr'), url, { label: `Private invitation QR for ${invite.name}` }); dialog.showModal();
+}
+
+function showSolutionReveal() {
+  const dialog = $('#solution-reveal'); const cards = dialog.querySelector('.solution-cards');
+  cards.replaceChildren(...game.solution.map((id, index) => { const card = cardById(id); const article = document.createElement('article'); article.style.setProperty('--reveal-order', index); article.innerHTML = `<img src="${cardImageUrl(card)}" alt=""><span>${card.category}</span><strong>${card.label}</strong>`; return article; }));
+  dialog.showModal();
+}
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('../service-worker.js', { scope: '../' });
 window.addEventListener('blur', () => { if ($('#private')?.open) $('#private').close(); });

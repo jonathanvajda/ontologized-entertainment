@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "coordinateSystem": {
     "columns": 26,
     "columnLabels": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -42,6 +42,7 @@
     { "kind": "door", "edge": "I11:J11", "connects": ["game-room", "hallway"] },
     { "kind": "open-entryway", "edge": "J8:K9", "connects": ["hallway", "ballroom"] },
     { "kind": "open-entryway", "edge": "R8:S9", "connects": ["ballroom", "hallway"] },
+    { "kind": "open-entryway", "edge": "S8:T9", "connects": ["hallway", "kitchen"] },
     { "kind": "open-entryway", "edge": "N13:O14", "connects": ["ballroom", "hallway"] },
     { "kind": "door", "edge": "V9:W10", "connects": ["kitchen", "dining-room"] },
     { "kind": "open-entryway", "edge": "I15:J16", "connects": ["living-room", "hallway"] },

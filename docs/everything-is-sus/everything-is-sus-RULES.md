@@ -55,7 +55,7 @@ This prevents accidental viewing during ordinary play, but everyone’s informat
 
 ### Local multi-device
 
-Use one host device for setup, the board, turns, die rolls, room accusations, and final accusations. Each player opens the player page on a personal device and enters the table code, their chosen suspect, and private five-letter hand code shown by the host.
+Use one host device for setup, the board, turns, die rolls, room accusations, and final accusations. Each player opens the player page on a personal device and enters the table code, their chosen suspect, and private five-letter hand code shown by the host. For faster setup, selecting a player's access row on the host opens that suspect's portrait and a QR code containing the same player-scoped access details; scanning it opens and fills the player page automatically.
 
 The player page contains that player’s starting hand and private detective notebook. It does not automatically receive later board changes; players follow the host screen and update their notebooks themselves.
 
@@ -103,7 +103,7 @@ Rolling, movement, and a room accusation are each optional. A player may end the
 
 The player may roll one fair six-sided die once on the host or shared page. Each result from 1 through 6 has equal probability. The result is recorded in the game state and becomes that turn's maximum movement allowance. Rolling does not require movement, and a player may stop before spending every pace.
 
-- From a hallway or Foyer space, the interface offers each legal adjacent destination: up, down, left, or right. Diagonal movement is never offered.
+- From a hallway or Foyer space, the board highlights each legal adjacent destination. Movement choices are made directly on those nearby board spaces rather than through ambiguous directional controls in a separate panel. Diagonal movement is never offered.
 - Moving to an orthogonally adjacent walkable space normally costs 1 pace.
 - Crossing an open entryway costs 2 paces total. An entryway is simply an unobstructed gap in the wall: it has no door, gate, curtain, or other physical barrier.
 - Crossing a doorway costs 3 paces total. A paired or double door is one doorway crossing, not two.
@@ -115,9 +115,9 @@ The player may roll one fair six-sided die once on the host or shared page. Each
 - A hallway or Foyer space may contain at most one person. You may not enter or pass through one occupied by another person.
 - Entering a room ends movement immediately. Exact count is not required to enter it, but the player must still have enough paces to pay the complete ingress cost.
 - A player who begins a turn in a room may leave through one marked egress and continue through passage spaces, but may not enter another room during that turn because that would cross a second ingress/egress.
-- A player who begins in a room may instead use a shown secret passage without rolling, or remain to make a room accusation and end the turn.
+- A player who begins in a corner room may use its shown secret passage before or after rolling, provided they have not left that room. Using it discards any unspent paces, moves directly to the paired room, and ends movement.
 
-When a person is adjacent to a marked room entrance, the interface offers **Enter room** and reports its cost. If fewer than 2 paces remain for an entryway or fewer than 3 remain for a doorway, the option remains visible but disabled with the explanation **Not enough moves**. It is also disabled after the player has already crossed an ingress or egress that turn.
+When a person is adjacent to a marked room entrance, the room itself becomes a board control and reports the 2- or 3-pace cost. Unavailable destinations are not duplicated in the side panel. The Greenhouse has a 3-pace doorway from hallway site S4, and the Kitchen has a 2-pace open entryway from hallway sites S8/S9, aligned across the hall from the Ballroom opening, in addition to its connection with the Dining Room.
 
 Each room is one location rather than a collection of movement spaces. It may contain zero through six suspect people, and the board must be able to display all six corresponding tokens in one room. Weapon pieces do not count against this person capacity.
 
@@ -127,7 +127,7 @@ The displayed die uses the same accessible SVG face design as Poker Dice, but it
 
 Every walkable hallway and Foyer site is visibly outlined as a square on the finished board. These subtle grid lines are part of the player view so players can count one-pace orthogonal routes before rolling. Room interiors are not subdivided because each room is one multiply occupiable site.
 
-The four literal corner rooms have diagonal secret passages: **Swimming Pool Room ↔ Dining Room** and **Greenhouse ↔ Living Room**. A player who begins in one of those rooms may use its marked passage instead of rolling. Passage use moves the person directly to the paired room and ends movement for the turn.
+The four literal corner rooms have diagonal secret passages: **Swimming Pool Room ↔ Dining Room** and **Greenhouse ↔ Living Room**. When the active person is in a corner room, that room's corner-arrow marker is the passage control. It remains clickable after a die roll as well as before one. Passage use moves the person directly to the paired room, discards any remaining paces, and ends movement for the turn.
 
 ### Estate layout
 
@@ -160,6 +160,8 @@ If your suspect person ends movement in one of the nine murder rooms—or began 
 - any weapon; and
 - the room the person currently occupies.
 
+The accusation form displays the current room as a fixed third element beside the suspect and weapon selectors, so the complete classic formula is visible before confirmation. Once announced, the complete suspect–weapon–room accusation is recorded in the public change log.
+
 Move the named suspect person and weapon into that room in the game state, then render their pieces there. The moved suspect person remains located in that room until moved normally or named by another room accusation.
 
 Beginning with the next player in the fixed turn order and wrapping around as needed, each other player checks whether their hand contains at least one card named by the accusation.
@@ -169,7 +171,7 @@ Beginning with the next player in the fixed turn order and wrapping around as ne
 - Refutation stops after one card is shown.
 - Nobody else may see which card was shown.
 
-In pass-and-play, use the private reveal screen. In multi-device play, the refuting player selects the card on their own device and physically shows that device only to the accuser. The accuser records the information in their notebook. After the room accusation is resolved—or after every other player reports that they cannot refute—the turn ends.
+In pass-and-play, use the private reveal screen. In multi-device play, the refuting player selects the card on their own device and physically shows that device only to the accuser. The accuser records the information in their notebook. If no card is available to show—whether because the accuser holds it, it is in the sealed solution, or no other player can refute—play is not blocked. The active player may always end the turn from the refutation screen.
 
 ## 8. Detective notebook
 
@@ -182,6 +184,8 @@ Your notebook is private. It may track:
 
 Notebook marks are aids, not authoritative game state. The game does not make deductions or correct mistaken notes.
 
+The local sleuth sheet always preserves at least one unchecked possibility in each category. When only one suspect, weapon, or room remains, that row is highlighted and its checkbox is disabled. Unchecking another row makes it editable again. This is a notebook safeguard, not a claim by the authoritative host that the highlighted card is correct.
+
 ## 9. Final accusations
 
 To distinguish this game-ending claim from the refutable action in Section 7, this section calls it a **final accusation**. A final accusation names a suspect, weapon, and room and is checked directly against the sealed solution rather than offered to other players for evidence.
@@ -190,11 +194,13 @@ A player may make a final accusation only while their suspect person is located 
 
 The host compares the final accusation with the sealed solution without first displaying the solution.
 
-- If all three cards match, the solution is revealed, its setup commitment is verified, and the accuser wins.
+- If all three cards match, an envelope-style reveal presents the suspect, weapon, and room cards one at a time; the setup commitment is verified, and the accuser wins.
 - If any card differs, the final accusation fails. The accuser is eliminated from taking turns, moving, making room accusations, and making final accusations.
 - An eliminated player keeps their cards and must continue refuting room accusations when able.
 
-If every player but one is eliminated, the remaining eligible player does not automatically win; they must still make a correct accusation. If every player becomes eliminated, reveal and verify the solution and record that the mystery defeated the table.
+If every player but one is eliminated, the remaining eligible player does not automatically win; they must still make a correct accusation. If every player becomes eliminated, use the same three-card reveal, verify the solution, and record that the mystery defeated the table. A failed accusation never reveals any solution card while another player remains eligible.
+
+Every suspect token carries a short visible name label. Pointing to it with a mouse, focusing it with a keyboard, or selecting it on a touchscreen shows the larger portrait and full suspect name without moving the token.
 
 ## 10. Information and fairness
 

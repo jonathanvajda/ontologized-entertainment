@@ -1,5 +1,5 @@
 {
-  "version": "a81a1ddbdfc7d14df743c8cb",
+  "version": "f45660f864a9faf4a61a115b",
   "files": [
     {
       "path": "../packages/game-mechanics/src/action-engine.js",
@@ -47,7 +47,7 @@
     },
     {
       "path": "../packages/game-mechanics/src/index.js",
-      "sha256": "148b99db6cd318e7f2d5cac4b0d27da1640ae44a4d1b6c9654f9e877eb056fc8"
+      "sha256": "3e74f2d4b6eeca73b152ed330e588106eb4f47d92e9f15a25afa48f80a883252"
     },
     {
       "path": "../packages/game-mechanics/src/logger.js",
@@ -56,6 +56,10 @@
     {
       "path": "../packages/game-mechanics/src/persistence.js",
       "sha256": "d585cbfa7c7749244fd089f8c9487dffb45a491b1ab5e59239e0540f7ab9e5b5"
+    },
+    {
+      "path": "../packages/game-mechanics/src/qr-code.js",
+      "sha256": "97336a8dd05df93556bc5d7edefd030f8225c6e483b8615725375e0a1cd7120a"
     },
     {
       "path": "../packages/game-mechanics/src/random-engine.js",
@@ -515,7 +519,7 @@
     },
     {
       "path": "js/scanner.js",
-      "sha256": "d2261508166ebb52910528223edb806d57e3d0b4580f39238391034b081cc6a6"
+      "sha256": "29e5374446c911cbfc7c28cb96679b9ee9b97b03fbb4a2dc6421f518f30c59ba"
     },
     {
       "path": "js/session.js",

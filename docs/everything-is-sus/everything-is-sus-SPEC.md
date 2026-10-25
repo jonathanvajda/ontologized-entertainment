@@ -113,7 +113,7 @@ The approved topology is the explicit 26-column (`A`–`Z`) by 18-row (`1`–`18
 
 Each orthogonal edge between two ordinary walkable cells has movement cost 1. A topology edge marked as an open entryway has cost 2; an edge marked as a doorway has cost 3. These are total edge costs, not surcharges. Every movement path has an ingress/egress crossing count, initialized to zero and capped at one. Crossing either marked edge type increments it once. A double door is one topology edge and one crossing. Entering a room ends movement; leaving a room consumes the sole crossing but may be followed by ordinary passage-space steps.
 
-The topology also defines two bidirectional secret-passage pairs between the literal corner rooms: Swimming Pool Room–Dining Room and Greenhouse–Living Room. Each endpoint SHALL have a persistent player-visible passage marker independent of the room bitmap. Markers occupy the literal outer estate corners: Swimming Pool Room top-left, Greenhouse top-right, Living Room bottom-left, and Dining Room bottom-right. Passage use is available only at `turn-start`, replaces rolling and ordinary movement, moves the suspect person directly to the paired room, and enters `room-decision`.
+The topology also defines two bidirectional secret-passage pairs between the literal corner rooms: Swimming Pool Room–Dining Room and Greenhouse–Living Room. Each endpoint SHALL have a persistent player-visible passage marker independent of the room bitmap. Markers occupy the literal outer estate corners: Swimming Pool Room top-left, Greenhouse top-right, Living Room bottom-left, and Dining Room bottom-right. The active endpoint marker SHALL be clickable at `turn-start` and during `movement` while the person remains in that room. Passage use discards any rolled allowance, moves the suspect person directly to the paired room, and enters `room-decision`.
 
 Room sites do not expose internal movement cells. Up to six suspect people may be `located in` the same room site, and its renderer SHALL provide six stable token slots. Each individual Foyer or hallway site has maximum person occupancy one. Weapon pieces do not consume person occupancy. A legal path cannot enter or traverse an occupied capacity-one site.
 
@@ -193,16 +193,16 @@ A turn is an ordered sequence of optional player actions followed by mandatory c
 1. The player may roll the single d6 once, or skip rolling.
 2. If rolled, the player may spend zero through the full allowance on legal movement. Movement may end on a hallway or Foyer site; reaching a room is not required.
 3. After the player resolves their end location, they may submit one room accusation only if their suspect person is located in a murder-room site.
-4. A submitted room accusation must finish its deterministic refutation sequence; after it resolves, the turn ends automatically. If no room accusation is submitted, the player may end the turn directly.
+4. A submitted room accusation starts its deterministic refutation sequence. A shown card may resolve it automatically; if no card is available or the physical/private reveal cannot be completed, the active player can still end the turn.
 
-`endTurn` is therefore legal at every voluntary decision point: before rolling, after rolling without moving, after any legal partial movement, or after declining a room accusation. It is not legal while a submitted accusation is awaiting required refutation responses. Skipping a step does not fabricate a roll or movement act in RDF.
+`endTurn` is therefore legal at every voluntary decision point: before rolling, after rolling without moving, after any legal partial movement, after declining a room accusation, and from the refutation phase when no further card is shown. Skipping a step does not fabricate a roll, movement, or disclosure act in RDF.
 
 | Phase | Legal actions | Exit |
 | --- | --- | --- |
 | `turn-start` | `roll`, `useSecretPassage`, `submitRoomAccusation` when already in a room, `submitFinalAccusation`, `endTurn` | Roll committed, movement choice taken, accusation submitted, or turn ended |
-| `movement` | `moveStep`, `crossBoundary`, `stopMovement`, `endTurn` | Room entered, allowance exhausted, player stops, or turn ends |
+| `movement` | `moveStep`, `crossBoundary`, `useSecretPassage` when still in its endpoint room, `stopMovement`, `endTurn` | Room entered, passage used, allowance exhausted, player stops, or turn ends |
 | `room-decision` | `submitRoomAccusation` when in a room, `submitFinalAccusation`, `endTurn` | Accusation submitted or turn ended |
-| `refutation` | `cannotRefute`, `selectRefutationCard`, `confirmPrivateReveal` | First refutation or full circuit |
+| `refutation` | `cannotRefute`, `selectRefutationCard`, `confirmPrivateReveal`, `endTurn` | First refutation, full circuit, or explicit turn end |
 | `notebook` | local notebook actions | Player ends turn |
 | `final-accusation` | select triple, confirm | Resolved immediately |
 | `turn-cleanup` | automatic | Next eligible player or game end |
@@ -218,12 +218,12 @@ Eliminated players are skipped as active players but remain in the refutation or
 | `moveStep` | Orthogonally adjacent walkable destination; destination occupancy below capacity; at least 1 pace remains | Spend 1 pace; replace the suspect person's current `located in` triple; retain movement phase |
 | `crossBoundary` | Marked ingress/egress boundary; crossing count is 0; destination occupancy below capacity; enough allowance remains | Spend 2 paces for an open entryway or 3 for a doorway; set crossing count to 1; replace the person's location; entering a room resolves movement |
 | `stopMovement` | Movement is active | Preserve the current site as the end location; discard unused allowance; enter room decision |
-| `useSecretPassage` | Current room owns route; not otherwise moved | Replace location; consume movement choice |
+| `useSecretPassage` | Current room owns route; phase is `turn-start` or `movement`; person has not left the endpoint room | Replace location; discard remaining allowance; enter room decision |
 | `submitRoomAccusation` | Active suspect person is located in the named murder room; movement resolved; no room accusation this turn | Create room-accusation act; move named suspect person and weapon into that room; initialize refutation cursor at the next player in fixed order |
 | `cannotRefute` | Cursor player holds no card matching the room accusation | Record negative response; advance cursor deterministically with wraparound |
 | `selectRefutationCard` | Cursor player owns selected matching card | Create protected disclosure event; end refutation |
 | `submitFinalAccusation` | Eligible active player at an allowed voluntary decision point whose suspect person is located on a Foyer site | Compare triple with host-only solution; reveal/complete or eliminate accuser |
-| `endTurn` | Voluntary decision point; no unresolved room accusation | Discard unused allowance and advance to next non-eliminated active player |
+| `endTurn` | Any nonterminal active phase, including an unresolved/unavailable refutation | Discard unused allowance and advance to next non-eliminated active player without fabricating a disclosure |
 | `revealSolution` | Game complete | Publish solution and salt; verify commitment |
 
 Notebook actions remain player-local UI/persistence operations and do not mutate host RDF.
@@ -234,6 +234,8 @@ The refutation order is the fixed player order established at setup: begin with 
 
 The host may know that Player B refuted Player A's room accusation, but the shown card is visible only to A and B.
 
+The public accusation event and change log SHALL preserve the announced suspect, weapon, and current room. The accusation UI SHALL render that room as a fixed, non-editable third field. Failure to produce a refutation card is a valid outcome and MUST NOT trap the game in `refutation`; an explicit **End turn** remains available.
+
 - Pass-and-play: project the matching cards for B during a confirmed private selection screen, then project exactly the selected card for A during a second confirmed screen.
 - Multi-device baseline: B selects one matching card on B's player page and physically shows it to A. The host records only that B refuted.
 - Optional token flow: B encrypts a one-card disclosure to A using the shared ECDH module; A imports it locally. This requires a manual QR/copy step and is not required for the first UI.
@@ -242,7 +244,7 @@ The host may know that Player B refuted Player A's room accusation, but the show
 
 A final accusation is distinct from the refutable room accusation. It is legal only when the active suspect person's canonical location is one of `FOYER_SITES`; a token drawn in the Foyer is merely the projection of that required RDF fact. The action is evaluated only on the host/pass-and-play authoritative device and is compared directly with the concealed solution. Before evaluation the chosen triple is confirmed without revealing the solution. The interface SHALL keep the action visible but disabled elsewhere with the brief explanation **Return to the Foyer**.
 
-On success or terminal table defeat, the host publishes solution IRIs and commitment salt. Every client can verify the setup digest. On failure, only correctness=false and elimination are public; the solution remains concealed.
+On success or terminal table defeat, the host publishes solution IRIs and commitment salt. The UI SHALL reveal the three corresponding card faces sequentially with an envelope/opening transition. Every client can verify the setup digest. On failure, only correctness=false and elimination are public; no solution card is rendered while another eligible player remains.
 
 ## 11. Validation invariants
 
@@ -265,7 +267,7 @@ On success or terminal table defeat, the host publishes solution IRIs and commit
 | Room-accusation room equals the active suspect person's current room | JS |
 | Refutation follows fixed player order and stops at the first capable player | JS |
 | Refutation card matches the room accusation, belongs to the refuter, and is chosen by that refuter | JS + visibility tests |
-| `endTurn` is accepted at every voluntary decision point and rejected during unresolved refutation | JS transition tests |
+| `endTurn` is accepted at every voluntary decision point, including unavailable/unresolved refutation | JS transition tests |
 | Eliminated players cannot take active turns | JS |
 | Solution commitment verifies on reveal | Shared crypto module |
 
@@ -293,15 +295,18 @@ Undo is available in practice mode. Competitive play disables undo after private
 ### Host
 
 - Setup/deal, randomized Foyer placement, hand-code distribution, public board, turns, one-die SVG roll, pace-by-pace movement, room accusations, refutation status, final accusations, saves, and final reveal verification.
-- During movement, expose only the four orthogonal neighboring spaces and any adjacent marked room entrance. Label an entrance action with its 2- or 3-pace cost. Keep unaffordable entrances visible but disabled with the terse reason `Not enough moves`; use an equally terse `Already crossed an entrance` when the one-crossing limit is the blocker.
+- During movement, expose legal destinations exclusively as controls on the board: the orthogonal neighboring cells, adjacent marked room entrances, and the active corner-room passage arrow. Overlay the pace cost on each available destination. Do not duplicate these as direction or entrance buttons in the side panel.
 - Permit the player to stop movement and end the turn while located on a hallway or Foyer site. The UI MUST NOT force selection of a reachable room.
 - Never display a player's hand during ordinary multi-device play.
+- Render a compact suspect label on every board token. Hover/focus and touchscreen selection SHALL expose the full portrait and name without changing location.
+- Render each player access row as a compact control. Activating it SHALL open a modal with the suspect portrait, private hand code, and a QR code for a fragment-based player URL. The QR payload SHALL use the shared game-mechanics adapter and SHALL auto-populate and submit the player access form without a server round trip.
 
 ### Player
 
-- Enter table code, chosen suspect, and five-letter private hand code.
+- Scan a host-displayed invitation QR with the device camera, or enter the table code, chosen suspect, and five-letter private hand code manually. A successful scan SHALL populate and submit the same local form without contacting a server.
 - Reject codes whose checksum does not match that access context.
 - Show only own hand, private notebook, current static game identity, and optional disclosure tools.
+- In each sleuth-sheet category, prevent the last unchecked non-hand item from being checked. Highlight it as the last remaining local possibility, and release it when another item in that category is unchecked. Normalize previously saved all-checked categories to the same invariant.
 - Work offline after import.
 
 ## 14. Image and visual asset specification
