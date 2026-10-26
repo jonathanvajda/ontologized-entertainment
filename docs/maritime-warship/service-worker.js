@@ -1,7 +1,8 @@
-const CACHE = 'maritime-warship-v11';
+const CACHE = 'maritime-warship-v12';
 const base = new URL('./', self.location.href);
 const paths = [
   './', './index.html', './app.js', './theme.css', './game-config.js', './storage.js', './network.js', './manifest.webmanifest', './assets/icon.svg',
+  './assets/icon-32.png', './assets/icon-192.png', './assets/icon-512.png', './assets/icon-maskable-512.png', './assets/apple-touch-icon.png',
   './rules/board.js', './model/game.js', './model/projection.js', './model/vocabulary.js', './model/visibility.js', './rendering/board-svg.js',
   '../styles/normalize.css', '../query-whom/vendor/qrcode.js', '../query-whom/vendor/jsQR.js', '../query-whom/js/protocol.js', '../query-whom/js/scanner.js',
   ...['rdf-store', 'engine', 'action-engine', 'random-engine', 'rule-registry', 'validator', 'transaction-log', 'state-projector', 'result', 'persistence'].map(name => `../packages/game-mechanics/src/${name}.js`),

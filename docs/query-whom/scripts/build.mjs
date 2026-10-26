@@ -155,7 +155,8 @@ await output('ontology/oliver-example.md', '# Oliver: complete generated RDF ins
 console.log(`${check ? 'Validated' : 'Built'} 40 characters, ${catalogStore.size} catalog triples and ${all.size} closure triples.`);
 
 // Walk actual ES-module imports so the complete shared package closure is available offline.
-const precachePaths = new Set(['index.html', 'app.css', 'manifest.webmanifest', 'assets/icon.svg', 'assets/catalog-manifest.json', 'README.md',
+const precachePaths = new Set(['index.html', 'app.css', 'manifest.webmanifest', 'assets/icon.svg', 'assets/icon-32.png', 'assets/icon-192.png', 'assets/icon-512.png',
+  'assets/icon-maskable-512.png', 'assets/apple-touch-icon.png', 'assets/catalog-manifest.json', 'README.md',
   '../styles/normalize.css', '../styles/skeleton.css', 'vendor/qrcode.js', 'vendor/jsQR.js', '../vendor/n3.min.js', ...new Set(Object.values(imports))]);
 async function visitModule(relative) {
   if (precachePaths.has(relative)) return;

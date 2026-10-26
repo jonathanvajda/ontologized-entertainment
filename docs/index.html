@@ -5,7 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0b2e25">
   <meta name="description" content="Ontologized Entertainment creates thoughtful, browser-based games powered by semantic game models.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Ontologized Entertainment</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="./assets/icon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
   <link rel="stylesheet" href="./styles/normalize.css">
   <link rel="stylesheet" href="./styles/skeleton.css">
   <link rel="stylesheet" href="./styles/app-base.css">
@@ -143,5 +149,6 @@ const game = createGameEngine({
     <a class="wordmark footer-mark" href="./"><span class="wordmark-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>Ontologized <strong>Entertainment</strong></span></a>
     <p>Open games. Explicit rules. Local-first play.</p>
   </footer>
+  <script type="module" src="./pwa.js"></script>
 </body>
 </html>

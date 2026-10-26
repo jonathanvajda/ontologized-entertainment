@@ -1,5 +1,5 @@
 {
-  "version": "f45660f864a9faf4a61a115b",
+  "version": "45e0b391dd13e4c5cbfe2f03",
   "files": [
     {
       "path": "../packages/game-mechanics/src/action-engine.js",
@@ -162,12 +162,32 @@
       "sha256": "795d50fe2958cb973ad17a57b2f7da67bfda81b884aea65c8cdddcdeae19bb2f"
     },
     {
+      "path": "assets/apple-touch-icon.png",
+      "sha256": "538324c8726f83e37f310e7543b72a7fb7ce7ca39d0fbb1b22f7411953c63560"
+    },
+    {
       "path": "assets/catalog-manifest.json",
       "sha256": "4517790a2efd974b82d5b3e10e51007b11c8a01639489eb2b56ef27c2b689064"
     },
     {
       "path": "assets/catalog-v1.ttl",
       "sha256": "eaab02b187396da36eba5b9a2904a47f3dd94cfc128fab19f2a25cd216a63bb9"
+    },
+    {
+      "path": "assets/icon-192.png",
+      "sha256": "1f2862355c73d691ef4731f2d1b7e6790b9b831ff2bf8a0cf87b23b7d074a3b9"
+    },
+    {
+      "path": "assets/icon-32.png",
+      "sha256": "46b08e40d1b5c631dd1649d41a341fff7b9345308727c92261074967f996c460"
+    },
+    {
+      "path": "assets/icon-512.png",
+      "sha256": "9db210b2a7fa3a02d8440dbcc1277e8942953058f565bb4852c04f8a9376201f"
+    },
+    {
+      "path": "assets/icon-maskable-512.png",
+      "sha256": "9db210b2a7fa3a02d8440dbcc1277e8942953058f565bb4852c04f8a9376201f"
     },
     {
       "path": "assets/icon.svg",
@@ -495,7 +515,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "dfc2c9f7cb5051fe7d2472a3d2039fcac2cd8138a08f6d5babc95bc35ca6d88b"
+      "sha256": "c3922b08e25acde760343b8ecaf8c003ca338fa6943ff7c1e0ee97671f19def0"
     },
     {
       "path": "js/app.js",
@@ -539,7 +559,7 @@
     },
     {
       "path": "manifest.webmanifest",
-      "sha256": "2b858a3ed0d28f4f213fc1297d066be20add6b390cb2d9ed7517d9808455d6f5"
+      "sha256": "90af8a6ec4c2c29733668eaf9ebfe7fd8b3d5914cdf207d00a2edaf85b72761e"
     },
     {
       "path": "ontology/CommonCoreOntologiesMerged.ttl",

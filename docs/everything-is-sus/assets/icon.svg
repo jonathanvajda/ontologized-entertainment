@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Everything's Sus">
+  <rect width="192" height="192" rx="40" fill="#15251f"/>
+  <circle cx="82" cy="78" r="42" fill="#f4eedf" stroke="#d1aa4c" stroke-width="9"/>
+  <path d="M111 109l38 38" fill="none" stroke="#d1aa4c" stroke-width="17" stroke-linecap="round"/>
+  <path d="M82 55c17 0 27 9 27 22 0 12-7 18-18 24v8H76V91l7-3c7-3 10-6 10-11 0-5-4-8-11-8-7 0-12 3-18 8l-9-12c8-7 16-10 27-10zm-8 66h18v18H74z" fill="#8f4435"/>
+</svg>

@@ -1,7 +1,10 @@
-const CACHE = 'everything-is-sus-v29';
+const PREFIX = 'everything-is-sus-';
+const CACHE = `${PREFIX}v30`;
 const ASSETS = [
   './', './index.html', './everything-is-sus.css', './game-config.js', './game-ui.js', './player.js', './sleuth-sheet-ui.js',
-  './manifest.webmanifest', './everything-is-sus-RULES.md', './pass-and-play/', './host/', './player/',
+  './manifest.webmanifest', './assets/icon.svg', './assets/icon-32.png', './assets/icon-192.png', './assets/icon-512.png',
+  './assets/icon-maskable-512.png', './assets/apple-touch-icon.png',
+  './everything-is-sus-RULES.md', './pass-and-play/', './host/', './player/',
   './model/everything-is-sus-game.js', './model/compact-hand-code.js', './model/sleuth-sheet-state.js', './assets/manifest.json', './assets/board-topology.json', './assets/art/board-layout.png', './assets/art/board-layout-legend.png', './assets/art/board-layout-and-legend.png', './assets/art/estate-board-01.png', './assets/art/estate-board-02.png', './assets/art/estate-board-03.png', './assets/art/estate-board-04.png',
   './assets/art/person-mrs-eggshell.png', './assets/art/person-lt-marinara.png',
   './assets/art/person-ms-peach.png', './assets/art/person-mrs-mint-01.png', './assets/art/person-mrs-mint-02.png',
@@ -50,12 +53,12 @@ self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
 });
 self.addEventListener('activate', (event) => {
-  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)))).then(() => self.clients.claim()));
+  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key.startsWith(PREFIX) && key !== CACHE).map((key) => caches.delete(key)))).then(() => self.clients.claim()));
 });
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  event.respondWith(caches.match(event.request).then((hit) => hit || fetch(event.request).then((response) => {
-    if (response.ok && new URL(event.request.url).origin === location.origin) caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
+  event.respondWith(caches.open(CACHE).then((cache) => cache.match(event.request).then((hit) => hit || fetch(event.request).then((response) => {
+    if (response.ok && new URL(event.request.url).origin === location.origin) cache.put(event.request, response.clone());
     return response;
-  })));
+  }))));
 });

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Ontologized Entertainment">
+  <rect width="192" height="192" rx="40" fill="#0b2e25"/>
+  <rect x="34" y="34" width="124" height="124" rx="30" fill="none" stroke="#e8ca7a" stroke-width="8"/>
+  <circle cx="70" cy="70" r="12" fill="#fff8e5"/>
+  <circle cx="96" cy="96" r="12" fill="#fff8e5"/>
+  <circle cx="122" cy="122" r="12" fill="#fff8e5"/>
+</svg>

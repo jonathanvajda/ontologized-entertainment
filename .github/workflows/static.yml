@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  validate-query-whom:
+  validate-site:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,6 +34,8 @@ jobs:
       - name: Install fixed development dependencies
         run: npm ci --ignore-scripts
         working-directory: docs/query-whom
+      - name: Validate PWA manifests, icons, and cache isolation
+        run: node scripts/check-pwas.mjs
       - name: Validate generated RDF and offline assets
         run: npm run check
         working-directory: docs/query-whom
@@ -47,12 +49,14 @@ jobs:
       - name: Install browser for accessibility and offline checks
         run: npx playwright install --with-deps chromium
         working-directory: docs/query-whom
+      - name: Test PWA scopes and offline launch pages
+        run: node scripts/browser-pwa-qa.mjs
       - name: Test browser gameplay and accessibility
         run: npm run test:browser
         working-directory: docs/query-whom
   # Single deploy job since we're just deploying
   deploy:
-    needs: validate-query-whom
+    needs: validate-site
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

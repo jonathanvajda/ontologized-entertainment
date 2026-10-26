@@ -1,0 +1,25 @@
+{
+  "name": "Ontologized Entertainment",
+  "short_name": "Ontologized",
+  "description": "A local-first collection of thoughtful browser games built on explicit rules and semantic models.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3eee2",
+  "theme_color": "#0b2e25",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    { "src": "./assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Poker Dice", "url": "./poker-dice/" },
+    { "name": "Everything's Sus", "url": "./everything-is-sus/" },
+    { "name": "Query Whom!", "url": "./query-whom/" },
+    { "name": "Maritime Warship", "url": "./maritime-warship/" }
+  ]
+}
