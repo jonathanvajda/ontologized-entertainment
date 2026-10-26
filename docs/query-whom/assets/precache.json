@@ -1,5 +1,5 @@
 {
-  "version": "45e0b391dd13e4c5cbfe2f03",
+  "version": "306141a79c291bc8e54bb7ad",
   "files": [
     {
       "path": "../packages/game-mechanics/src/action-engine.js",
@@ -167,7 +167,7 @@
     },
     {
       "path": "assets/catalog-manifest.json",
-      "sha256": "4517790a2efd974b82d5b3e10e51007b11c8a01639489eb2b56ef27c2b689064"
+      "sha256": "5ef98cbdb8f8f2edf6ddeaf0fb38bd15dbf4055787c95723c6b19ea2f9c73578"
     },
     {
       "path": "assets/catalog-v1.ttl",
@@ -267,11 +267,11 @@
     },
     {
       "path": "assets/portraits/person-10-320.webp",
-      "sha256": "e22ddeadea7de5dbf651d52dd130b6e2f7029e2aad08f900b9a156a181027942"
+      "sha256": "4380b8ba563028bfaf49cb868a6c59c50d68f5878c1bffad56253f12ee83377a"
     },
     {
       "path": "assets/portraits/person-10-960.webp",
-      "sha256": "433e532df906421bd2d0c2c565f895b1241d77e7cf775ea5c90aeeffba3bfd7f"
+      "sha256": "4d5dc58c3b61f45b3f490ef6ec427d47fbd89bd2d9032bbff2a8f823e8e09cda"
     },
     {
       "path": "assets/portraits/person-11-320.webp",
@@ -347,11 +347,11 @@
     },
     {
       "path": "assets/portraits/person-20-320.webp",
-      "sha256": "2b327e2183494ae9c61c18b9386e833f34b31496428caff957e6b5e89924ba58"
+      "sha256": "f6403586a405eec5c80a8927d54f2a9f63ad9c919241154760586562f705bfc5"
     },
     {
       "path": "assets/portraits/person-20-960.webp",
-      "sha256": "218263036520aa63ba5e22117a7048b3ba9298e1858c507a875d72f8f90b8e88"
+      "sha256": "38e5edb47cf55a1c4c8993fc02765c2e1d98daa554a34256a1d4f36d3bebfa77"
     },
     {
       "path": "assets/portraits/person-21-320.webp",
