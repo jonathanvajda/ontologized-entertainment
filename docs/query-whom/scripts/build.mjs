@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { N3, browserLibrary } from './runtime.mjs';
 import { prefixes, Q, TYPE, PART, BEARER, PERSON, CCO_COMMIT, CCO_SHA256, CCO_VERSION, APP_ONTOLOGY, CATALOG_ONTOLOGY, hairClasses, eyeClasses, ethnicityClasses, traitFields } from '../js/vocabulary.js';
+import { CATALOG_SIZE } from '../js/protocol.js';
 import { projectCatalog } from '../js/catalog.js';
 import { DECK_VERSION } from '../js/protocol.js';
 
@@ -20,11 +21,11 @@ async function output(relative, text) {
 }
 
 const Papa = await browserLibrary(new URL('../../vendor/papaparse.min.js', import.meta.url), 'Papa');
-const source = await readFile(path('personal-traits-40-people-alt.csv'), 'utf8');
+const source = await readFile(path('personal-traits-44-people.csv'), 'utf8');
 const parsed = Papa.parse(source, { header: true, skipEmptyLines: true });
 assert.equal(parsed.errors.length, 0, 'Invalid CSV');
 const rows = parsed.data;
-assert.equal(rows.length, 40);
+assert.equal(rows.length, CATALOG_SIZE);
 const expected = ['Person', 'Name', 'Sex', 'Race', 'Hair color', 'Eye color', 'Facial hair', ...Object.keys(traitFields)];
 assert.deepEqual([...parsed.meta.fields].sort(), expected.sort(), 'CSV columns must match the documented contract');
 const ccoText = await readFile(path('ontology/CommonCoreOntologiesMerged.ttl'), 'utf8');
@@ -73,7 +74,7 @@ let catalog = header + `<${CATALOG_ONTOLOGY}> a owl:Ontology ; owl:versionInfo "
 const ids = new Set();
 for (const row of rows) {
   const match = /^Person (\d+)$/.exec(row.Person); assert(match, 'Invalid person number');
-  const id = Number(match[1]); assert(id >= 1 && id <= 40 && !ids.has(id)); ids.add(id);
+  const id = Number(match[1]); assert(id >= 1 && id <= CATALOG_SIZE && !ids.has(id)); ids.add(id);
   for (const column of parsed.meta.fields) assert.equal(typeof row[column], 'string');
   assert(row.Name.trim()); assert(ethnicityClasses[row.Race]); assert(eyeClasses[row['Eye color']]); assert(['Male', 'Female'].includes(row.Sex));
   assert(['Yes', 'No'].includes(row.Bald)); const bald = row.Bald === 'Yes';
@@ -134,12 +135,12 @@ for (const quad of [...parse(ontology), ...parse(catalog), ...parse(await readFi
   for (const term of [quad.subject, quad.predicate, quad.object]) if (term.termType === 'NamedNode' && /^https:\/\/www.commoncoreontologies.org\/ont\d+$/.test(term.value)) assert(cco.countQuads(term, null, null, null), `Unknown CCO term ${term.value}`);
 }
 const files = {};
-for (const relative of [...new Set(Object.values(imports)), 'assets/catalog-v1.json', 'personal-traits-40-people-alt.csv', 'vendor/qrcode.js', 'vendor/jsQR.js', '../vendor/n3.min.js']) files[relative] = hash(await readFile(path(relative)));
-for (let id = 1; id <= 40; id++) for (const suffix of ['.png', '-320.webp', '-960.webp']) {
+for (const relative of [...new Set(Object.values(imports)), 'assets/catalog-v1.json', 'personal-traits-44-people.csv', 'vendor/qrcode.js', 'vendor/jsQR.js', '../vendor/n3.min.js']) files[relative] = hash(await readFile(path(relative)));
+for (let id = 1; id <= CATALOG_SIZE; id++) for (const suffix of ['.png', '-320.webp', '-960.webp']) {
   const relative = `${suffix === '.png' ? 'portraits' : 'assets/portraits'}/person-${String(id).padStart(2, '0')}${suffix}`;
   files[relative] = hash(await readFile(path(relative)));
 }
-const manifest = { gameVersion: '1.0.0', schemaVersion: '1.0.0', protocolVersion: 1, deckVersion: DECK_VERSION, personCount: 40,
+const manifest = { gameVersion: '1.0.0', schemaVersion: '1.0.0', protocolVersion: 1, deckVersion: DECK_VERSION, personCount: CATALOG_SIZE,
   cco: { commit: CCO_COMMIT, versionIri: CCO_VERSION, sha256: files['ontology/CommonCoreOntologiesMerged.ttl'] }, imports, files };
 manifest.catalogHash = hash(Buffer.from(catalog));
 await output('assets/catalog-manifest.json', JSON.stringify(manifest, null, 2) + '\n');
@@ -152,7 +153,7 @@ const compact = iri => { const entry = Object.entries(prefixes).find(([, base]) 
 const edges = oliver.map(q => `  ${nodeId(q.subject)} -->|${compact(q.predicate.value)}| ${nodeId(q.object)}`);
 const mermaid = ['flowchart LR', ...[...nodes.values()].map(({id, term}) => `  ${id}${term.termType === 'Literal' ? '([' : '['}${JSON.stringify(term.termType === 'Literal' ? term.value + (term.datatype.value.endsWith('#string') ? '' : ' · ' + compact(term.datatype.value)) : compact(term.value))}${term.termType === 'Literal' ? '])' : ']'}`), ...edges].join('\n');
 await output('ontology/oliver-example.md', '# Oliver: complete generated RDF instance\n\nIncludes explicit type edges and every source column. Generated from catalog-v1.ttl.\n\n```mermaid\n' + mermaid + '\n```\n');
-console.log(`${check ? 'Validated' : 'Built'} 40 characters, ${catalogStore.size} catalog triples and ${all.size} closure triples.`);
+console.log(`${check ? 'Validated' : 'Built'} ${CATALOG_SIZE} characters, ${catalogStore.size} catalog triples and ${all.size} closure triples.`);
 
 // Walk actual ES-module imports so the complete shared package closure is available offline.
 const precachePaths = new Set(['index.html', 'app.css', 'manifest.webmanifest', 'assets/icon.svg', 'assets/icon-32.png', 'assets/icon-192.png', 'assets/icon-512.png',
@@ -171,7 +172,7 @@ async function visitModule(relative) {
   }
 }
 await visitModule('js/app.js');
-for (let id = 1; id <= 40; id++) for (const size of [320, 960]) precachePaths.add(`assets/portraits/person-${String(id).padStart(2, '0')}-${size}.webp`);
+for (let id = 1; id <= CATALOG_SIZE; id++) for (const size of [320, 960]) precachePaths.add(`assets/portraits/person-${String(id).padStart(2, '0')}-${size}.webp`);
 const cacheFiles = [];
 for (const relative of [...precachePaths].sort()) cacheFiles.push({ path: relative, sha256: hash(await readFile(path(relative))) });
 const template = await readFile(path('scripts/service-worker.template.js'), 'utf8');

@@ -1,5 +1,18 @@
 import { Q, TYPE, PART, BEARER, PERSON, personIri, prefixes, hairClasses, eyeClasses, ethnicityClasses, traitFields } from './vocabulary.js';
-import { DECK_VERSION } from './protocol.js';
+import { CATALOG_SIZE, DECK_VERSION } from './protocol.js';
+
+const HAIR_COLOR_ORDER = new Map([
+  ['Black', 0],
+  ['Dark brown', 1],
+  ['Brown', 2],
+  ['Light brown', 3],
+  ['Red', 4],
+  ['Blonde', 5],
+  ['Black going grey/white', 6],
+  ['Brown going grey/white', 6],
+  ['Fully white/grey', 7],
+  ['Bald', 9]
+]);
 
 export function projectCatalog(store, manifest) {
   const objects = (s, p) => store.getQuads(s, p, null, null).map(q => q.object.value);
@@ -15,8 +28,8 @@ export function projectCatalog(store, manifest) {
   };
   const result = [];
   const ids = store.getQuads(null, TYPE, PERSON, null).map(q => Number(one(q.subject.value, Q('personNumber'))));
-  if (ids.length !== 40 || new Set(ids).size !== 40 || ids.some(id => !Number.isInteger(id) || id < 1 || id > 40)) throw new Error('Catalog must contain exactly people 1–40.');
-  for (let id = 1; id <= 40; id++) {
+  if (ids.length !== CATALOG_SIZE || new Set(ids).size !== CATALOG_SIZE || ids.some(id => !Number.isInteger(id) || id < 1 || id > CATALOG_SIZE)) throw new Error(`Catalog must contain exactly people 1–${CATALOG_SIZE}.`);
+  for (let id = 1; id <= CATALOG_SIZE; id++) {
     const iri = personIri(id), head = typedChild(iri, PART, Q('Head'));
     if (!head) throw new Error(`Missing head for person ${id}.`);
     const hair = typedChild(head, PART, prefixes.cco + 'ont00000058');
@@ -60,6 +73,10 @@ export function sortedCards(cards, sortMode, catalog) {
   if (!['name', 'hairColor', 'eyeColor', 'ethnicity', 'sex'].includes(sortMode)) throw new Error('Unknown sort mode.');
   return [...cards].sort((a, b) => {
     const x = people.get(a.id)[sortMode], y = people.get(b.id)[sortMode];
+    if (sortMode === 'hairColor') {
+      const rankDifference = (HAIR_COLOR_ORDER.get(x) ?? 8) - (HAIR_COLOR_ORDER.get(y) ?? 8);
+      if (rankDifference) return rankDifference;
+    }
     return (x < y ? -1 : x > y ? 1 : 0) || a.id - b.id;
   });
 }

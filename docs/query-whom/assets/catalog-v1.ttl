@@ -8,7 +8,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
-<https://w3id.org/ontologized-entertainment/query-whom/catalog/v4> a owl:Ontology ; owl:versionInfo "4" ; owl:imports <https://w3id.org/ontologized-entertainment/query-whom>, <https://www.commoncoreontologies.org/2026-08-13/CommonCoreOntologiesMerged> ; rdfs:label "Query Whom character catalog v4" .
+<https://w3id.org/ontologized-entertainment/query-whom/catalog/v5> a owl:Ontology ; owl:versionInfo "5" ; owl:imports <https://w3id.org/ontologized-entertainment/query-whom>, <https://www.commoncoreontologies.org/2026-08-13/CommonCoreOntologiesMerged> ; rdfs:label "Query Whom character catalog v5" .
 
 qw:person-01 a cco:ont00001262 .
 qw:person-01 rdfs:label "Oliver" .
@@ -2313,7 +2313,7 @@ qw:person-36 a cco:ont00001262 .
 qw:person-36 rdfs:label "Lily" .
 qw:person-36 qw:personNumber "36"^^xsd:positiveInteger .
 qw:person-36 qw:sourcePersonLabel "Person 36" .
-qw:person-36 qw:sourceRaceLabel "Caucasian" .
+qw:person-36 qw:sourceRaceLabel "East Asian" .
 qw:person-36 qw:portraitPath "portraits/person-36.png"^^xsd:anyURI .
 qw:person-36 obo:BFO_0000178 qw:person-36-head .
 qw:person-36-head a qw:Head .
@@ -2330,7 +2330,7 @@ qw:person-36-right-eye a cco:ont00000500 .
 qw:person-36-right-eye obo:BFO_0000196 qw:person-36-right-eye-color .
 qw:person-36-right-eye-color a qw:BrownEyeColor .
 qw:person-36 obo:BFO_0000196 qw:person-36-ethnicity .
-qw:person-36-ethnicity a qw:WhiteEthnicity .
+qw:person-36-ethnicity a qw:EastAsianEthnicity .
 qw:person-36 obo:BFO_0000196 qw:person-36-sex .
 qw:person-36-sex a cco:ont00001212 .
 qw:person-36 qw:hasAgeYears "36"^^xsd:nonNegativeInteger .
@@ -2570,7 +2570,7 @@ qw:person-39-scalp-hair qw:hasHairAccessory "None" .
 qw:person-39 qw:hasClothingColor "Black" .
 
 qw:person-40 a cco:ont00001262 .
-qw:person-40 rdfs:label "Charis" .
+qw:person-40 rdfs:label "Katherine" .
 qw:person-40 qw:personNumber "40"^^xsd:positiveInteger .
 qw:person-40 qw:sourcePersonLabel "Person 40" .
 qw:person-40 qw:sourceRaceLabel "Caucasian" .
@@ -2621,7 +2621,7 @@ qw:person-40-head qw:hasExpression "Neutral" .
 qw:person-40-head qw:hasFaceShape "Oval" .
 qw:person-40-head qw:hasEarSize "Medium" .
 qw:person-40 qw:hasSkinTone "Light" .
-qw:person-40 qw:hasGlasses "false"^^xsd:boolean .
+qw:person-40 qw:hasGlasses "true"^^xsd:boolean .
 qw:person-40 qw:hasHat "true"^^xsd:boolean .
 qw:person-40 qw:hasHatType "Fedora" .
 qw:person-40 qw:hasHatColor "Cream" .
@@ -2633,4 +2633,263 @@ qw:person-40 qw:hasCollar "true"^^xsd:boolean .
 qw:person-40 qw:hasNecklace "false"^^xsd:boolean .
 qw:person-40-scalp-hair qw:hasHairAccessory "None" .
 qw:person-40 qw:hasClothingColor "Blue" .
+
+qw:person-41 a cco:ont00001262 .
+qw:person-41 rdfs:label "Christopher" .
+qw:person-41 qw:personNumber "41"^^xsd:positiveInteger .
+qw:person-41 qw:sourcePersonLabel "Person 41" .
+qw:person-41 qw:sourceRaceLabel "Caucasian" .
+qw:person-41 qw:portraitPath "portraits/person-41.png"^^xsd:anyURI .
+qw:person-41 obo:BFO_0000178 qw:person-41-head .
+qw:person-41-head a qw:Head .
+qw:person-41-head obo:BFO_0000178 qw:person-41-scalp-hair .
+qw:person-41-scalp-hair a cco:ont00000058 .
+qw:person-41-scalp-hair obo:BFO_0000196 qw:person-41-hair-color .
+qw:person-41-hair-color a qw:LightBrownHairColor .
+qw:person-41-head obo:BFO_0000178 qw:person-41-left-eye .
+qw:person-41-left-eye a cco:ont00000500 .
+qw:person-41-left-eye obo:BFO_0000196 qw:person-41-left-eye-color .
+qw:person-41-left-eye-color a qw:GreenEyeColor .
+qw:person-41-head obo:BFO_0000178 qw:person-41-right-eye .
+qw:person-41-right-eye a cco:ont00000500 .
+qw:person-41-right-eye obo:BFO_0000196 qw:person-41-right-eye-color .
+qw:person-41-right-eye-color a qw:GreenEyeColor .
+qw:person-41 obo:BFO_0000196 qw:person-41-ethnicity .
+qw:person-41-ethnicity a qw:WhiteEthnicity .
+qw:person-41 obo:BFO_0000196 qw:person-41-sex .
+qw:person-41-sex a cco:ont00001363 .
+qw:person-41-head obo:BFO_0000178 qw:person-41-facial-hair .
+qw:person-41-facial-hair a qw:MustacheAndBeardTrimmedAndWellGroomedFacialHair .
+qw:person-41-facial-hair qw:sourceFacialHairLabel "Mustache and beard, trimmed and well-groomed" .
+qw:person-41 qw:hasAgeYears "29"^^xsd:nonNegativeInteger .
+qw:person-41 qw:hasAgeGroup "18-32" .
+qw:person-41 qw:hasAgeAppearance "Young adult" .
+qw:person-41-scalp-hair qw:hasHairLength "Short" .
+qw:person-41-scalp-hair qw:hasHairTexture "Wavy" .
+qw:person-41 qw:isBald "false"^^xsd:boolean .
+qw:person-41-scalp-hair qw:hasHairstyle "Side part" .
+qw:person-41-head qw:hasBangs "false"^^xsd:boolean .
+qw:person-41-head qw:hasBeard "true"^^xsd:boolean .
+qw:person-41-head qw:hasMustache "true"^^xsd:boolean .
+qw:person-41-left-eye qw:hasEyeDirection "Left" .
+qw:person-41-right-eye qw:hasEyeDirection "Left" .
+qw:person-41-left-eye qw:hasEyeOpenness "Open" .
+qw:person-41-right-eye qw:hasEyeOpenness "Open" .
+qw:person-41-head qw:hasEyebrowThickness "Medium" .
+qw:person-41-head qw:hasEyebrowShape "Straight" .
+qw:person-41-head qw:hasNoseSize "Medium" .
+qw:person-41-head qw:hasNoseShape "Straight" .
+qw:person-41-head qw:hasRosyCheeks "false"^^xsd:boolean .
+qw:person-41-head qw:hasFreckles "true"^^xsd:boolean .
+qw:person-41-head qw:hasDimples "false"^^xsd:boolean .
+qw:person-41-head qw:hasSmile "true"^^xsd:boolean .
+qw:person-41-head qw:hasTeethVisible "false"^^xsd:boolean .
+qw:person-41-head qw:hasMouthOpen "false"^^xsd:boolean .
+qw:person-41-head qw:hasExpression "Closed-mouth smile" .
+qw:person-41-head qw:hasFaceShape "Square" .
+qw:person-41-head qw:hasEarSize "Medium" .
+qw:person-41 qw:hasSkinTone "Light" .
+qw:person-41 qw:hasGlasses "true"^^xsd:boolean .
+qw:person-41 qw:hasHat "false"^^xsd:boolean .
+qw:person-41 qw:hasHatType "None" .
+qw:person-41 qw:hasHatColor "Not applicable" .
+qw:person-41 qw:hasHatAccessory "None" .
+qw:person-41 qw:hasEarrings "false"^^xsd:boolean .
+qw:person-41 qw:hasEarringType "None" .
+qw:person-41 qw:hasBow "false"^^xsd:boolean .
+qw:person-41 qw:hasCollar "true"^^xsd:boolean .
+qw:person-41 qw:hasNecklace "false"^^xsd:boolean .
+qw:person-41-scalp-hair qw:hasHairAccessory "None" .
+qw:person-41 qw:hasClothingColor "Red" .
+
+qw:person-42 a cco:ont00001262 .
+qw:person-42 rdfs:label "Kelvin" .
+qw:person-42 qw:personNumber "42"^^xsd:positiveInteger .
+qw:person-42 qw:sourcePersonLabel "Person 42" .
+qw:person-42 qw:sourceRaceLabel "Caucasian" .
+qw:person-42 qw:portraitPath "portraits/person-42.png"^^xsd:anyURI .
+qw:person-42 obo:BFO_0000178 qw:person-42-head .
+qw:person-42-head a qw:Head .
+qw:person-42-head obo:BFO_0000178 qw:person-42-left-eye .
+qw:person-42-left-eye a cco:ont00000500 .
+qw:person-42-left-eye obo:BFO_0000196 qw:person-42-left-eye-color .
+qw:person-42-left-eye-color a qw:GreenEyeColor .
+qw:person-42-head obo:BFO_0000178 qw:person-42-right-eye .
+qw:person-42-right-eye a cco:ont00000500 .
+qw:person-42-right-eye obo:BFO_0000196 qw:person-42-right-eye-color .
+qw:person-42-right-eye-color a qw:GreenEyeColor .
+qw:person-42 obo:BFO_0000196 qw:person-42-ethnicity .
+qw:person-42-ethnicity a qw:WhiteEthnicity .
+qw:person-42 obo:BFO_0000196 qw:person-42-sex .
+qw:person-42-sex a cco:ont00001363 .
+qw:person-42 qw:hasAgeYears "45"^^xsd:nonNegativeInteger .
+qw:person-42 qw:hasAgeGroup "32-46" .
+qw:person-42 qw:hasAgeAppearance "Middle-aged" .
+qw:person-42-head qw:hasHairLength "None" .
+qw:person-42-head qw:hasHairTexture "Not applicable" .
+qw:person-42 qw:isBald "true"^^xsd:boolean .
+qw:person-42-head qw:hasHairstyle "Bald" .
+qw:person-42-head qw:hasBangs "false"^^xsd:boolean .
+qw:person-42-head qw:hasBeard "false"^^xsd:boolean .
+qw:person-42-head qw:hasMustache "false"^^xsd:boolean .
+qw:person-42-left-eye qw:hasEyeDirection "Forward" .
+qw:person-42-right-eye qw:hasEyeDirection "Forward" .
+qw:person-42-left-eye qw:hasEyeOpenness "Open" .
+qw:person-42-right-eye qw:hasEyeOpenness "Open" .
+qw:person-42-head qw:hasEyebrowThickness "Thick" .
+qw:person-42-head qw:hasEyebrowShape "Raised" .
+qw:person-42-head qw:hasNoseSize "Small" .
+qw:person-42-head qw:hasNoseShape "Rounded" .
+qw:person-42-head qw:hasRosyCheeks "false"^^xsd:boolean .
+qw:person-42-head qw:hasFreckles "false"^^xsd:boolean .
+qw:person-42-head qw:hasDimples "true"^^xsd:boolean .
+qw:person-42-head qw:hasSmile "false"^^xsd:boolean .
+qw:person-42-head qw:hasTeethVisible "false"^^xsd:boolean .
+qw:person-42-head qw:hasMouthOpen "false"^^xsd:boolean .
+qw:person-42-head qw:hasExpression "Neutral" .
+qw:person-42-head qw:hasFaceShape "Round" .
+qw:person-42-head qw:hasEarSize "Small" .
+qw:person-42 qw:hasSkinTone "Fair" .
+qw:person-42 qw:hasGlasses "false"^^xsd:boolean .
+qw:person-42 qw:hasHat "false"^^xsd:boolean .
+qw:person-42 qw:hasHatType "None" .
+qw:person-42 qw:hasHatColor "Not applicable" .
+qw:person-42 qw:hasHatAccessory "None" .
+qw:person-42 qw:hasEarrings "false"^^xsd:boolean .
+qw:person-42 qw:hasEarringType "None" .
+qw:person-42 qw:hasBow "false"^^xsd:boolean .
+qw:person-42 qw:hasCollar "true"^^xsd:boolean .
+qw:person-42 qw:hasNecklace "false"^^xsd:boolean .
+qw:person-42-head qw:hasHairAccessory "None" .
+qw:person-42 qw:hasClothingColor "Purple" .
+
+qw:person-43 a cco:ont00001262 .
+qw:person-43 rdfs:label "Elloise" .
+qw:person-43 qw:personNumber "43"^^xsd:positiveInteger .
+qw:person-43 qw:sourcePersonLabel "Person 43" .
+qw:person-43 qw:sourceRaceLabel "Caucasian" .
+qw:person-43 qw:portraitPath "portraits/person-43.png"^^xsd:anyURI .
+qw:person-43 obo:BFO_0000178 qw:person-43-head .
+qw:person-43-head a qw:Head .
+qw:person-43-head obo:BFO_0000178 qw:person-43-scalp-hair .
+qw:person-43-scalp-hair a cco:ont00000058 .
+qw:person-43-scalp-hair obo:BFO_0000196 qw:person-43-hair-color .
+qw:person-43-hair-color a qw:LightBrownHairColor .
+qw:person-43-head obo:BFO_0000178 qw:person-43-left-eye .
+qw:person-43-left-eye a cco:ont00000500 .
+qw:person-43-left-eye obo:BFO_0000196 qw:person-43-left-eye-color .
+qw:person-43-left-eye-color a qw:BlueEyeColor .
+qw:person-43-head obo:BFO_0000178 qw:person-43-right-eye .
+qw:person-43-right-eye a cco:ont00000500 .
+qw:person-43-right-eye obo:BFO_0000196 qw:person-43-right-eye-color .
+qw:person-43-right-eye-color a qw:BlueEyeColor .
+qw:person-43 obo:BFO_0000196 qw:person-43-ethnicity .
+qw:person-43-ethnicity a qw:WhiteEthnicity .
+qw:person-43 obo:BFO_0000196 qw:person-43-sex .
+qw:person-43-sex a cco:ont00001212 .
+qw:person-43 qw:hasAgeYears "27"^^xsd:nonNegativeInteger .
+qw:person-43 qw:hasAgeGroup "18-32" .
+qw:person-43 qw:hasAgeAppearance "Young adult" .
+qw:person-43-scalp-hair qw:hasHairLength "Long" .
+qw:person-43-scalp-hair qw:hasHairTexture "Straight" .
+qw:person-43 qw:isBald "false"^^xsd:boolean .
+qw:person-43-scalp-hair qw:hasHairstyle "Loose" .
+qw:person-43-head qw:hasBangs "true"^^xsd:boolean .
+qw:person-43-head qw:hasBeard "false"^^xsd:boolean .
+qw:person-43-head qw:hasMustache "false"^^xsd:boolean .
+qw:person-43-left-eye qw:hasEyeDirection "Right" .
+qw:person-43-right-eye qw:hasEyeDirection "Right" .
+qw:person-43-left-eye qw:hasEyeOpenness "Open" .
+qw:person-43-right-eye qw:hasEyeOpenness "Open" .
+qw:person-43-head qw:hasEyebrowThickness "Thin" .
+qw:person-43-head qw:hasEyebrowShape "Arched" .
+qw:person-43-head qw:hasNoseSize "Small" .
+qw:person-43-head qw:hasNoseShape "Upturned" .
+qw:person-43-head qw:hasRosyCheeks "true"^^xsd:boolean .
+qw:person-43-head qw:hasFreckles "true"^^xsd:boolean .
+qw:person-43-head qw:hasDimples "false"^^xsd:boolean .
+qw:person-43-head qw:hasSmile "true"^^xsd:boolean .
+qw:person-43-head qw:hasTeethVisible "false"^^xsd:boolean .
+qw:person-43-head qw:hasMouthOpen "false"^^xsd:boolean .
+qw:person-43-head qw:hasExpression "Closed-mouth smile" .
+qw:person-43-head qw:hasFaceShape "Heart" .
+qw:person-43-head qw:hasEarSize "Small" .
+qw:person-43 qw:hasSkinTone "Fair" .
+qw:person-43 qw:hasGlasses "false"^^xsd:boolean .
+qw:person-43 qw:hasHat "false"^^xsd:boolean .
+qw:person-43 qw:hasHatType "None" .
+qw:person-43 qw:hasHatColor "Not applicable" .
+qw:person-43 qw:hasHatAccessory "None" .
+qw:person-43 qw:hasEarrings "true"^^xsd:boolean .
+qw:person-43 qw:hasEarringType "Drops" .
+qw:person-43 qw:hasBow "false"^^xsd:boolean .
+qw:person-43 qw:hasCollar "false"^^xsd:boolean .
+qw:person-43 qw:hasNecklace "true"^^xsd:boolean .
+qw:person-43-scalp-hair qw:hasHairAccessory "None" .
+qw:person-43 qw:hasClothingColor "Orange" .
+
+qw:person-44 a cco:ont00001262 .
+qw:person-44 rdfs:label "Avery" .
+qw:person-44 qw:personNumber "44"^^xsd:positiveInteger .
+qw:person-44 qw:sourcePersonLabel "Person 44" .
+qw:person-44 qw:sourceRaceLabel "Caucasian" .
+qw:person-44 qw:portraitPath "portraits/person-44.png"^^xsd:anyURI .
+qw:person-44 obo:BFO_0000178 qw:person-44-head .
+qw:person-44-head a qw:Head .
+qw:person-44-head obo:BFO_0000178 qw:person-44-scalp-hair .
+qw:person-44-scalp-hair a cco:ont00000058 .
+qw:person-44-scalp-hair obo:BFO_0000196 qw:person-44-hair-color .
+qw:person-44-hair-color a qw:BrownHairColor .
+qw:person-44-head obo:BFO_0000178 qw:person-44-left-eye .
+qw:person-44-left-eye a cco:ont00000500 .
+qw:person-44-left-eye obo:BFO_0000196 qw:person-44-left-eye-color .
+qw:person-44-left-eye-color a qw:GreenEyeColor .
+qw:person-44-head obo:BFO_0000178 qw:person-44-right-eye .
+qw:person-44-right-eye a cco:ont00000500 .
+qw:person-44-right-eye obo:BFO_0000196 qw:person-44-right-eye-color .
+qw:person-44-right-eye-color a qw:GreenEyeColor .
+qw:person-44 obo:BFO_0000196 qw:person-44-ethnicity .
+qw:person-44-ethnicity a qw:WhiteEthnicity .
+qw:person-44 obo:BFO_0000196 qw:person-44-sex .
+qw:person-44-sex a cco:ont00001212 .
+qw:person-44 qw:hasAgeYears "54"^^xsd:nonNegativeInteger .
+qw:person-44 qw:hasAgeGroup "46-70" .
+qw:person-44 qw:hasAgeAppearance "Older adult" .
+qw:person-44-scalp-hair qw:hasHairLength "Long" .
+qw:person-44-scalp-hair qw:hasHairTexture "Straight" .
+qw:person-44 qw:isBald "false"^^xsd:boolean .
+qw:person-44-scalp-hair qw:hasHairstyle "Loose" .
+qw:person-44-head qw:hasBangs "false"^^xsd:boolean .
+qw:person-44-head qw:hasBeard "false"^^xsd:boolean .
+qw:person-44-head qw:hasMustache "false"^^xsd:boolean .
+qw:person-44-left-eye qw:hasEyeDirection "Forward" .
+qw:person-44-right-eye qw:hasEyeDirection "Forward" .
+qw:person-44-left-eye qw:hasEyeOpenness "Open" .
+qw:person-44-right-eye qw:hasEyeOpenness "Open" .
+qw:person-44-head qw:hasEyebrowThickness "Medium" .
+qw:person-44-head qw:hasEyebrowShape "Raised" .
+qw:person-44-head qw:hasNoseSize "Large" .
+qw:person-44-head qw:hasNoseShape "Straight" .
+qw:person-44-head qw:hasRosyCheeks "false"^^xsd:boolean .
+qw:person-44-head qw:hasFreckles "false"^^xsd:boolean .
+qw:person-44-head qw:hasDimples "false"^^xsd:boolean .
+qw:person-44-head qw:hasSmile "false"^^xsd:boolean .
+qw:person-44-head qw:hasTeethVisible "false"^^xsd:boolean .
+qw:person-44-head qw:hasMouthOpen "false"^^xsd:boolean .
+qw:person-44-head qw:hasExpression "Thoughtful" .
+qw:person-44-head qw:hasFaceShape "Oval" .
+qw:person-44-head qw:hasEarSize "Large" .
+qw:person-44 qw:hasSkinTone "Light-medium" .
+qw:person-44 qw:hasGlasses "false"^^xsd:boolean .
+qw:person-44 qw:hasHat "false"^^xsd:boolean .
+qw:person-44 qw:hasHatType "None" .
+qw:person-44 qw:hasHatColor "Not applicable" .
+qw:person-44 qw:hasHatAccessory "None" .
+qw:person-44 qw:hasEarrings "true"^^xsd:boolean .
+qw:person-44 qw:hasEarringType "Hoops" .
+qw:person-44 qw:hasBow "false"^^xsd:boolean .
+qw:person-44 qw:hasCollar "true"^^xsd:boolean .
+qw:person-44 qw:hasNecklace "false"^^xsd:boolean .
+qw:person-44-scalp-hair qw:hasHairAccessory "None" .
+qw:person-44 qw:hasClothingColor "Green" .
 

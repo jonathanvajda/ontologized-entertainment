@@ -1,6 +1,8 @@
 export const ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
 export const PROTOCOL_VERSION = 1;
-export const DECK_VERSION = 4;
+export const DECK_VERSION = 5;
+export const MIN_BOARD_SIZE = 20;
+export const CATALOG_SIZE = 44;
 const digest = async (bytes) => new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
 
 export function base32Encode(bytes) {
@@ -32,7 +34,7 @@ export function base32Decode(code) {
   return new Uint8Array(bytes);
 }
 export const formatCode = (code) => normalizeCode(code).match(/.{1,4}/g).join('-');
-function assertSize(size) { if (!Number.isInteger(size) || size < 20 || size > 40) throw new Error('Choose between 20 and 40 people.'); }
+function assertSize(size) { if (!Number.isInteger(size) || size < MIN_BOARD_SIZE || size > CATALOG_SIZE) throw new Error(`Choose between ${MIN_BOARD_SIZE} and ${CATALOG_SIZE} people.`); }
 export async function encodeGame({ size, seed, deckVersion = DECK_VERSION, protocolVersion = PROTOCOL_VERSION }) {
   assertSize(size);
   if (!(seed instanceof Uint8Array) || seed.length !== 16) throw new Error('A 16-byte seed is required.');
@@ -87,7 +89,7 @@ export class HashRandom {
 }
 export async function reconstructBoard(definition) {
   assertSize(definition.size);
-  return (await new HashRandom(definition.seed).shuffle(Array.from({ length: 40 }, (_, i) => i + 1))).slice(0, definition.size);
+  return (await new HashRandom(definition.seed).shuffle(Array.from({ length: CATALOG_SIZE }, (_, i) => i + 1))).slice(0, definition.size);
 }
 export function eligibleTargets(board, playerRole) {
   if (!['creator', 'joiner'].includes(playerRole)) throw new Error('Invalid player role.');

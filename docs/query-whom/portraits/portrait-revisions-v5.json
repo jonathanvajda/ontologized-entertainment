@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-26",
+  "deckVersion": 5,
+  "tool": "built-in image_gen",
+  "changes": [
+    { "person": 36, "name": "Lily", "field": "Race", "from": "Caucasian", "to": "East Asian" },
+    { "person": 40, "field": "Name", "from": "Charis", "to": "Katherine" },
+    { "person": 41, "name": "Christopher", "change": "Added to catalog" },
+    { "person": 42, "name": "Kelvin", "change": "Added to catalog" },
+    { "person": 43, "name": "Avery", "change": "Added to catalog" },
+    { "person": 44, "name": "Elloise", "change": "Added to catalog" },
+    { "person": 40, "name": "Katherine", "change": "Added dark-framed glasses" },
+    { "person": 43, "name": "Avery", "field": "Hair texture", "from": "Wavy", "to": "Straight" },
+    { "person": 44, "name": "Elloise", "field": "Hair texture", "from": "Curly", "to": "Straight" },
+    { "person": 44, "name": "Elloise", "field": "Hat", "from": "Straw hat", "to": "None" },
+    { "person": 43, "field": "Name", "from": "Avery", "to": "Elloise" },
+    { "person": 44, "field": "Name", "from": "Elloise", "to": "Avery" }
+  ],
+  "prompts": [
+    {
+      "person": 41,
+      "name": "Christopher",
+      "output": "portraits/person-41.png",
+      "generationPrompt": "Create a brand-new 29-year-old Caucasian man in the established polished hand-drawn 2D feature-animation portrait style: short wavy light-brown side-parted hair, trimmed mustache and beard, green eyes looking image left, rectangular glasses, freckles, square face and a closed-mouth smile. One centered floating head on genuine transparent alpha; no hat, neck, shoulders, text or watermark."
+    },
+    {
+      "person": 42,
+      "name": "Kelvin",
+      "output": "portraits/person-42.png",
+      "generationPrompt": "Create a brand-new 45-year-old Caucasian man in the established polished hand-drawn 2D feature-animation portrait style: completely bald and clean-shaven, green eyes looking forward, thick raised eyebrows, small rounded nose, round face, fair skin, subtle dimples and a neutral closed mouth. One centered floating head on genuine transparent alpha; no hair, facial hair, glasses, hat, text or watermark."
+    },
+    {
+      "person": 43,
+      "name": "Avery",
+      "output": "portraits/person-43.png",
+      "generationPrompt": "Create a brand-new 27-year-old Caucasian woman in the established polished hand-drawn 2D feature-animation portrait style: long loose wavy light-brown hair with soft bangs, blue eyes looking image right, freckles, rosy cheeks, dimples, drop earrings, a simple necklace and a closed-mouth smile. One centered floating head with all long hair on genuine transparent alpha; no hat, glasses, text or watermark."
+    },
+    {
+      "person": 44,
+      "name": "Elloise",
+      "output": "portraits/person-44.png",
+      "generationPrompt": "Create a brand-new 54-year-old Caucasian woman in the established polished hand-drawn 2D feature-animation portrait style: long loose curly brown hair, green eyes looking forward, subtle age lines, thoughtful neutral mouth, tan straw hat with a simple ribbon and hoop earrings. One centered floating head with the complete hat and hair on genuine transparent alpha; no glasses, text or watermark."
+    },
+    {
+      "person": 40,
+      "name": "Katherine",
+      "output": "portraits/person-40.png",
+      "editPrompt": "Add tasteful dark-framed eyeglasses to Katherine. Preserve her exact identity, age, facial structure, expression, brown eyes looking image-left, curly cropped brown hair, cream fedora, gold hoop earrings, skin tone, pose, crop, lighting, polished hand-drawn 2D feature-animation style, and genuine transparent background. Change only the eyeglasses."
+    },
+    {
+      "person": 43,
+      "name": "Avery",
+      "output": "portraits/person-43.png",
+      "editPrompt": "Make Avery's long light-brown hair predominantly straight with only subtle natural bends near the ends. Preserve her exact identity, facial features, blue rightward gaze, freckles, jewelry, pose, crop, lighting, style, and transparent background. Change only hair texture."
+    },
+    {
+      "person": 44,
+      "name": "Elloise",
+      "output": "portraits/person-44.png",
+      "editPrompt": "Remove Elloise's straw hat completely and make her long brown hair predominantly straight with only subtle natural bends near the ends. Preserve her exact identity, thoughtful expression, vivid green forward gaze, age lines, large straight nose, gold hoop earrings, pose, crop, lighting, style, and transparent background. Do not add glasses."
+    }
+  ]
+}

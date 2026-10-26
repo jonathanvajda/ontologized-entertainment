@@ -1,7 +1,7 @@
 # Query Whom!
 
 A playful two-player game of guessing and deduction. Yes-or-no questions narrow down the people until you can guess the person your friend picked. Each player uses a separate device.
-Create a board of 20–40 people, share its QR or code, privately reveal your
+Create a board of 20–44 people, share its QR or code, privately reveal your
 person, and ask yes-or-no questions out loud or through your own chat.
 Your friend guesses your person; you guess theirs. Tap a portrait to inspect
 it and use the separate × control to eliminate a candidate. Eliminations stay
@@ -45,8 +45,8 @@ No npm package is loaded by the shipped game at runtime.
 
 `ontology/query-whom.ttl` extends CCO and the shared Game Ontology.
 `assets/catalog-v1.ttl` imports that vocabulary and the pinned CCO merged
-ontology. Its 40 character instances are generated from the supplied CSV.
-The current deck is version 4; the existing `catalog-v1` filenames remain stable
+ontology. Its 44 character instances are generated from `personal-traits-44-people.csv`.
+The current deck is version 5; the existing `catalog-v1` filenames remain stable
 asset paths, while the ontology version, manifest and shared codes identify the
 revised deck. Version 2 revises six portraits, gives Noah red hair and Joshua
 brown hair, and opens Ella's eyes with a forward gaze. Joshua is Person 7;
@@ -63,6 +63,11 @@ clip and brown eyes, and gives Sophia long hair while preserving her identity.
 Olivia has a long French braid with her existing bow; Elizabeth has a long
 curly ponytail, glasses and no hat. Exact edits are recorded in
 `portraits/portrait-revisions-v4.json`.
+Version 5 expands the catalog to 44 people, renames Charis to Katherine,
+corrects Lily's source ethnicity to East Asian, and adds Christopher, Kelvin,
+Avery and Elloise. It also adds the explicit `Light brown` hair-color category.
+The four generation prompts are recorded in
+`portraits/portrait-revisions-v5.json`.
 `ontology/oliver-example.md` is a complete Mermaid instance graph generated
 from Oliver’s actual triples, including explicit type edges.
 
@@ -106,7 +111,7 @@ it is not authentication. Distinct seeds can produce the same board.
 Random words are SHA-256(seed || uint32 big-endian counter), beginning at
 counter zero, consumed as eight big-endian uint32 words per digest. Bounded
 choice rejects words at or above floor(2^32 / bound) * bound. Fisher–Yates
-shuffles IDs 1–40 and takes the first k. Fixed vectors are in the protocol tests.
+shuffles IDs 1–44 and takes the first k. Fixed vectors are in the protocol tests.
 This adapter retains all seed bits without changing other games’ generators.
 
 Creator targets come from the first floor(k/2) positions; joiner targets come
@@ -143,7 +148,7 @@ Catalog/ontology breaking changes require new deck/save compatibility versions.
 
 ## Assets and attribution
 
-The 40 supplied `portraits/person-NN.png` originals are preserved. Transparent
+The 44 supplied `portraits/person-NN.png` originals are preserved. Transparent
 320- and 960-pixel WebP derivatives are used in-browser. The original CSV,
 images, generated RDF and derivatives are hashed in the catalog manifest.
 Portrait usage follows the supplied project assets; no new third-party images

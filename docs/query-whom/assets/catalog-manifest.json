@@ -2,15 +2,15 @@
   "gameVersion": "1.0.0",
   "schemaVersion": "1.0.0",
   "protocolVersion": 1,
-  "deckVersion": 4,
-  "personCount": 40,
+  "deckVersion": 5,
+  "personCount": 44,
   "cco": {
     "commit": "be13b74cccf85617739c5288f9fdac805437386c",
     "versionIri": "https://www.commoncoreontologies.org/2026-08-13/CommonCoreOntologiesMerged",
     "sha256": "a9453382b25b40781c181d6ba44981f228abb76d90d548846713adba9baadb42"
   },
   "imports": {
-    "https://w3id.org/ontologized-entertainment/query-whom/catalog/v4": "assets/catalog-v1.ttl",
+    "https://w3id.org/ontologized-entertainment/query-whom/catalog/v5": "assets/catalog-v1.ttl",
     "https://w3id.org/ontologized-entertainment/query-whom": "ontology/query-whom.ttl",
     "https://www.commoncoreontologies.org/2026-08-13/CommonCoreOntologiesMerged": "ontology/CommonCoreOntologiesMerged.ttl",
     "https://www.commoncoreontologies.org/CommonCoreOntologiesMerged": "ontology/CommonCoreOntologiesMerged.ttl",
@@ -23,12 +23,12 @@
     "https://www.commoncoreontologies.org/TimeOntology": "ontology/CommonCoreOntologiesMerged.ttl"
   },
   "files": {
-    "assets/catalog-v1.ttl": "eaab02b187396da36eba5b9a2904a47f3dd94cfc128fab19f2a25cd216a63bb9",
-    "ontology/query-whom.ttl": "84d1193fe07da7874e1203682c4360890385ef09e5af05f8f196e7f2c2b5baa5",
+    "assets/catalog-v1.ttl": "b5d4fce0d7e3f7fde2284d227a79b8a4860b1df15a075d4586b574c63bd57005",
+    "ontology/query-whom.ttl": "f27755b0e4e1ba7c2e48af6483eacc8402e60c5d0027718483dbeaf85569636c",
     "ontology/CommonCoreOntologiesMerged.ttl": "a9453382b25b40781c181d6ba44981f228abb76d90d548846713adba9baadb42",
     "../src/ontologies/GameOntology.ttl": "2695631654b332782cd5e30c7b3f054ecb33b541d55911507a37ccb0db4bcf9b",
-    "assets/catalog-v1.json": "5e2b348111cdad58a5b014bbe5727e67506bac32ac07a99c2023232fb3b94ebf",
-    "personal-traits-40-people-alt.csv": "1854b223cf02b1c058b5573f3cf39f04842c81d2f8e0b7703b755b6f833715f8",
+    "assets/catalog-v1.json": "f4cf2cae73d611fd3186ba4011b2c2e9d72846d3160ced5a8c6e7e51c61bcb2d",
+    "personal-traits-44-people.csv": "23b3f04e703ab5a6296b09af326257ab4837dd81d14fb53a1e4e1527f00838e2",
     "vendor/qrcode.js": "18ae399f81182bc9de916e9c77b195df20cc58d6f2d55a62b085a299f1bf1780",
     "vendor/jsQR.js": "bc40c8a15196236b2314db0856f72ca0b49980cd5413b8c852a7349f5fee0859",
     "../vendor/n3.min.js": "442bd3f118fa86bc2ef68d2a56a5637e9e878076aaab52f1093d0aed2c9452c3",
@@ -149,9 +149,21 @@
     "portraits/person-39.png": "e7a22d90195043d0e3c26e20c0294969ed9e1a416737e37d86c9543b40c462db",
     "assets/portraits/person-39-320.webp": "e84ba497ba1ba85feb9f2bc0a6c342270118f18ad756a2bcccc81e56524567d1",
     "assets/portraits/person-39-960.webp": "81334c5866c3034d5c05017597dd0d259505284b3bfde48a43b5a9c81f37dd29",
-    "portraits/person-40.png": "8ac35a06f460b8cce3d73652cc9fa7ca7b7948a47ce70f809910382847a97886",
-    "assets/portraits/person-40-320.webp": "56a094e68def2a43f17f2afb479dc87801d9aaf291e00aebdf2d7f88198c95d3",
-    "assets/portraits/person-40-960.webp": "6c6bcaea9f8c2c7b28fb027a70d0f764fe158918226761fe51c83ee8a871d03a"
+    "portraits/person-40.png": "80cb3f111679d8eb0cfd6bf68720665b6082aea506c89b9780413e6560c5b1f1",
+    "assets/portraits/person-40-320.webp": "18b458759d150b9794a4c60e5decc5a4fd1d06f930b2da9ac380af35b40e74ee",
+    "assets/portraits/person-40-960.webp": "0a2a6b05df8816e3eeb8a7d367ca0bc24f17cb3757a84fabb118d1c651438a64",
+    "portraits/person-41.png": "5d4dd1dee8d8d41e47c4a2d52c0ccce5917674e902c62970ff6b500fbdbc5fc8",
+    "assets/portraits/person-41-320.webp": "84242e7388f8bfd92e20fb4412f3c77915dc2fec81c13c3f28162fc5af3b25ef",
+    "assets/portraits/person-41-960.webp": "5e6459a8360f589fe5509034c57a10a7a49270108164af7dcd3e5cd1f13c3f8e",
+    "portraits/person-42.png": "920a1d56380374fa7700da7351f9dadfd42d4965406beecd75f805ae875c3485",
+    "assets/portraits/person-42-320.webp": "851a8a19246496830e25b98c7347bfb7aa74ce17260456ed96d7c84e6c8360f4",
+    "assets/portraits/person-42-960.webp": "f9c313365130d81869b681f89116ff52f649be1982d3715b422efea2d0f08df7",
+    "portraits/person-43.png": "14f7b9d0ef049028caf7962a4f835b8303a4224d7e2261a46a32eee1a5275246",
+    "assets/portraits/person-43-320.webp": "8577f60cfcc657503ee0638e1b97db59fc07dd308346114be92e2616a67d2393",
+    "assets/portraits/person-43-960.webp": "022858c55406fc554f5d8e905bdf699bdfcebf91c4b397ae68d36d7955b08680",
+    "portraits/person-44.png": "dc7277b9dd7c10591c9c01abe49b60b6cd67f320c71cde8d95063449b007e53a",
+    "assets/portraits/person-44-320.webp": "bb09d3603e9079de479c3ca8e80c4a2f588b79c9f277571d0bcf8c71e6b265e5",
+    "assets/portraits/person-44-960.webp": "78a56290a2bcb421dfd473ab22105f69d936dad633fc3d310a704e88fb2b43c9"
   },
-  "catalogHash": "eaab02b187396da36eba5b9a2904a47f3dd94cfc128fab19f2a25cd216a63bb9"
+  "catalogHash": "b5d4fce0d7e3f7fde2284d227a79b8a4860b1df15a075d4586b574c63bd57005"
 }

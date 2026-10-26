@@ -91,7 +91,7 @@ try {
   await host.evaluate(async()=>{mermaid.initialize({startOnLoad:false});const text=await (await fetch('./ontology/oliver-example.md')).text();await mermaid.parse(text.split('```mermaid\n')[1].split('\n```')[0]);});
   console.log('Passed home accessibility and protocol browser vector.');
   const vector=await host.evaluate(async()=>{const p=await import('./js/protocol.js');const code=await p.encodeGame({size:24,seed:Uint8Array.from({length:16},(_,i)=>i)});return {code,board:await p.reconstructBoard(await p.decodeGame(code))};});
-  assert.equal(vector.code,'2622A822263283272S5JJ4AC3E82U5JHZZT5G'); assert.deepEqual(vector.board,[9,40,38,1,15,26,5,25,21,4,7,32,39,37,34,18,33,36,14,16,24,17,27,22]);
+  assert.equal(vector.code,'2622C822263283272S5JJ4AC3E82U5JHCRSXU'); assert.deepEqual(vector.board,[23,12,37,15,10,40,36,44,6,17,20,28,5,14,19,7,11,43,18,1,8,41,29,16]);
   await host.locator('#create-form button').click(); await host.locator('#share-view').waitFor({state:'visible'});
   const code=(await host.locator('#share-code').textContent()).replaceAll('-','');
   const qr=await host.evaluate(()=>{const canvas=document.querySelector('#share-qr canvas'),ctx=canvas.getContext('2d'),data=ctx.getImageData(0,0,canvas.width,canvas.height);return jsQR(data.data,data.width,data.height).data;});
@@ -181,8 +181,8 @@ try {
   await host.locator('#scan-button').click(); await host.locator('#scan-dialog').waitFor({state:'visible'});
   await host.locator('#scan-message').filter({hasText:'unavailable'}).waitFor({timeout:15000}); await host.locator('#scan-cancel').click();
   assert.equal(await host.locator('#join-code').isVisible(),true);
-  // Dedicated 20/40-card layouts and narrow landscape touch targets.
-  for (const size of [20,40]) {
+  // Dedicated 20/44-card layouts and narrow landscape touch targets.
+  for (const size of [20,44]) {
     const context=await browser.newContext({viewport:{width:844,height:390},isMobile:true,hasTouch:true}); const page=await pageFor(context);
     await page.locator('#board-size').fill(String(size)); await page.locator('#board-size').dispatchEvent('input'); await page.locator('#create-form button').click();
     await page.locator('#share-continue').click(); await page.locator('#reveal-button').click(); await page.locator('#start-board').click();
@@ -260,5 +260,5 @@ try {
   assert.equal(await host.locator(`#saved-list button[data-session-id="${pauseInstead.id}"]`).count(),1);
   console.log('Passed pause/resume, end/remove, optional finished history, cancellation and New game lifecycle.');
   assert.deepEqual(errors,[],'Uncaught browser errors'); assert.deepEqual(external,[],'External runtime requests');
-  console.log('Browser QA passed: shared QR/boards, distinct secrets, transitions, resume, offline reload/play, imports, camera fallback, accessibility and 20/24/40-card layouts.');
+  console.log('Browser QA passed: shared QR/boards, distinct secrets, transitions, resume, offline reload/play, imports, camera fallback, accessibility and 20/24/44-card layouts.');
 } finally { await browser.close(); await new Promise(resolve=>server.close(resolve)); }

@@ -7,13 +7,13 @@
 
 ## 1. Purpose and scope
 
-Build an original two-player character deduction game. One player creates a game using 20–40 distinct portraits from a fixed, initially 40-person character library. Both see the same board and independently receive different secret target cards. Players ask yes/no questions using communications outside the application and manually eliminate candidates on their own screens. An optional QR scan or manually entered code joins the same board. Portraits have fixed identifiers, names, metadata, and assets from the existing spreadsheet.
+Build an original two-player character deduction game. One player creates a game using 20–44 distinct portraits from a fixed 44-person character library. Both see the same board and independently receive different secret target cards. Players ask yes/no questions using communications outside the application and manually eliminate candidates on their own screens. An optional QR scan or manually entered code joins the same board. Portraits have fixed identifiers, names, metadata, and assets from the existing spreadsheet.
 
 ### 1.1 In scope
 
 - Single main `index.html` with views/panels for create, join, share, reveal, board, zoom, and basic settings.
 - Responsive portrait-card grid and persistent own-target dock.
-- User-adjustable board size (integer 20–40; default 24) via thumb-friendly range slider, with tick labels and numeric output.
+- User-adjustable board size (integer 20–44; default 24) via thumb-friendly range slider, with tick labels and numeric output.
 - Local game code and QR sharing; validation and version compatibility.
 - Reproducible selection and ordering of board cards.
 - Two disjoint eligible target partitions, followed by private independent random selection on the respective devices.
@@ -36,7 +36,7 @@ Build an original two-player character deduction game. One player creates a game
 ### 2.1 Home
 
 - Prominent **Create Game** and **Join Game** actions; readable for children aged six or older.
-- Create displays a range slider (20–40, step 1, default 24), current number in large digits, and **Create** button.
+- Create displays a range slider (20–44, step 1, default 24), current number in large digits, and **Create** button.
 - Join displays **Scan QR**, manually editable code input, and **Join**. Auto-uppercase; strip spaces and hyphens; reject invalid alphabet and failed checksum. Do not auto-open external URLs from arbitrary scanned QR payloads.
 - URL navigation remains on `index.html`; use internal view state rather than a routing framework.
 
@@ -78,7 +78,7 @@ Build an original two-player character deduction game. One player creates a game
 
 ### 3.1 Canonical catalog
 
-- Canonical `personId` values 1–40, unique and immutable; file paths and names are *not* identifiers.
+- Canonical `personId` values 1–44, unique and immutable; file paths and names are *not* identifiers.
 - Canonical roster order by numeric ID, fixed to a versioned catalog (`deckId`, `deckVersion`, content manifest hash).
 - Validation: exact expected IDs, portrait path exists, no duplicate IDs, nonempty label, normalized optional sort keys, correct image sizes.
 - Each device must use identical catalog and algorithm version or explicitly reject/require the matching offline-compatible pack.
@@ -89,12 +89,12 @@ For board size `k`, sample `k` unique people without replacement and produce a r
 
 **Important distinction:** a fixed-length random seed makes board construction reproducible, but does **not** mathematically guarantee that two different seeds produce different ordered boards. An injective code requires explicitly ranking/unranking the *ordered selection* (k-permutations), not merely seeding a shuffle.
 
-For 40 fixed people, the ordered boards of size `k` number `P(40,k) = 40!/(40-k)!`. The aggregate number of ordered boards for k = 20..40 is `sum(P(40,k))`, which is > 2^160 and requires **33 Base32 characters** to index injectively across all sizes, before version/checksum. Fixed-width individual sizes could also be encoded with a size field and k-specific permutation rank. Thus an **8-character code is not enough** to guarantee unique board *and* order across the requested size range. Do not make this promise in the UI.
+For 44 fixed people, the ordered boards of size `k` number `P(44,k) = 44!/(44-k)!`. The aggregate number of ordered boards for k = 20..44 is `sum(P(44,k))`, which is > 2^182 and requires **37 Base32 data characters** to index injectively across all sizes, before version/checksum. Fixed-width individual sizes could also be encoded with a size field and k-specific permutation rank. Thus an **8-character code is not enough** to guarantee unique board *and* order across the requested size range. Do not make this promise in the UI.
 
 **Decision proposal:**
 
 - **v1 default pragmatic mode:** random 128-bit `gameSeed`, represented with **26 Base32 characters**, plus compact format/deck version and at least one checksum character. Reconstruct with a specified, deterministic integer PRNG and an unbiased Fisher–Yates shuffle, then take k cards (or select/reorder as defined in a locked algorithm spec). Extremely low random collisions, but not mathematical injectivity of board outcomes.
-- **Strict injective alternative:** uniformly sample the ordered-board rank for the chosen k, encode size + rank in Base32; use a reversible k-permutation unranking algorithm. Include deck version and checksum. For a single uniform namespace spanning k=20..40, reserve **33 data characters**, plus validation/version fields. This is the correct path if “guarantee no duplicate board+shuffle representations” is a hard mathematical requirement.
+- **Strict injective alternative:** uniformly sample the ordered-board rank for the chosen k, encode size + rank in Base32; use a reversible k-permutation unranking algorithm. Include deck version and checksum. For a single uniform namespace spanning k=20..44, reserve **37 data characters**, plus validation/version fields. This is the correct path if “guarantee no duplicate board+shuffle representations” is a hard mathematical requirement.
 - QR is strongly preferred for the strict encoding, since 33+ characters are awkward for children. Manual typing should remain available, with grouping every 4 characters.
 - Never label the code a cryptographic **hash**: it is a reversible game identifier/seed.
 
@@ -187,7 +187,7 @@ game:EliminatedCandidateRole rdfs:subClassOf game:CandidateRole .
 - On manual elimination, atomically delete the person's active-role bearer link and insert a link to their eliminated-role instance; reverse that operation on restore. Retain stable role instance IRIs to avoid orphan nodes and unbounded growth.
 - Ensure at most one *operational status* bearer relation per person within the local session. If role identities are preserved, prefer toggling the two role links; choose a single explicit transition strategy and unit-test it.
 - Do not mutate the original catalog's Person, name, hair or ethnicity assertions; each local game has a separate state graph or session-specific role IRIs.
-- Quadstore update triggers UI reconciliation of affected card(s); querying all 20–40 cards is also cheap and acceptable initially.
+- Quadstore update triggers UI reconciliation of affected card(s); querying all 20–44 cards is also cheap and acceptable initially.
 
 **Note:** RDF/OWL's open-world semantics do not enforce exclusive status on their own. The app's state machine must enforce and test these invariants (SHACL optional in future).
 
@@ -203,7 +203,7 @@ game:EliminatedCandidateRole rdfs:subClassOf game:CandidateRole .
 
 | ID | Capability | Acceptance criteria |
 |---|---|---|
-| C01 | Host create game | 20–40 slider, step 1, default 24; creates valid board with no repeated IDs |
+| C01 | Host create game | 20–44 slider, step 1, default 24; creates valid board with no repeated IDs |
 | C02 | Random deterministic board | Same version+code reconstructs same ordered IDs on both devices; invalid code rejected |
 | C03 | Sharing | QR and formatted uppercase Base32 code displayed; clipboard copy; checksum validated |
 | C04 | Joining | Valid QR or typed code loads same board; unsupported version rejected with meaningful message |
@@ -346,7 +346,7 @@ For the existing monorepo, import shared namespace, RDF I/O, IndexedDB, and test
 2. **Protocol choice** — decide pragmatic short seed versus mathematically injective ordered-board code; freeze encoding, deck version and reproducibility vectors before UI work.
 3. **Game core** — deterministic board setup, partition, private role-specific draws, invariants, tests.
 4. **RDF vocabulary** — verify official CCO/BFO IRIs, write a small Turtle fixture and role-state transitions against N3.Store.
-5. **Wireframes** — main/create/join/share/reveal/board/zoom states; test 20/24/40 cards on mobile.
+5. **Wireframes** — main/create/join/share/reveal/board/zoom states; test 20/24/44 cards on mobile.
 6. **QR exchange** — vendored generator/scanner and manual fallback; test iOS Safari/Android Chrome.
 7. **Board interactions** — elimination, restoration, own-card lock, sorting, hide/reflow and zoom.
 8. **Persistence & offline** — local resume, asset caching, version handling and update prompts.
@@ -354,7 +354,7 @@ For the existing monorepo, import shared namespace, RDF I/O, IndexedDB, and test
 
 ## 9. Open decisions (explicitly not blockers for a v1 prototype)
 
-- Prefer **26-character compact random seed** (practically collision-resistant but not injective) or **33+ character strict rank code** (mathematically injective ordered boards)?
+- Prefer **26-character compact random seed** (practically collision-resistant but not injective) or **37+ character strict rank code** (mathematically injective ordered boards)?
 - Should QR carry a link (convenient for native camera apps, but may navigate/reload) or just the validated game payload (simpler for built-in scanner)? Support both when possible.
 - Should gender/race/ethnicity spreadsheet fields be displayed as sort keys, only internal metadata, or omitted from UI? Avoid inferring those values from illustrations; preserve the supplied source semantics.
 - Exact official CCO property IRIs and relevant ontology versions; verify before generating production RDF.
@@ -366,7 +366,7 @@ For the existing monorepo, import shared namespace, RDF I/O, IndexedDB, and test
 For every supported size k and protocol version:
 
 ```text
-20 <= k <= 40
+20 <= k <= 44
 board.length === k
 unique(board.personIds).length === k
 all(board.personIds belong to versioned catalog)

@@ -5,7 +5,8 @@ from PIL import Image
 root = Path(__file__).resolve().parents[1]
 target = root / "assets" / "portraits"
 target.mkdir(parents=True, exist_ok=True)
-for number in range(1, 41):
+count = 44
+for number in range(1, count + 1):
     original = root / "portraits" / f"person-{number:02}.png"
     with Image.open(original) as image:
         for size in (320, 960):
@@ -15,4 +16,4 @@ for number in range(1, 41):
             image.convert("RGBA").resize((size, size), Image.Resampling.LANCZOS).save(
                 derivative, "WEBP", quality=85, method=6
             )
-print("Generated 80 transparent WebP portraits.")
+print(f"Generated {count * 2} transparent WebP portraits.")

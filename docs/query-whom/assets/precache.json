@@ -1,5 +1,5 @@
 {
-  "version": "306141a79c291bc8e54bb7ad",
+  "version": "afe4bb9beb618209e4f05c98",
   "files": [
     {
       "path": "../packages/game-mechanics/src/action-engine.js",
@@ -155,7 +155,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "7cb1d7eb53fbae0599785ef846dda5f073b0bc40152c5b27d2ad1051df643ef5"
+      "sha256": "10cf5019dcbc09da46365a1c79b24ed8acd663932f7420913063e5d7feb73147"
     },
     {
       "path": "app.css",
@@ -167,11 +167,11 @@
     },
     {
       "path": "assets/catalog-manifest.json",
-      "sha256": "5ef98cbdb8f8f2edf6ddeaf0fb38bd15dbf4055787c95723c6b19ea2f9c73578"
+      "sha256": "4d24abcef1a7305ee5b4c8a6bdc26e105f41fd8b5cb939f515dde2ad75fd00fd"
     },
     {
       "path": "assets/catalog-v1.ttl",
-      "sha256": "eaab02b187396da36eba5b9a2904a47f3dd94cfc128fab19f2a25cd216a63bb9"
+      "sha256": "b5d4fce0d7e3f7fde2284d227a79b8a4860b1df15a075d4586b574c63bd57005"
     },
     {
       "path": "assets/icon-192.png",
@@ -507,15 +507,47 @@
     },
     {
       "path": "assets/portraits/person-40-320.webp",
-      "sha256": "56a094e68def2a43f17f2afb479dc87801d9aaf291e00aebdf2d7f88198c95d3"
+      "sha256": "18b458759d150b9794a4c60e5decc5a4fd1d06f930b2da9ac380af35b40e74ee"
     },
     {
       "path": "assets/portraits/person-40-960.webp",
-      "sha256": "6c6bcaea9f8c2c7b28fb027a70d0f764fe158918226761fe51c83ee8a871d03a"
+      "sha256": "0a2a6b05df8816e3eeb8a7d367ca0bc24f17cb3757a84fabb118d1c651438a64"
+    },
+    {
+      "path": "assets/portraits/person-41-320.webp",
+      "sha256": "84242e7388f8bfd92e20fb4412f3c77915dc2fec81c13c3f28162fc5af3b25ef"
+    },
+    {
+      "path": "assets/portraits/person-41-960.webp",
+      "sha256": "5e6459a8360f589fe5509034c57a10a7a49270108164af7dcd3e5cd1f13c3f8e"
+    },
+    {
+      "path": "assets/portraits/person-42-320.webp",
+      "sha256": "851a8a19246496830e25b98c7347bfb7aa74ce17260456ed96d7c84e6c8360f4"
+    },
+    {
+      "path": "assets/portraits/person-42-960.webp",
+      "sha256": "f9c313365130d81869b681f89116ff52f649be1982d3715b422efea2d0f08df7"
+    },
+    {
+      "path": "assets/portraits/person-43-320.webp",
+      "sha256": "8577f60cfcc657503ee0638e1b97db59fc07dd308346114be92e2616a67d2393"
+    },
+    {
+      "path": "assets/portraits/person-43-960.webp",
+      "sha256": "022858c55406fc554f5d8e905bdf699bdfcebf91c4b397ae68d36d7955b08680"
+    },
+    {
+      "path": "assets/portraits/person-44-320.webp",
+      "sha256": "bb09d3603e9079de479c3ca8e80c4a2f588b79c9f277571d0bcf8c71e6b265e5"
+    },
+    {
+      "path": "assets/portraits/person-44-960.webp",
+      "sha256": "78a56290a2bcb421dfd473ab22105f69d936dad633fc3d310a704e88fb2b43c9"
     },
     {
       "path": "index.html",
-      "sha256": "c3922b08e25acde760343b8ecaf8c003ca338fa6943ff7c1e0ee97671f19def0"
+      "sha256": "1c3c1bd7638ef78a27b609850a490fccccba72ceba0326d4eec3f1c0499008a3"
     },
     {
       "path": "js/app.js",
@@ -523,7 +555,7 @@
     },
     {
       "path": "js/catalog.js",
-      "sha256": "752961c8379c242b66045aed5d470a59f5a1cbdddf172a6c26d6189afd96c07a"
+      "sha256": "173f960cdefa4e701569b2002ee7705676a2500c34ebe6915731cce5955a832b"
     },
     {
       "path": "js/graph-loader.js",
@@ -535,7 +567,7 @@
     },
     {
       "path": "js/protocol.js",
-      "sha256": "b40e6132d7dce5afcdb34ce95773c95a3d7c0137957eab55cb50bbe0618a1278"
+      "sha256": "2b88a129e132b267d4220a99df75197607f56b204e1fb92666eb02f4415938ae"
     },
     {
       "path": "js/scanner.js",
@@ -555,7 +587,7 @@
     },
     {
       "path": "js/vocabulary.js",
-      "sha256": "d9925eac32597edd8c16f1754144140dcf9217b690a75d8513acdc27f04aac25"
+      "sha256": "c3860e28db09400d1b613fe088bf4acf25cb6a5a7d4da94e039fd6fefd0f76dc"
     },
     {
       "path": "manifest.webmanifest",
@@ -567,7 +599,7 @@
     },
     {
       "path": "ontology/query-whom.ttl",
-      "sha256": "84d1193fe07da7874e1203682c4360890385ef09e5af05f8f196e7f2c2b5baa5"
+      "sha256": "f27755b0e4e1ba7c2e48af6483eacc8402e60c5d0027718483dbeaf85569636c"
     },
     {
       "path": "vendor/jsQR.js",

@@ -1,6 +1,6 @@
 /* Lightweight launcher cache. Each game owns its more-specific service-worker scope. */
 const PREFIX = 'ontologized-entertainment-launcher-';
-const CACHE = `${PREFIX}v1`;
+const CACHE = `${PREFIX}v2`;
 const base = new URL('./', self.location.href);
 const paths = [
   './', './index.html', './pwa.js', './manifest.webmanifest', './assets/icon.svg', './assets/icon-32.png',

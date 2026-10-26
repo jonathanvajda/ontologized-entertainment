@@ -25,7 +25,7 @@ export const APP_ONTOLOGY = prefixes.qw.slice(0, -1);
 export const CATALOG_ONTOLOGY = Q(`catalog/v${DECK_VERSION}`);
 
 export const hairClasses = {
-  Blonde: 'BlondeHairColor', Black: 'BlackHairColor', Brown: 'BrownHairColor', Red: 'RedHairColor',
+  Blonde: 'BlondeHairColor', Black: 'BlackHairColor', Brown: 'BrownHairColor', 'Light brown': 'LightBrownHairColor', Red: 'RedHairColor',
   'Black going grey/white': 'BlackGoingGreyWhiteHairColor',
   'Brown going grey/white': 'BrownGoingGreyWhiteHairColor', 'Fully white/grey': 'WhiteGreyHairColor'
 };

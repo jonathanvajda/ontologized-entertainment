@@ -7,7 +7,7 @@ docs/styles/skeleton.css text eol=lf
 docs/vendor/n3.min.js text eol=lf
 
 # Preserve exact supplied/source bytes and audited vendor downloads.
-docs/query-whom/personal-traits-40-people-alt.csv -text
+docs/query-whom/personal-traits-44-people.csv -text
 docs/query-whom/vendor/** -text
 docs/query-whom/ontology/CommonCoreOntologiesMerged.ttl -text
 docs/query-whom/ontology/CCO-LICENSE.txt -text
