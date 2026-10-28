@@ -58,6 +58,33 @@ try {
     assert(cacheNames.some(name => name.startsWith(prefix)), `Missing cache owned by ${prefix}`);
   }
 
+  for (const modePath of ['/everything-is-sus/host/', '/everything-is-sus/pass-and-play/']) {
+    await page.goto(origin + modePath, { waitUntil: 'domcontentloaded' });
+    await page.locator('.suspect-toggle').first().waitFor();
+    const suspects = page.locator('.suspect-toggle');
+    await suspects.nth(0).click(); await suspects.nth(1).click(); await suspects.nth(2).click();
+    await page.locator('#deal-case').click();
+    await page.locator('#setup').waitFor({ state: 'hidden' });
+    await page.getByRole('button', { name: 'Roll one die' }).click();
+    const beforeReload = await page.evaluate(() => ({ current: document.querySelector('#current').textContent, actions: document.querySelector('#actions').textContent, currentSites: [...document.querySelectorAll('.is-current')].map((node) => node.dataset.room || node.getAttribute('aria-label')) }));
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.getByText('Investigation restored from this device. Changes are saved automatically.').waitFor();
+    const afterReload = await page.evaluate(() => ({ current: document.querySelector('#current').textContent, actions: document.querySelector('#actions').textContent, currentSites: [...document.querySelectorAll('.is-current')].map((node) => node.dataset.room || node.getAttribute('aria-label')) }));
+    assert.deepEqual(afterReload, beforeReload, `${modePath}: automatic RDF state recovery changed the current game`);
+  }
+
+  await page.goto(origin + '/everything-is-sus/player/', { waitUntil: 'domcontentloaded' });
+  await page.evaluate(async () => {
+    const { openEverythingsSusStorage } = await import('../storage.js');
+    const storage = await openEverythingsSusStorage();
+    await storage.savePrivateState({ tableCode: 'QA1234', suspectId: 'mint', cardIds: ['mint', 'rope', 'kitchen'], markedCardIds: ['brown'], notes: 'Reload-safe notes' });
+    storage.close();
+  });
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.getByRole('heading', { name: /private hand/i }).waitFor();
+  assert.equal(await page.locator('textarea').inputValue(), 'Reload-safe notes', 'player: private RDF notes did not restore');
+  assert.equal(await page.locator('.evidence-card').count(), 3, 'player: private RDF hand did not restore');
+
   await context.setOffline(true);
   for (const [name, path] of apps) {
     const response = await page.goto(origin + path, { waitUntil: 'domcontentloaded' });

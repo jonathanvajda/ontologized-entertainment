@@ -2,10 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createEverythingsSusGame, restoreEverythingsSusGame, serializeHostGame } from '../model/everything-is-sus-game.js';
-import { BOARD_REGIONS, CARDS, ENTRANCE_MARKERS, ROOMS, SECRET_PASSAGES, SECRET_PASSAGE_CORNERS, START_SITES, SUSPECTS, WEAPONS, boardRegionStyle } from '../game-config.js';
+import { BOARD_REGIONS, CARDS, ENTRANCES, ENTRANCE_MARKERS, ROOMS, SECRET_PASSAGES, SECRET_PASSAGE_CORNERS, START_SITES, SUSPECTS, WEAPONS, boardRegionStyle } from '../game-config.js';
 import { openHandCode } from '../model/compact-hand-code.js';
 import { normalizeSleuthMarks, remainingSleuthCandidates } from '../model/sleuth-sheet-state.js';
 import { namedNode, quad } from '../../packages/game-mechanics/src/index.js';
+import { createRequire } from 'node:module';
+import { openEverythingsSusStorage, parsePrivateState, privateStateQuads } from '../storage.js';
+import { N3 } from '../../query-whom/scripts/runtime.mjs';
+
+const require = createRequire(new URL('../../query-whom/package.json', import.meta.url));
+const { IDBFactory } = require('fake-indexeddb');
 
 const names = ['Ada', 'Bert', 'Cy'];
 const NS = 'https://w3id.org/ontoeagle/games/everything-is-sus/';
@@ -33,6 +39,15 @@ async function gameWithRollValue(value, prefix = 'exact-roll') {
     if (game.act('roll').value === value) return game;
   }
   throw new Error(`Could not produce roll ${value}.`);
+}
+
+async function gameAtWithRollAtLeast(locationId, minimum, prefix = 'located-roll') {
+  for (let index = 0; index < 100; index += 1) {
+    const game = await createEverythingsSusGame({ names, seed: `${prefix}-${index}` });
+    placePerson(game, game.state().players[0].tokenId, locationId);
+    if (game.act('roll').value >= minimum) return game;
+  }
+  throw new Error('No suitable deterministic roll found.');
 }
 
 test('board geometry uses the approved 26 by 18 topology without image-frame offsets', () => {
@@ -145,26 +160,35 @@ test('occupied walkable sites are disabled and never traversed', async () => {
   assert.equal(game.act('moveStep', { destination: target }).ok, false);
 });
 
-test('doors cost two, entryways cost one, and only one crossing is allowed per turn', async () => {
-  const game = await gameWithRollAtLeast(2, 'ingress'); const active = game.state().players[0];
-  placePerson(game, active.tokenId, 'ballroom');
-  const exit = game.movementOptions().find((option) => option.destination === 'N4');
+test('all marked boundaries cost one and a player may leave one room and enter another', async () => {
+  assert(ENTRANCES.every((entrance) => entrance.cost === 1));
+  const game = await gameAtWithRollAtLeast('ballroom', 2, 'two-boundaries'); const active = game.state().players[0];
+  const exit = game.movementOptions().find((option) => option.destination === 'S8');
   assert.equal(exit.cost, 1); assert.equal(exit.kind, 'entryway'); assert.equal(exit.available, true);
-  game.act('moveStep', { destination: 'N4' });
-  assert.equal(game.state().moves, game.state().die - 1);
-  const reentry = game.movementOptions().find((option) => option.destination === 'ballroom');
-  const door = game.movementOptions().find((option) => option.destination === 'screened-porch');
-  assert.equal(reentry.available, false); assert.equal(reentry.reason, 'Already crossed an entrance');
-  assert.equal(door.cost, 2); assert.equal(door.available, false);
+  assert.equal(game.act('moveStep', { destination: 'S8' }).ok, true);
+  const kitchen = game.movementOptions().find((option) => option.destination === 'kitchen');
+  assert.equal(kitchen.cost, 1); assert.equal(kitchen.available, true);
+  assert.equal(game.act('moveStep', { destination: 'kitchen' }).ok, true);
+  assert.equal(game.state().locations[active.tokenId], 'kitchen');
+  assert.equal(game.state().moves, game.state().die - 2);
+  assert.equal(game.state().phase, 'room-decision');
+  assert.deepEqual(game.movementOptions(), []);
 });
 
-test('a roll of one can cross an open entryway but not a doorway', async () => {
+test('a roll of one can cross either an open entryway or a doorway', async () => {
   const game = await gameWithRollValue(1, 'one-pace-boundary'); const active = game.state().players[0];
   placePerson(game, active.tokenId, 'N4');
   const entryway = game.movementOptions().find((option) => option.destination === 'ballroom');
   const doorway = game.movementOptions().find((option) => option.destination === 'screened-porch');
   assert.equal(entryway.cost, 1); assert.equal(entryway.available, true);
-  assert.equal(doorway.cost, 2); assert.equal(doorway.available, false); assert.equal(doorway.reason, 'Not enough moves');
+  assert.equal(doorway.cost, 1); assert.equal(doorway.available, true);
+});
+
+test('a player cannot re-enter the room departed during the same move', async () => {
+  const game = await gameAtWithRollAtLeast('ballroom', 2, 'no-room-reentry');
+  assert.equal(game.act('moveStep', { destination: 'N4' }).ok, true);
+  const reentry = game.movementOptions().find((option) => option.destination === 'ballroom');
+  assert.equal(reentry.available, false); assert.equal(reentry.reason, 'Already visited');
 });
 
 test('room accusation may be skipped or refuted, and resolution concludes the turn', async () => {
@@ -194,6 +218,7 @@ test('corner-room secret passages are paired diagonally and end movement in the 
   assert.equal(game.act('secretPassage').value, 'dining-room');
   assert.equal(game.state().locations[active.tokenId], 'dining-room');
   assert.equal(game.state().phase, 'room-decision');
+  assert.equal(game.store.getQuads(namedNode(NS + 'secret-passage-1'), namedNode(NS + 'paceCost'), null, null)[0]?.object.value, '0');
 });
 
 test('a rolled player may still choose the current room secret passage', async () => {
@@ -206,14 +231,25 @@ test('a rolled player may still choose the current room secret passage', async (
   assert.equal(game.state().phase, 'room-decision');
 });
 
-test('greenhouse door and kitchen hallway entry use their reduced boundary costs', async () => {
+test('greenhouse door and kitchen hallway entry both use the one-pace boundary cost', async () => {
   const game = await gameWithRollAtLeast(2, 'east-hall-access'); const active = game.state().players[0];
   placePerson(game, active.tokenId, 'S4');
   let option = game.movementOptions().find((candidate) => candidate.destination === 'greenhouse');
-  assert.equal(option.available, true); assert.equal(option.cost, 2); assert.equal(option.kind, 'door');
+  assert.equal(option.available, true); assert.equal(option.cost, 1); assert.equal(option.kind, 'door');
   placePerson(game, active.tokenId, 'S8');
   option = game.movementOptions().find((candidate) => candidate.destination === 'kitchen');
   assert.equal(option.available, true); assert.equal(option.cost, 1); assert.equal(option.kind, 'entryway');
+});
+
+test('doors and open entryways remain distinct RDF individuals with equal traversal costs', async () => {
+  const game = await createEverythingsSusGame({ names, seed: 'access-feature-rdf' });
+  for (const entrance of ENTRANCES) {
+    const feature = namedNode(NS + 'access-' + entrance.id);
+    const expectedClass = namedNode(NS + (entrance.kind === 'door' ? 'Door' : 'OpenEntryway'));
+    assert.equal(game.store.getQuads(feature, namedNode(RDF_TYPE), expectedClass, null).length, 1);
+    assert.equal(game.store.getQuads(feature, namedNode(NS + 'traversalPaceCost'), null, null)[0]?.object.value, '1');
+    assert(game.store.getQuads(feature, namedNode(NS + 'connectsBoardSite'), null, null).length >= 2);
+  }
 });
 
 test('an unresolved room accusation never prevents ending the turn', async () => {
@@ -281,4 +317,49 @@ test('compact hand codes round-trip every seat for three through six players', a
 
 test('host save round-trips RDF state and deterministic random state', async () => {
   const game = await createEverythingsSusGame({ names, seed: 'restore' }); game.act('roll'); const restored = restoreEverythingsSusGame(serializeHostGame(game)); assert.deepEqual(restored.state(), game.state());
+});
+
+test('IndexedDB restores independent host and pass-and-play RDF snapshots', async () => {
+  const storage = await openEverythingsSusStorage({ indexedDBRef: new IDBFactory() });
+  const host = await createEverythingsSusGame({ names, mode: 'host', seed: 'idb-host' });
+  host.act('roll');
+  await storage.saveGame('host', host);
+  const pass = await createEverythingsSusGame({ names, mode: 'pass-and-play', seed: 'idb-pass' });
+  await storage.saveGame('pass-and-play', pass);
+
+  const restoredHost = restoreEverythingsSusGame((await storage.loadActiveGame('host')).snapshot);
+  const restoredPass = restoreEverythingsSusGame((await storage.loadActiveGame('pass-and-play')).snapshot);
+  assert.deepEqual(restoredHost.state(), host.state());
+  assert.deepEqual(restoredPass.state(), pass.state());
+  assert.notEqual(restoredHost.code, restoredPass.code);
+
+  await storage.clearActiveGame('host');
+  assert.equal(await storage.loadActiveGame('host'), null);
+  assert.ok(await storage.loadActiveGame('pass-and-play'));
+  storage.close();
+});
+
+test('private RDF persistence contains one hand and local deductions only', async () => {
+  const storage = await openEverythingsSusStorage({ indexedDBRef: new IDBFactory() });
+  const input = { tableCode: 'ABC123', suspectId: 'mint', cardIds: ['mint', 'rope', 'kitchen'], markedCardIds: ['brown', 'pistol'], notes: 'Shown by Peach.' };
+  const quads = privateStateQuads(input);
+  const roundTrip = parsePrivateState(quads);
+  assert.deepEqual(roundTrip, input);
+  assert.ok(quads.every((item) => !item.predicate.value.includes('solution')));
+  assert.ok(quads.every((item) => !item.predicate.value.includes('currentPlayer')));
+
+  await storage.savePrivateState(input);
+  assert.deepEqual(await storage.loadActivePrivateState(), input);
+  await storage.clearActivePrivateState();
+  assert.equal(await storage.loadActivePrivateState(), null);
+  assert.deepEqual(await storage.loadPrivateState(input.tableCode, input.suspectId), input);
+  storage.close();
+});
+
+test('Everything\'s Sus ontology and SHACL shapes parse with private persistence terms', () => {
+  const ontology = new N3.Parser().parse(readFileSync(new URL('../../src/ontologies/EverythingsSusOntology.ttl', import.meta.url), 'utf8'));
+  const shapes = new N3.Parser().parse(readFileSync(new URL('../../src/ontologies/EverythingsSusShapes.ttl', import.meta.url), 'utf8'));
+  assert(ontology.some((item) => item.subject.value === NS + 'PrivatePlayerState'));
+  assert(ontology.some((item) => item.subject.value === NS + 'privateTableCode'));
+  assert(shapes.some((item) => item.subject.value === NS + 'PrivatePlayerStateShape'));
 });

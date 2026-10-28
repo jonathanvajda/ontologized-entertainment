@@ -1,12 +1,10 @@
 import { CARDS } from './game-config.js';
 import { normalizeSleuthMarks, remainingSleuthCandidates } from './model/sleuth-sheet-state.js';
 
-export function renderSleuthSheet(body, hand, storageKey) {
+export function renderSleuthSheet(body, hand, { markedCardIds = [], onChange = () => {} } = {}) {
   const ownIds = new Set(hand.map((card) => card.id));
-  let stored = [];
-  try { stored = JSON.parse(localStorage.getItem(storageKey) || '[]'); } catch { stored = []; }
-  const marked = normalizeSleuthMarks(CARDS, ownIds, stored);
-  persist(storageKey, marked);
+  const marked = normalizeSleuthMarks(CARDS, ownIds, markedCardIds);
+  onChange([...marked]);
 
   for (const category of ['suspect', 'weapon', 'room']) {
     const entries = [];
@@ -23,7 +21,7 @@ export function renderSleuthSheet(body, hand, storageKey) {
       entries.push({ card, own, row, checkbox });
       if (!own) checkbox.onchange = () => {
         if (checkbox.checked) marked.add(card.id); else marked.delete(card.id);
-        persist(storageKey, marked);
+        onChange([...marked]);
         updateCategory(entries, ownIds, marked, category);
       };
       body.append(row);
@@ -43,8 +41,4 @@ function updateCategory(entries, ownIds, marked, category) {
     entry.row.querySelector('.candidate-note').hidden = !protectedCandidate;
     entry.checkbox.title = protectedCandidate ? 'Keep at least one possibility in this category.' : '';
   }
-}
-
-function persist(storageKey, marked) {
-  localStorage.setItem(storageKey, JSON.stringify([...marked]));
 }

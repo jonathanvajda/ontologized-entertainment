@@ -11,13 +11,14 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 <https://w3id.org/ontoeagle/games/everything-is-sus> a owl:Ontology ;
-  owl:versionIRI <https://w3id.org/ontoeagle/games/everything-is-sus/2026-09-25> ;
-  owl:versionInfo "0.2.0" ;
+  owl:versionIRI <https://w3id.org/ontoeagle/games/everything-is-sus/2026-10-27> ;
+  owl:versionInfo "0.3.1" ;
   owl:imports <https://w3id.org/ontologized-entertainment/game> , <https://w3id.org/ontologized-entertainment/game/dice> , <https://w3id.org/ontologized-entertainment/game/hidden-information> , <https://www.commoncoreontologies.org/AgentOntology> , <https://www.commoncoreontologies.org/InformationEntityOntology> ;
   dcterms:title "Everything's Sus Ontology"@en ;
   dcterms:description "A CCO-aligned model of cards, hands, board locations, suggestions, refutations, accusations, and the sealed solution in Everything's Sus."@en ;
   dcterms:creator "Ontologized Entertainment contributors"@en ;
   dcterms:created "2026-09-25"^^xsd:date ;
+  dcterms:modified "2026-10-27"^^xsd:date ;
   dcterms:license <https://opensource.org/license/bsd-3-clause> ;
   rdfs:label "Everything's Sus Ontology"@en ;
   rdfs:comment "Canonical game facts are RDF; transient focus, dialog, animation, and layout state are excluded."@en .
@@ -29,12 +30,15 @@ everything-is-sus:SuspectCard a owl:Class ; rdfs:subClassOf everything-is-sus:Ev
 everything-is-sus:WeaponCard a owl:Class ; rdfs:subClassOf everything-is-sus:EvidenceCard ; rdfs:label "Weapon card"@en ; skos:definition "An Evidence Card that identifies a possible weapon."@en .
 everything-is-sus:RoomCard a owl:Class ; rdfs:subClassOf everything-is-sus:EvidenceCard ; rdfs:label "Room card"@en ; skos:definition "An Evidence Card that identifies a possible room."@en .
 everything-is-sus:PlayerHand a owl:Class ; rdfs:subClassOf game:Hand ; rdfs:label "Player hand"@en ; skos:definition "A Hand containing the Evidence Cards visible to exactly one detective during play."@en .
+everything-is-sus:PrivatePlayerState a owl:Class ; rdfs:subClassOf cco:ont00000958 ; rdfs:label "Private player state"@en ; skos:definition "An Information Content Entity persisted on one player device that records only that player's hand identifiers, private deductions, and notes for one Everything's Sus table."@en ; skos:scopeNote "A Private Player State excludes the sealed solution, other players' hands, and authoritative turn state."@en .
 everything-is-sus:SealedSolution a owl:Class ; rdfs:subClassOf obo:BFO_0000027 ; rdfs:label "Sealed solution"@en ; skos:definition "An Object Aggregate containing exactly one suspect, weapon, and room card and governed by a hidden-information visibility policy until the session ends."@en .
 everything-is-sus:BoardSite a owl:Class ; rdfs:subClassOf obo:BFO_0000029 ; rdfs:label "Board site"@en ; skos:definition "A site in the estate topology that may be the location of a suspect person."@en .
 everything-is-sus:Room a owl:Class ; rdfs:subClassOf everything-is-sus:BoardSite ; rdfs:label "Room"@en ; skos:definition "A board site that can contain zero through six suspect persons and ground a room accusation."@en .
 everything-is-sus:HallwaySpace a owl:Class ; rdfs:subClassOf everything-is-sus:BoardSite ; rdfs:label "Hallway space"@en ; skos:definition "A unit walkable board site that can contain no more than one suspect person."@en .
 everything-is-sus:FoyerSpace a owl:Class ; rdfs:subClassOf everything-is-sus:HallwaySpace ; rdfs:label "Foyer space"@en ; skos:definition "A non-card walkable site in the estate Foyer used for initial placement and movement."@en .
 everything-is-sus:BoardReserve a owl:Class ; rdfs:subClassOf everything-is-sus:BoardSite ; rdfs:label "Board reserve"@en ; skos:definition "An off-board site for a suspect person whose token is not controlled by a player and has not been named in a room accusation."@en .
+everything-is-sus:Door a owl:Class ; rdfs:subClassOf game:GameObject ; owl:disjointWith everything-is-sus:OpenEntryway ; rdfs:label "Door"@en ; skos:definition "A material game object representing a movable architectural barrier at an estate ingress or egress."@en ; skos:scopeNote "A Door remains ontologically distinct from an Open Entryway even when both have the same traversal pace cost."@en .
+everything-is-sus:OpenEntryway a owl:Class ; rdfs:subClassOf obo:BFO_0000029 ; rdfs:label "Open entryway"@en ; skos:definition "A site at an unobstructed architectural opening through which a suspect person may enter or leave a room."@en ; skos:scopeNote "An Open Entryway contains no door, gate, curtain, or other closure."@en .
 everything-is-sus:SuspectPerson a owl:Class ; rdfs:subClassOf cco:ont00001262 ; rdfs:label "Suspect person"@en ; skos:definition "A fictional person whose current board site is canonical game state."@en .
 everything-is-sus:SuspectToken a owl:Class ; rdfs:subClassOf game:GamePiece ; rdfs:label "Suspect token"@en ; skos:definition "A game piece that visually represents a suspect person but does not itself bear the person's board location."@en .
 everything-is-sus:MovementDie a owl:Class ; rdfs:subClassOf dice:SixSidedDie ; rdfs:label "Movement die"@en ; skos:definition "The single fair six-sided die whose result supplies a turn's optional movement allowance."@en .
@@ -51,6 +55,11 @@ everything-is-sus:memberOf a owl:ObjectProperty ; rdfs:domain everything-is-sus:
 everything-is-sus:ownedBy a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:PlayerHand ; rdfs:range everything-is-sus:Detective ; rdfs:label "owned by"@en ; skos:definition "Relates a Player Hand to its only authorized detective."@en .
 everything-is-sus:usesToken a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:Detective ; rdfs:range everything-is-sus:SuspectToken ; rdfs:label "uses token"@en ; skos:definition "Relates a detective to the suspect token they control."@en .
 everything-is-sus:controlsPerson a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:Detective ; rdfs:range everything-is-sus:SuspectPerson ; rdfs:label "controls person"@en ; skos:definition "Relates a detective to the suspect person whose movement they control."@en .
+everything-is-sus:privateStateForPerson a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:PrivatePlayerState ; rdfs:range everything-is-sus:SuspectPerson ; rdfs:label "private state for person"@en ; skos:definition "Relates locally persisted private player state to the suspect person controlled by that player."@en .
+everything-is-sus:hasPrivateCard a owl:ObjectProperty ; rdfs:domain everything-is-sus:PrivatePlayerState ; rdfs:range everything-is-sus:EvidenceCard ; rdfs:label "has private card"@en ; skos:definition "Relates locally persisted private player state to an Evidence Card in that player's hand."@en .
+everything-is-sus:ruledOutCard a owl:ObjectProperty ; rdfs:domain everything-is-sus:PrivatePlayerState ; rdfs:range everything-is-sus:EvidenceCard ; rdfs:label "ruled out card"@en ; skos:definition "Relates locally persisted private player state to an Evidence Card the player has privately ruled out."@en .
+everything-is-sus:privateNotes a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:PrivatePlayerState ; rdfs:range xsd:string ; rdfs:label "private notes"@en ; skos:definition "Records free-text deductions visible only on the player's device."@en .
+everything-is-sus:privateTableCode a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:PrivatePlayerState ; rdfs:range xsd:string ; rdfs:label "private table code"@en ; skos:definition "Records the public table identifier associated with locally persisted private player state."@en .
 everything-is-sus:representsPerson a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:SuspectToken ; rdfs:range everything-is-sus:SuspectPerson ; rdfs:label "represents person"@en ; skos:definition "Relates a visual suspect token to the suspect person it represents."@en .
 everything-is-sus:refutedBy a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:RoomAccusationAct ; rdfs:range everything-is-sus:Detective ; rdfs:label "refuted by"@en ; skos:definition "Relates a room accusation to the first clockwise detective able to refute it."@en .
 everything-is-sus:winner a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:MysteryGameSession ; rdfs:range everything-is-sus:Detective ; rdfs:label "winner"@en ; skos:definition "Relates a completed session to the detective whose correct accusation completed it."@en .
@@ -64,12 +73,56 @@ everything-is-sus:complete a owl:DatatypeProperty , owl:FunctionalProperty ; rdf
 everything-is-sus:cardCategory a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:EvidenceCard ; rdfs:range xsd:string ; rdfs:label "card category"@en ; skos:definition "Records the implementation category identifier of an Evidence Card."@en .
 everything-is-sus:dieResult a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:MysteryGameSession ; rdfs:range xsd:integer ; rdfs:label "movement die result"@en ; skos:definition "Records the one-through-six result of the optional single-die roll in the current turn."@en .
 everything-is-sus:movementAllowance a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:MysteryGameSession ; rdfs:range xsd:integer ; rdfs:label "movement allowance"@en ; skos:definition "Records the number of paces remaining in the current movement phase."@en .
-everything-is-sus:paceCost a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:MovementAct ; rdfs:range xsd:integer ; rdfs:label "pace cost"@en ; skos:definition "Records the number of movement paces consumed by a movement act: one for a space, two for an entryway, or three for a door."@en .
+everything-is-sus:paceCost a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:MovementAct ; rdfs:range xsd:integer ; rdfs:label "pace cost"@en ; skos:definition "Records the number of die-granted movement paces consumed by a movement act: zero for a secret-passage traversal and one for an ordinary step, doorway crossing, or open-entryway crossing."@en .
 everything-is-sus:performedBy a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain game:GameAct ; rdfs:range everything-is-sus:Detective ; rdfs:label "performed by"@en ; skos:definition "Relates a game act to the acting detective."@en .
 everything-is-sus:movesPerson a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:MovementAct ; rdfs:range everything-is-sus:SuspectPerson ; rdfs:label "moves person"@en ; skos:definition "Relates a movement act to the suspect person whose location it changes."@en .
 everything-is-sus:originSite a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:MovementAct ; rdfs:range everything-is-sus:BoardSite ; rdfs:label "origin site"@en ; skos:definition "Relates a movement act to its origin board site."@en .
 everything-is-sus:destinationSite a owl:ObjectProperty , owl:FunctionalProperty ; rdfs:domain everything-is-sus:MovementAct ; rdfs:range everything-is-sus:BoardSite ; rdfs:label "destination site"@en ; skos:definition "Relates a movement act to its destination board site."@en .
+everything-is-sus:connectsBoardSite a owl:ObjectProperty ; rdfs:domain [ a owl:Class ; owl:unionOf ( everything-is-sus:Door everything-is-sus:OpenEntryway ) ] ; rdfs:range everything-is-sus:BoardSite ; rdfs:label "connects board site"@en ; skos:definition "Relates a Door or Open Entryway to a Board Site accessible through that architectural feature."@en .
+everything-is-sus:traversalPaceCost a owl:DatatypeProperty , owl:FunctionalProperty ; rdfs:domain [ a owl:Class ; owl:unionOf ( everything-is-sus:Door everything-is-sus:OpenEntryway ) ] ; rdfs:range xsd:integer ; rdfs:label "traversal pace cost"@en ; skos:definition "Records the movement allowance consumed by traversing an architectural access feature; every current Door and Open Entryway has value one."@en .
 everything-is-sus:connectsRoom a owl:ObjectProperty ; rdfs:domain everything-is-sus:SecretPassage ; rdfs:range everything-is-sus:Room ; rdfs:label "connects room"@en ; skos:definition "Relates a Secret Passage to either of the two corner rooms it connects."@en .
+
+everything-is-sus:room-pool-room a everything-is-sus:Room ; rdfs:label "Swimming Pool Room"@en .
+everything-is-sus:room-screened-porch a everything-is-sus:Room ; rdfs:label "Screened-in Porch"@en .
+everything-is-sus:room-greenhouse a everything-is-sus:Room ; rdfs:label "Greenhouse"@en .
+everything-is-sus:room-study a everything-is-sus:Room ; rdfs:label "Study"@en .
+everything-is-sus:room-game-room a everything-is-sus:Room ; rdfs:label "Game Room"@en .
+everything-is-sus:room-living-room a everything-is-sus:Room ; rdfs:label "Living Room"@en .
+everything-is-sus:room-ballroom a everything-is-sus:Room ; rdfs:label "Ballroom"@en .
+everything-is-sus:room-kitchen a everything-is-sus:Room ; rdfs:label "Kitchen"@en .
+everything-is-sus:room-dining-room a everything-is-sus:Room ; rdfs:label "Dining Room"@en .
+
+everything-is-sus:site-N4 a everything-is-sus:HallwaySpace .
+everything-is-sus:site-O4 a everything-is-sus:HallwaySpace .
+everything-is-sus:site-S4 a everything-is-sus:HallwaySpace .
+everything-is-sus:site-J11 a everything-is-sus:HallwaySpace .
+everything-is-sus:site-J8 a everything-is-sus:HallwaySpace .
+everything-is-sus:site-J9 a everything-is-sus:HallwaySpace .
+everything-is-sus:site-S8 a everything-is-sus:HallwaySpace .
+everything-is-sus:site-S9 a everything-is-sus:HallwaySpace .
+everything-is-sus:site-N14 a everything-is-sus:HallwaySpace .
+everything-is-sus:site-O14 a everything-is-sus:HallwaySpace .
+everything-is-sus:site-J15 a everything-is-sus:HallwaySpace .
+everything-is-sus:site-J16 a everything-is-sus:HallwaySpace .
+everything-is-sus:site-S15 a everything-is-sus:HallwaySpace .
+everything-is-sus:site-S16 a everything-is-sus:HallwaySpace .
+
+everything-is-sus:access-pool-porch-door a everything-is-sus:Door ; rdfs:label "Swimming Pool Roomâ€“Screened-in Porch door"@en ; everything-is-sus:traversalPaceCost 1 ; everything-is-sus:connectsBoardSite everything-is-sus:room-pool-room , everything-is-sus:room-screened-porch .
+everything-is-sus:access-porch-south-door a everything-is-sus:Door ; rdfs:label "Screened-in Porch south door"@en ; everything-is-sus:traversalPaceCost 1 ; everything-is-sus:connectsBoardSite everything-is-sus:room-screened-porch , everything-is-sus:site-N4 , everything-is-sus:site-O4 .
+everything-is-sus:access-greenhouse-hall-door a everything-is-sus:Door ; rdfs:label "Greenhouse hallway door"@en ; everything-is-sus:traversalPaceCost 1 ; everything-is-sus:connectsBoardSite everything-is-sus:room-greenhouse , everything-is-sus:site-S4 .
+everything-is-sus:access-greenhouse-kitchen-door a everything-is-sus:Door ; rdfs:label "Greenhouseâ€“Kitchen door"@en ; everything-is-sus:traversalPaceCost 1 ; everything-is-sus:connectsBoardSite everything-is-sus:room-greenhouse , everything-is-sus:room-kitchen .
+everything-is-sus:access-study-game-door a everything-is-sus:Door ; rdfs:label "Studyâ€“Game Room door"@en ; everything-is-sus:traversalPaceCost 1 ; everything-is-sus:connectsBoardSite everything-is-sus:room-study , everything-is-sus:room-game-room .
+everything-is-sus:access-study-living-door a everything-is-sus:Door ; rdfs:label "Studyâ€“Living Room door"@en ; everything-is-sus:traversalPaceCost 1 ; everything-is-sus:connectsBoardSite everything-is-sus:room-study , everything-is-sus:room-living-room .
+everything-is-sus:access-game-hall-door a everything-is-sus:Door ; rdfs:label "Game Room hallway door"@en ; everything-is-sus:traversalPaceCost 1 ; everything-is-sus:connectsBoardSite everything-is-sus:room-game-room , everything-is-sus:site-J11 .
+everything-is-sus:access-kitchen-dining-door a everything-is-sus:Door ; rdfs:label "Kitchenâ€“Dining Room door"@en ; everything-is-sus:traversalPaceCost 1 ; everything-is-sus:connectsBoardSite everything-is-sus:room-kitchen , everything-is-sus:room-dining-room .
+
+everything-is-sus:access-ballroom-north-entry a everything-is-sus:OpenEntryway ; rdfs:label "Ballroom north open entryway"@en ; everything-is-sus:traversalPaceCost 1 ; everything-is-sus:connectsBoardSite everything-is-sus:room-ballroom , everything-is-sus:site-N4 , everything-is-sus:site-O4 .
+everything-is-sus:access-ballroom-west-entry a everything-is-sus:OpenEntryway ; rdfs:label "Ballroom west open entryway"@en ; everything-is-sus:traversalPaceCost 1 ; everything-is-sus:connectsBoardSite everything-is-sus:room-ballroom , everything-is-sus:site-J8 , everything-is-sus:site-J9 .
+everything-is-sus:access-ballroom-east-entry a everything-is-sus:OpenEntryway ; rdfs:label "Ballroom east open entryway"@en ; everything-is-sus:traversalPaceCost 1 ; everything-is-sus:connectsBoardSite everything-is-sus:room-ballroom , everything-is-sus:site-S8 , everything-is-sus:site-S9 .
+everything-is-sus:access-kitchen-west-entry a everything-is-sus:OpenEntryway ; rdfs:label "Kitchen west open entryway"@en ; everything-is-sus:traversalPaceCost 1 ; everything-is-sus:connectsBoardSite everything-is-sus:room-kitchen , everything-is-sus:site-S8 , everything-is-sus:site-S9 .
+everything-is-sus:access-ballroom-south-entry a everything-is-sus:OpenEntryway ; rdfs:label "Ballroom south open entryway"@en ; everything-is-sus:traversalPaceCost 1 ; everything-is-sus:connectsBoardSite everything-is-sus:room-ballroom , everything-is-sus:site-N14 , everything-is-sus:site-O14 .
+everything-is-sus:access-living-hall-entry a everything-is-sus:OpenEntryway ; rdfs:label "Living Room hallway open entryway"@en ; everything-is-sus:traversalPaceCost 1 ; everything-is-sus:connectsBoardSite everything-is-sus:room-living-room , everything-is-sus:site-J15 , everything-is-sus:site-J16 .
+everything-is-sus:access-dining-hall-entry a everything-is-sus:OpenEntryway ; rdfs:label "Dining Room hallway open entryway"@en ; everything-is-sus:traversalPaceCost 1 ; everything-is-sus:connectsBoardSite everything-is-sus:room-dining-room , everything-is-sus:site-S15 , everything-is-sus:site-S16 .
 
 everything-is-sus:passage-pool-dining a everything-is-sus:SecretPassage ; rdfs:label "Swimming Pool Room–Dining Room secret passage"@en ; everything-is-sus:connectsRoom everything-is-sus:room-pool-room , everything-is-sus:room-dining-room .
 everything-is-sus:passage-greenhouse-living a everything-is-sus:SecretPassage ; rdfs:label "Greenhouse–Living Room secret passage"@en ; everything-is-sus:connectsRoom everything-is-sus:room-greenhouse , everything-is-sus:room-living-room .

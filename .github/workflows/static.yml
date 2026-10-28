@@ -43,6 +43,7 @@ jobs:
         run: |
           npm test --prefix docs/query-whom
           npm test --prefix docs/packages/game-mechanics
+          node --test docs/everything-is-sus/tests/*.test.js
       - name: Audit fixed dependencies
         run: npm audit --audit-level=high
         working-directory: docs/query-whom

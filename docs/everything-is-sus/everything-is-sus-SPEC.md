@@ -1,9 +1,9 @@
 # Everything's Sus — Capability and Technical Specification
 
 **Status:** Refined implementation draft  
-**Game version:** 0.1.0  
+**Game version:** 0.3.0
 **Schema version:** 1  
-**Date:** 2026-10-24
+**Date:** 2026-10-27
 
 ## 1. Overview
 
@@ -24,7 +24,7 @@ The game has no backend and does not claim live synchronization from a short cod
 | Game IRI | `https://w3id.org/ontologize-entertainment/games/everything-is-sus` |
 | Ontology namespace | `https://w3id.org/ontologize-entertainment/games/everything-is-sus/` |
 | Prefix | `everything-is-sus:` |
-| Game version | `0.1.0` |
+| Game version | `0.3.0` |
 | Rules profile | `estate-mystery-1` |
 | Save format | `1` |
 
@@ -84,7 +84,8 @@ Each card is both a `game:Card` and a category-specific subclass. Card art is re
 | Foyer space | Instance of `obo:BFO_0000029` and walkable-space class; capacity 0–1 suspect person | Stable grid IRI |
 | Hallway space | Instance of `obo:BFO_0000029` and walkable-space class; capacity 0–1 suspect person | Stable grid IRI |
 | Stair site | Instance of `obo:BFO_0000029`; non-walkable | Stable grid IRI |
-| Doorway connection | Asserted adjacency between passage and room | Endpoint pair |
+| Door | Instance of `everything-is-sus:Door`, a material `game:GameObject` | Stable access-feature IRI + connected board sites + 1-pace traversal cost |
+| Open entryway | Instance of `everything-is-sus:OpenEntryway`, a BFO site without a physical closure | Stable access-feature IRI + connected board sites + 1-pace traversal cost |
 | Secret passage | Individuated route entity | Stable IRI |
 | Suspect token | Individuated `game:GamePiece` that visually represents, but is not identical with, one suspect person | One per suspect |
 | Weapon token | Individuated `game:GamePiece` | One per weapon |
@@ -111,7 +112,7 @@ Adjacency describes architectural reachability, not necessarily a single movemen
 
 The approved topology is the explicit 26-column (`A`–`Z`) by 18-row (`1`–`18`) plan in `specs/everything-is-sus/board-layout.png`. Runtime room masks are exact cell sets: Swimming Pool Room `A1:J3` plus `A4:I5` (excluding hallway sites `J4` and `J5`); Screened-in Porch `K1:R3`; Greenhouse `S1:Z3`; Study `A6:D12`; Game Room `E6:I12`; Living Room `A13:I18`; Ballroom `K5:R13`; Kitchen `T4:Z9`; Dining Room `T10:Z18`; and the walkable Foyer cells `K15:R16` plus `M17:P18`. Hallway, stair, door, and open-entryway markings remain a separate topology layer above room artwork. Artwork MUST NOT determine legal geometry.
 
-Each orthogonal edge between two ordinary walkable cells has movement cost 1. A topology edge marked as an open entryway also has cost 1; an edge marked as a doorway has cost 2. These are total edge costs, not surcharges. Every movement path has an ingress/egress crossing count, initialized to zero and capped at one. Crossing either marked edge type increments it once. A double door is one topology edge and one crossing. Entering a room ends movement; leaving a room consumes the sole crossing but may be followed by ordinary passage-space steps.
+Each orthogonal edge between two ordinary walkable cells has movement cost 1. Every topology edge marked as an open entryway or doorway also has total movement cost 1; it is not a surcharge. A double door is one topology edge and one crossing. A person may leave a room, traverse passage spaces, and enter a different room if the route fits within the die allowance. Entering any room ends movement immediately, so no room can be used as a pass-through. The room departed at the start of the move is recorded as visited and cannot be re-entered that turn.
 
 The topology also defines two bidirectional secret-passage pairs between the literal corner rooms: Swimming Pool Room–Dining Room and Greenhouse–Living Room. Each endpoint SHALL have a persistent player-visible passage marker independent of the room bitmap. Markers occupy the literal outer estate corners: Swimming Pool Room top-left, Greenhouse top-right, Living Room bottom-left, and Dining Room bottom-right. The active endpoint marker SHALL be clickable at `turn-start` and during `movement` while the person remains in that room. Passage use discards any rolled allowance, moves the suspect person directly to the paired room, and enters `room-decision`.
 
@@ -127,7 +128,7 @@ The coordinate labels and diagnostic colors SHALL NOT appear in the ordinary pla
 - player order, active/eliminated status, and token assignment;
 - suspect-person locations and their token-to-person representation links;
 - board topology;
-- turn/phase, the optional die result, remaining movement allowance, and ingress/egress crossing count;
+- turn/phase, the optional die result, remaining movement allowance, and sites visited during the current move;
 - room accusations and whether/which player refuted, but not the shown card;
 - final-accusation outcome after resolution;
 - public solution commitment digest.
@@ -217,7 +218,7 @@ Eliminated players are skipped as active players but remain in the refutation or
 | --- | --- | --- |
 | `roll` | Active, eligible player; `turn-start`; no roll yet this turn | Generate one uniform integer from 1–6; add one die-rolling act/result; set movement allowance to the result; enter movement |
 | `moveStep` | Orthogonally adjacent walkable destination; destination occupancy below capacity; at least 1 pace remains | Spend 1 pace; replace the suspect person's current `located in` triple; retain movement phase |
-| `crossBoundary` | Marked ingress/egress boundary; crossing count is 0; destination occupancy below capacity; enough allowance remains | Spend 1 pace for an open entryway or 2 for a doorway; set crossing count to 1; replace the person's location; entering a room resolves movement |
+| `crossBoundary` | Marked ingress/egress boundary; destination was not already visited; destination occupancy below capacity; at least 1 pace remains | Spend 1 pace; replace the person's location; entering a room resolves movement immediately |
 | `stopMovement` | Movement is active | Preserve the current site as the end location; discard unused allowance; enter room decision |
 | `useSecretPassage` | Current room owns route; phase is `turn-start` or `movement`; person has not left the endpoint room | Replace location; discard remaining allowance; enter room decision |
 | `submitRoomAccusation` | Active suspect person is located in the named murder room; movement resolved; no room accusation this turn | Create room-accusation act; move named suspect person and weapon into that room; initialize refutation cursor at the next player in fixed order |
@@ -264,8 +265,9 @@ On success or terminal table defeat, the host publishes solution IRIs and commit
 | A movement roll has exactly one integer result in the inclusive range 1–6 | Shared dice SHACL + JS |
 | Each die result has equal selection probability by construction | Shared random-engine boundary/statistical tests |
 | Movement follows orthogonal topology and never spends more than the roll | JS |
-| Ordinary steps and open entryways cost 1; doorways cost 2 | JS topology fixtures |
-| At most one ingress/egress is crossed in a turn | RDF turn state + JS |
+| Ordinary steps, open entryways, and doorways all cost 1 | JS topology fixtures + RDF access-feature individuals |
+| A player may leave one room and enter a different room when the route fits the roll | RDF visited-site state + JS |
+| Entering a room ends movement immediately; the departed room cannot be re-entered that turn | RDF phase/visited-site state + JS |
 | Room-accusation room equals the active suspect person's current room | JS |
 | Refutation follows fixed player order and stops at the first capable player | JS |
 | Refutation card matches the room accusation, belongs to the refuter, and is chosen by that refuter | JS + visibility tests |
@@ -275,7 +277,11 @@ On success or terminal table defeat, the host publishes solution IRIs and commit
 
 ## 12. Save and replay
 
-Host save contains canonical RDF, transaction history, RNG state, commitment salt, and hand-code context. Player devices persist only their local notebook; the hand is reconstructed from the five-letter code and access details.
+Host and pass-and-play pages SHALL automatically persist their active canonical RDF snapshot, RNG state, commitment salt, and hand-code context in IndexedDB after every accepted game action. On reload, navigation back, browser restart, or device restart, the page SHALL restore the active investigation before offering setup. Starting a new investigation requires explicit confirmation and clears that mode's active-save pointer. Manual JSON export/import remains available as portable backup rather than the primary save mechanism.
+
+Player pages SHALL persist a separate RDF private-state graph in IndexedDB after hand access and after each sleuth-sheet or notes change. It contains only the public table code, controlled suspect person, that player's card IRIs, ruled-out card IRIs, and private notes. It MUST NOT contain the sealed solution, another player's hand, or authoritative turn state. A player page without a new invitation restores its active private hand automatically; a newly scanned invitation takes precedence. Pass-and-play deductions use the same private-state RDF structure, keyed by table and suspect, while the authoritative game remains a separate record.
+
+The save record and active pointer SHALL be updated in one IndexedDB transaction. A failed automatic save must leave the current screen usable and report the local recovery failure. Existing JSON export/import remains supported.
 
 Undo is available in practice mode. Competitive play disables undo after private information is revealed or an accusation is evaluated. Replay tools must respect audience policies and MUST NOT expose future hidden state during ordinary playback.
 
@@ -410,7 +416,7 @@ docs/everything-is-sus/
 
 The 26×18 room geometry, doors, open entryways, Foyer, hallways, and stairs are frozen in `assets/board-topology.json`. The implemented movement graph derives individual path nodes, occupancy, and boundary costs from that topology while keeping room artwork separate from scalable hit regions. Square identifiers remain internal and are not printed for players.
 
-1. Playtesting resolved boundary costs at 1 pace for an open entryway and 2 paces for a doorway; one fair six-sided die remains fixed.
+1. Playtesting resolved every ordinary step, open entryway, and doorway at 1 pace. Doors and open entryways remain distinct architectural entities even though their movement costs are equal; one fair six-sided die remains fixed.
 2. Whether remaining in a room permits a new room accusation every turn; this draft permits it.
 3. Whether a failed accuser continues refuting; this draft requires it.
 4. Whether the first release includes manual encrypted disclosure tokens or physical screen showing only.
