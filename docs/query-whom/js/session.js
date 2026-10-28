@@ -7,6 +7,10 @@ import { decodeGame, reconstructBoard, eligibleTargets, privateChoice, HashRando
 
 const ACTIVE = Q('ActiveCandidateRole'), ELIMINATED = Q('EliminatedCandidateRole');
 const SESSION_PREFIX = Q('session/');
+export const LEGACY_CATALOG_HASHES = new Set([
+  // Deck v5 before the label-only Theodore -> Emmanuel rename.
+  'b5d4fce0d7e3f7fde2284d227a79b8a4860b1df15a075d4586b574c63bd57005'
+]);
 const NAME_PATTERN = /^https:\/\/w3id\.org\/ontologized-entertainment\/query-whom\/session\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const literalProps = new Set(['gameCode', 'playerRole', 'createdAt', 'targetRevealed'].map(Q));
 const actTypes = ['CreateSessionAct', 'RevealTargetAct', 'EliminateCandidateAct', 'RestoreCandidateAct'].map(Q);
@@ -164,7 +168,8 @@ export class QueryWhomSession {
   static async restore({ N3, baseStore, manifest, save }) {
     const result = validateSavePackage(save, { gameId: 'query-whom' });
     if (!result.ok) throw new Error(result.message);
-    if (save.manifest.schemaVersion !== '1.0.0' || save.manifest.gameVersion !== '1.0.0' || save.manifest.catalogHash !== manifest.catalogHash || save.manifest.deckVersion !== DECK_VERSION || save.manifest.protocolVersion !== 1) throw new Error('This save needs a different game or catalog version.');
+    const compatibleCatalog = save.manifest.catalogHash === manifest.catalogHash || LEGACY_CATALOG_HASHES.has(save.manifest.catalogHash);
+    if (save.manifest.schemaVersion !== '1.0.0' || save.manifest.gameVersion !== '1.0.0' || !compatibleCatalog || save.manifest.deckVersion !== DECK_VERSION || save.manifest.protocolVersion !== 1) throw new Error('This save needs a different game or catalog version.');
     if (save.transactions.length > 10000) throw new Error('Save history is too large.');
     const parsed = parseRdfTextWithN3(save.state, { format: 'turtle', runtime: { N3 } }).quads;
     if (parsed.some(q => !isSessionQuad(q) || q.graph.termType !== 'DefaultGraph')) throw new Error('Save contains non-session RDF.');

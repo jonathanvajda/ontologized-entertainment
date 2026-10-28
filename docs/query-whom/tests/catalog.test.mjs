@@ -33,7 +33,7 @@ test('revised named characters retain their intended CSV and RDF traits', () => 
   assert.equal(catalog[38].traits['Eye direction'], 'Forward');
   assert.equal(catalog[9].ethnicity, 'East Asian');
   assert.equal(catalog[35].name, 'Lily'); assert.equal(catalog[35].ethnicity, 'East Asian');
-  assert.equal(catalog[11].ethnicity, 'Black or African American');
+  assert.equal(catalog[11].name, 'Emmanuel'); assert.equal(catalog[11].ethnicity, 'Black or African American');
   assert.equal(catalog[5].ethnicity, 'South Asian'); assert.equal(catalog[5].traits.Mustache, 'No');
   assert.equal(catalog[3].traits.Freckles, 'Yes'); assert.equal(catalog[6].traits.Freckles, 'No');
   assert.equal(catalog[9].traits['Hair texture'], 'Straight');

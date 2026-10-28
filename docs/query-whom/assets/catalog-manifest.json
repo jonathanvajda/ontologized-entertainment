@@ -23,12 +23,12 @@
     "https://www.commoncoreontologies.org/TimeOntology": "ontology/CommonCoreOntologiesMerged.ttl"
   },
   "files": {
-    "assets/catalog-v1.ttl": "b5d4fce0d7e3f7fde2284d227a79b8a4860b1df15a075d4586b574c63bd57005",
+    "assets/catalog-v1.ttl": "63145052e19c01b756bb3e5e73779fa69bc3ba0347e97a490e7128575f7bbdc5",
     "ontology/query-whom.ttl": "f27755b0e4e1ba7c2e48af6483eacc8402e60c5d0027718483dbeaf85569636c",
     "ontology/CommonCoreOntologiesMerged.ttl": "a9453382b25b40781c181d6ba44981f228abb76d90d548846713adba9baadb42",
     "../src/ontologies/GameOntology.ttl": "2695631654b332782cd5e30c7b3f054ecb33b541d55911507a37ccb0db4bcf9b",
-    "assets/catalog-v1.json": "f4cf2cae73d611fd3186ba4011b2c2e9d72846d3160ced5a8c6e7e51c61bcb2d",
-    "personal-traits-44-people.csv": "23b3f04e703ab5a6296b09af326257ab4837dd81d14fb53a1e4e1527f00838e2",
+    "assets/catalog-v1.json": "fc3703bd065eadf37b9cf7194ed4a5bc7a1a3924765484023f24fb35dbb7febe",
+    "personal-traits-44-people.csv": "08f4586343fd51e9153f5582de1dec6ce88d8cfe4aa024ca55db41993fa70230",
     "vendor/qrcode.js": "18ae399f81182bc9de916e9c77b195df20cc58d6f2d55a62b085a299f1bf1780",
     "vendor/jsQR.js": "bc40c8a15196236b2314db0856f72ca0b49980cd5413b8c852a7349f5fee0859",
     "../vendor/n3.min.js": "442bd3f118fa86bc2ef68d2a56a5637e9e878076aaab52f1093d0aed2c9452c3",
@@ -165,5 +165,5 @@
     "assets/portraits/person-44-320.webp": "bb09d3603e9079de479c3ca8e80c4a2f588b79c9f277571d0bcf8c71e6b265e5",
     "assets/portraits/person-44-960.webp": "78a56290a2bcb421dfd473ab22105f69d936dad633fc3d310a704e88fb2b43c9"
   },
-  "catalogHash": "b5d4fce0d7e3f7fde2284d227a79b8a4860b1df15a075d4586b574c63bd57005"
+  "catalogHash": "63145052e19c01b756bb3e5e73779fa69bc3ba0347e97a490e7128575f7bbdc5"
 }

@@ -737,7 +737,7 @@ qw:person-11-scalp-hair qw:hasHairAccessory "None" .
 qw:person-11 qw:hasClothingColor "Purple" .
 
 qw:person-12 a cco:ont00001262 .
-qw:person-12 rdfs:label "Theodore" .
+qw:person-12 rdfs:label "Emmanuel" .
 qw:person-12 qw:personNumber "12"^^xsd:positiveInteger .
 qw:person-12 qw:sourcePersonLabel "Person 12" .
 qw:person-12 qw:sourceRaceLabel "African" .

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { N3, args, manifest, baseStore } from './helpers.mjs';
-import { QueryWhomSession, isSessionQuad } from '../js/session.js';
+import { LEGACY_CATALOG_HASHES, QueryWhomSession, isSessionQuad } from '../js/session.js';
 import { Q, TYPE, personIri, prefixes } from '../js/vocabulary.js';
 const restore = save => QueryWhomSession.restore({ N3, manifest, baseStore, save });
 
@@ -29,6 +29,8 @@ test('JSON save restores target, roles, preferences and replayable history', asy
   assert.equal(save.transactions[0].actionIri,session.sessionIri+'/act-1');
   assert.equal(save.transactions.length,3);
   assert(!session.definition.code.includes('ownTarget'));
+  const labelOnlyPredecessor = structuredClone(save); labelOnlyPredecessor.manifest.catalogHash = [...LEGACY_CATALOG_HASHES][0];
+  assert.deepEqual((await restore(labelOnlyPredecessor)).project(), session.project());
 });
 test('concurrent proposals serialize before legality checks',async()=> {
   const session=await QueryWhomSession.create(args); await session.propose('revealTarget');
