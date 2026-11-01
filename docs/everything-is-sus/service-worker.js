@@ -1,7 +1,7 @@
 const PREFIX = 'everything-is-sus-';
-const CACHE = `${PREFIX}v32`;
+const CACHE = `${PREFIX}v38`;
 const ASSETS = [
-  './', './index.html', './everything-is-sus.css', './game-config.js', './game-ui.js', './player.js', './sleuth-sheet-ui.js', './storage.js',
+  './', './index.html', './everything-is-sus.css', './game-config.js', './game-ui.js', './player.js', './install-pwa.js', './sleuth-sheet-ui.js', './storage.js',
   './manifest.webmanifest', './assets/icon.svg', './assets/icon-32.png', './assets/icon-192.png', './assets/icon-512.png',
   './assets/icon-maskable-512.png', './assets/apple-touch-icon.png',
   './everything-is-sus-RULES.md', './pass-and-play/', './host/', './player/',

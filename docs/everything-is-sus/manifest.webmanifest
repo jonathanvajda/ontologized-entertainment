@@ -17,8 +17,8 @@
     { "src": "./assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Pass and play", "url": "./pass-and-play/" },
-    { "name": "Host a table", "url": "./host/" },
-    { "name": "Join a table", "url": "./player/" }
+    { "name": "Pass and play", "short_name": "Pass & play", "description": "Resume a saved pass-and-play case, or start a new one.", "url": "./pass-and-play/" },
+    { "name": "Host a table", "short_name": "Host", "description": "Resume a saved hosted case, or start a new one.", "url": "./host/" },
+    { "name": "Join a table", "short_name": "Player", "description": "Resume your saved private hand, or join a table.", "url": "./player/" }
   ]
 }

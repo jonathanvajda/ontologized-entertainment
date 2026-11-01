@@ -4,6 +4,14 @@ import { renderSleuthSheet } from './sleuth-sheet-ui.js';
 import { readInvitationUrl } from '../packages/game-mechanics/src/index.js';
 import { QrScanner } from '../query-whom/js/scanner.js';
 import { openEverythingsSusStorage } from './storage.js';
+import './install-pwa.js';
+
+const playerHeader = document.querySelector('.bar');
+const playerBrand = playerHeader.querySelector('a');
+playerBrand.className = 'game-brand';
+playerBrand.innerHTML = `<img src="../assets/art/person-mrs-mint-02.png" alt=""><span>Everything's Sus</span>`;
+playerHeader.querySelector(':scope > span')?.remove();
+playerHeader.insertAdjacentHTML('beforeend', `<nav><span>Private player page</span><button type="button" data-install-app>Install</button><a class="oe-link" href="../../" aria-label="Ontologized Entertainment home"><span class="oe-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>Ontologized <b>Entertainment</b></span></a></nav>`);
 
 let storage = null;
 let privateSaveChain = Promise.resolve();
@@ -17,7 +25,7 @@ const scanDialog = document.querySelector('#scan-invitation-dialog');
 const scanner = new QrScanner({
   video: document.querySelector('#scan-video'),
   decodeCode: async (value) => {
-    const decoded = readInvitationUrl(value);
+    const decoded = normalizeInvitation(readInvitationUrl(value));
     if (!decoded?.tableCode || !decoded?.suspectId || !decoded?.handCode) throw new Error('Not an Everything’s Sus invitation.');
     return { code: decoded };
   },
@@ -39,6 +47,10 @@ form.onsubmit = async (event) => {
   event.preventDefault();
   error.textContent = '';
   const values = Object.fromEntries(new FormData(form));
+  await openPrivateHand(values, error);
+};
+
+async function openPrivateHand(values, errorTarget) {
   try {
     const cards = await openHandCode({
       code: values.handCode,
@@ -47,16 +59,29 @@ form.onsubmit = async (event) => {
     });
     await render(values, cards);
   } catch (reason) {
-    error.textContent = reason.message || 'That access code could not be opened.';
+    errorTarget.textContent = reason.message || 'That access code could not be opened.';
   }
-};
+}
 
 function applyInvitation(decoded, clearFragment = false) {
+  decoded = normalizeInvitation(decoded);
   form.elements.tableCode.value = decoded.tableCode;
   form.elements.suspectId.value = decoded.suspectId;
   form.elements.handCode.value = decoded.handCode;
   if (clearFragment) history.replaceState(null, '', `${location.pathname}${location.search}`);
-  queueMicrotask(() => form.requestSubmit());
+  const suspect = SUSPECTS.find((item) => item.id === decoded.suspectId);
+  if (!suspect) { error.textContent = 'That invitation names an unknown player.'; return; }
+  app.innerHTML = `<section class="reveal-gate"><img src="${cardImageUrl(suspect)}" alt=""><p class="kicker">Private invitation · Table ${escapeText(decoded.tableCode.toUpperCase())}</p><h1>Welcome, ${escapeText(suspect.label)}!</h1><p>Your hand is still concealed. Make sure other players cannot see this screen before continuing.</p><button type="button" class="primary" id="reveal-hand">Reveal hand</button><p id="reveal-error" class="error" role="alert"></p></section>`;
+  app.querySelector('#reveal-hand').onclick = async (event) => {
+    event.currentTarget.disabled = true;
+    await openPrivateHand(decoded, app.querySelector('#reveal-error'));
+    if (event.currentTarget.isConnected) event.currentTarget.disabled = false;
+  };
+}
+
+function normalizeInvitation(value) {
+  if (!value) return value;
+  return { tableCode: value.tableCode || value.t, suspectId: value.suspectId || value.s, handCode: value.handCode || value.h };
 }
 
 async function render(values, cards, restored = null) {
@@ -83,9 +108,21 @@ async function render(values, cards, restored = null) {
   const note = app.querySelector('textarea');
   note.value = privateNotes;
   note.oninput = () => { privateNotes = note.value; void persist(); };
+  const playerActions = document.createElement('div'); playerActions.className = 'player-hand-actions';
   const changeHand = document.createElement('button'); changeHand.type = 'button'; changeHand.className = 'change-hand'; changeHand.textContent = 'Open a different hand';
   changeHand.onclick = async () => { await privateSaveChain; await storage?.clearActivePrivateState(); location.reload(); };
-  app.querySelector('.player-hand').prepend(changeHand);
+  const endGame = document.createElement('button'); endGame.type = 'button'; endGame.className = 'danger'; endGame.textContent = 'End game';
+  endGame.onclick = async () => {
+    if (!confirm('End this game and remove your private hand, deductions, and notes from this device?')) return;
+    endGame.disabled = true;
+    await privateSaveChain;
+    await storage?.clearActivePrivateState({ deleteSave: true });
+    localStorage.removeItem(`everything-is-sus-sleuth-${playerKey}`);
+    localStorage.removeItem(`everything-is-sus-notes-${playerKey}`);
+    location.replace(location.pathname);
+  };
+  playerActions.append(changeHand, endGame);
+  app.querySelector('.player-hand').prepend(playerActions);
   app.querySelector('.close-card').onclick = () => app.querySelector('#card-view').close();
   await persist();
 }
@@ -110,7 +147,7 @@ function readLegacyArray(key) {
 
 async function initialize() {
   try { storage = await openEverythingsSusStorage(); } catch (reason) { error.textContent = `Local recovery is unavailable: ${reason.message}`; }
-  const invitation = readInvitationUrl(location.href);
+  const invitation = normalizeInvitation(readInvitationUrl(location.href));
   if (invitation?.tableCode && invitation?.suspectId && invitation?.handCode) { applyInvitation(invitation, true); return; }
   const saved = await storage?.loadActivePrivateState();
   if (!saved) return;

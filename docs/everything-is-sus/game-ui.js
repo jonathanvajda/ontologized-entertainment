@@ -4,6 +4,7 @@ import { renderDice } from '../poker-dice/rendering/dice-svg.js';
 import { createInvitationUrl, renderQrCode } from '../packages/game-mechanics/src/index.js';
 import { renderSleuthSheet } from './sleuth-sheet-ui.js';
 import { openEverythingsSusStorage } from './storage.js';
+import './install-pwa.js';
 
 const mode = document.body.dataset.mode;
 let game = null;
@@ -13,6 +14,13 @@ let selectedSuspectIds = [];
 const app = document.querySelector('#app');
 app.innerHTML = `<header class="bar"><a href="../">Everything's Sus</a><nav><button id="rules">Rules</button><button id="load">Load</button><input id="load-file" hidden type="file" accept="application/json"><button id="save" disabled>Save</button><button id="new">New game</button></nav></header><main class="game-shell"><section class="board-panel"><div class="turn-card"><p><span class="kicker">Current detective</span><img id="current-portrait" alt=""><strong id="current">Set the table</strong></p></div><div class="estate-frame"><div class="estate-board" id="board" aria-label="Estate board"></div></div></section><aside class="case-panel"><div><p class="kicker">Case controls</p><h2 id="table-code">The sealed envelope</h2></div><div id="actions" class="actions"></div><div id="log" class="case-log" aria-live="polite"></div><div id="invitations"></div></aside></main><dialog id="setup"><form id="setup-form"><p class="kicker">New investigation</p><h2>Choose 3–6 suspects</h2><p>Select the detectives who are playing. Turn order will be randomized when the case is dealt.</p><div id="suspect-setup" class="suspect-setup"></div><button id="deal-case" disabled>Choose at least 3 suspects</button></form></dialog><dialog id="choice"><form id="choice-form"><h2 id="choice-title"></h2><div id="choice-fields"></div><menu><button type="button" id="cancel-choice">Cancel</button><button>Confirm</button></menu></form></dialog><dialog id="private"><div id="private-content"></div></dialog><dialog id="token-view" class="token-view"><button type="button" class="dialog-close" aria-label="Close token portrait">×</button><img alt=""><h2></h2></dialog><div id="token-preview" class="token-preview" hidden><img alt=""><strong></strong></div><dialog id="invite-view" class="invite-view"><button type="button" class="dialog-close" aria-label="Close player invitation">×</button><img class="invite-portrait" alt=""><p class="kicker">Private player invitation</p><h2></h2><div class="invite-qr"></div><p class="invite-codes"></p><p class="privacy-note">Let only this player scan the QR. It opens their private hand directly on their device.</p></dialog><dialog id="solution-reveal" class="solution-reveal"><div class="envelope-reveal" aria-hidden="true"><span></span></div><p class="kicker">The sealed solution</p><h2>Case closed</h2><div class="solution-cards"></div><button type="button" class="primary close-reveal">Continue</button></dialog>`;
 
+const gameNav = app.querySelector('.bar nav');
+const gameBrand = app.querySelector('.bar > a');
+gameBrand.className = 'game-brand';
+gameBrand.innerHTML = `<img src="../assets/art/person-mrs-mint-02.png" alt=""><span>Everything's Sus</span>`;
+gameNav.insertAdjacentHTML('beforeend', `<button type="button" id="end-game" class="danger" hidden>End game</button><button type="button" data-install-app>Install</button><a class="oe-link" href="../../" aria-label="Ontologized Entertainment home"><span class="oe-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>Ontologized <b>Entertainment</b></span></a>`);
+app.querySelector('#invite-view .privacy-note').textContent = 'Let only this player scan the QR. Their device asks them to confirm before revealing the hand.';
+
 const $ = (selector) => document.querySelector(selector);
 const setup = $('#setup');
 $('#load').textContent = 'Import'; $('#save').textContent = 'Export';
@@ -21,7 +29,14 @@ $('#new').onclick = async () => {
   if (game && !confirm('Start a new investigation? The current game will be removed from this device. Export it first if you want a backup.')) return;
   await saveChain;
   if (storage) await storage.clearActiveGame(mode);
-  game = null; $('#save').disabled = true; selectedSuspectIds = []; renderSuspectSetup(); setup.showModal();
+  game = null; $('#save').disabled = true; $('#end-game').hidden = true; selectedSuspectIds = []; renderSuspectSetup(); setup.showModal();
+};
+$('#end-game').onclick = async () => {
+  if (!game || !confirm('End this game and remove its saved investigation from this device?')) return;
+  $('#end-game').disabled = true;
+  await saveChain;
+  await storage?.clearActiveGame(mode, { deleteSave: true });
+  location.replace('../');
 };
 $('#load').onclick = () => $('#load-file').click();
 $('#rules').onclick = () => location.href = '../everything-is-sus-RULES.md';
@@ -76,6 +91,7 @@ $('#save').onclick = () => {
 };
 
 function render() {
+  $('#end-game').hidden = false;
   const state = game.state(); const active = state.players[state.currentPlayerIndex];
   const displayed = state.winnerIri ? state.players.find((player) => player.iri === state.winnerIri) : active;
   $('#current').textContent = state.complete ? (state.winnerIri ? `${displayed?.name} solved it` : 'The mystery won') : active.name;
@@ -312,10 +328,10 @@ function showTokenDialog(suspect) { hideTokenPreview(); const dialog = $('#token
 function showInvite(invite, suspect) {
   const dialog = $('#invite-view');
   const playerUrl = new URL('./player/', new URL('../', location.href));
-  const url = createInvitationUrl(playerUrl.href, { tableCode: invite.tableCode, suspectId: invite.suspectId, handCode: invite.handCode });
+  const url = createInvitationUrl(playerUrl.href, { t: invite.tableCode, s: invite.suspectId, h: invite.handCode });
   dialog.querySelector('.invite-portrait').src = cardImageUrl(suspect); dialog.querySelector('.invite-portrait').alt = suspect.label; dialog.querySelector('h2').textContent = invite.name;
   dialog.querySelector('.invite-codes').textContent = `Table ${invite.tableCode} · Private code ${invite.handCode}`;
-  renderQrCode(dialog.querySelector('.invite-qr'), url, { label: `Private invitation QR for ${invite.name}` }); dialog.showModal();
+  renderQrCode(dialog.querySelector('.invite-qr'), url, { errorCorrection: 'L', label: `Private invitation QR for ${invite.name}` }); dialog.showModal();
 }
 
 function showSolutionReveal() {

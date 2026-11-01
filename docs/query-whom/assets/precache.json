@@ -1,5 +1,5 @@
 {
-  "version": "8c84b8613bc8bcb42c85164b",
+  "version": "8d9debf1fb549836dee3444c",
   "files": [
     {
       "path": "../packages/game-mechanics/src/action-engine.js",
@@ -159,7 +159,7 @@
     },
     {
       "path": "app.css",
-      "sha256": "795d50fe2958cb973ad17a57b2f7da67bfda81b884aea65c8cdddcdeae19bb2f"
+      "sha256": "e200f29e40e231bc320bc4cb954bf88152d313439bf08ed827229a9a8c76da92"
     },
     {
       "path": "assets/apple-touch-icon.png",
@@ -547,7 +547,7 @@
     },
     {
       "path": "index.html",
-      "sha256": "1c3c1bd7638ef78a27b609850a490fccccba72ceba0326d4eec3f1c0499008a3"
+      "sha256": "75f415ddcbb14fb63abdc3f92d741076d9e5a50b1f2e1464c8ee006e27a90d67"
     },
     {
       "path": "js/app.js",

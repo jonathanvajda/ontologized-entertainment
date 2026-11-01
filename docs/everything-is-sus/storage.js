@@ -62,8 +62,12 @@ export async function openEverythingsSusStorage({ indexedDBRef = globalThis.inde
       return record ? parsePrivateState(record.quads) : null;
     },
 
-    async clearActivePrivateState() {
-      await transaction(db, ['preferences'], 'readwrite', ({ preferences }) => preferences.delete(playerPointer()));
+    async clearActivePrivateState({ deleteSave = false } = {}) {
+      const pointer = await read(db, 'preferences', playerPointer());
+      await transaction(db, ['preferences', 'saveStates'], 'readwrite', ({ preferences, saveStates }) => {
+        preferences.delete(playerPointer());
+        if (deleteSave && pointer?.value) saveStates.delete(pointer.value);
+      });
     },
 
     close() { db.close(); }

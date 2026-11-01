@@ -71,7 +71,19 @@ try {
     await page.getByText('Investigation restored from this device. Changes are saved automatically.').waitFor();
     const afterReload = await page.evaluate(() => ({ current: document.querySelector('#current').textContent, actions: document.querySelector('#actions').textContent, currentSites: [...document.querySelectorAll('.is-current')].map((node) => node.dataset.room || node.getAttribute('aria-label')) }));
     assert.deepEqual(afterReload, beforeReload, `${modePath}: automatic RDF state recovery changed the current game`);
+    page.once('dialog', dialog => dialog.accept());
+    await page.getByRole('button', { name: 'End game' }).click();
+    await page.waitForURL(`${origin}/everything-is-sus/`);
+    await page.goto(origin + modePath, { waitUntil: 'domcontentloaded' });
+    await page.locator('#setup').waitFor({ state: 'visible' });
+    assert.equal(await page.getByText('Investigation restored from this device. Changes are saved automatically.').count(), 0, `${modePath}: ended game returned after reopening the mode`);
   }
+
+  const invitationToken = Buffer.from(JSON.stringify({ h: 'ABCDE', s: 'mint', t: 'QA1234' })).toString('base64url');
+  await page.goto(`${origin}/everything-is-sus/player/#invite=${invitationToken}`, { waitUntil: 'domcontentloaded' });
+  await page.getByRole('heading', { name: 'Welcome, Mrs. Mint!' }).waitFor();
+  assert.equal(await page.locator('.evidence-card').count(), 0, 'QR invitation exposed private cards before confirmation');
+  assert.equal(await page.getByRole('button', { name: 'Reveal hand' }).count(), 1, 'QR invitation did not require explicit hand reveal');
 
   await page.goto(origin + '/everything-is-sus/player/', { waitUntil: 'domcontentloaded' });
   await page.evaluate(async () => {
@@ -84,6 +96,12 @@ try {
   await page.getByRole('heading', { name: /private hand/i }).waitFor();
   assert.equal(await page.locator('textarea').inputValue(), 'Reload-safe notes', 'player: private RDF notes did not restore');
   assert.equal(await page.locator('.evidence-card').count(), 3, 'player: private RDF hand did not restore');
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', { name: 'End game' }).click();
+  await page.getByRole('heading', { name: 'Open your hand' }).waitFor();
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.getByRole('heading', { name: 'Open your hand' }).waitFor();
+  assert.equal(await page.locator('.evidence-card').count(), 0, 'player: ended private game returned after reload');
 
   await context.setOffline(true);
   for (const [name, path] of apps) {
